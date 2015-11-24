@@ -1,5 +1,23 @@
 <resources>
     <string name="app_name">DoNExt</string>
     <string name="action_settings">Settings</string>
+    <string name="action_newTab">New list</string>
+    <string name="action_editTabs">Edit lists</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+    <string name="settings_confirm_donext">Confirm on DoNext?</string>
+    <string name="settings_confirm_markdone">Confirm on mark Done?</string>
+    <string name="settings_confirm_delete">Confirm on delete?</string>
+    <string name="settings_max_lists_label">Maximum number of lists:</string>
+    <string-array name="settings_max_lists_number">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
 </resources>
