@@ -69,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
+    /** Called when the user clicks the Edit Lists button  */
+    public void openTaskLists(MenuItem menuItem) {
+        Intent intent = new Intent(this, TaskListActivity.class);
+        startActivity(intent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

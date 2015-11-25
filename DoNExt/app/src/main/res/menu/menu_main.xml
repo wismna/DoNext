@@ -9,13 +9,14 @@
         android:onClick="openSettings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_newTab"
-        android:orderInCategory="50"
-        android:title="@string/action_newTab"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/action_editTabs"
         android:orderInCategory="60"
         android:title="@string/action_editTabs"
+        android:onClick="openTaskLists"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_about"
+        android:orderInCategory="50"
+        android:title="@string/action_about"
         app:showAsAction="never" />
 </menu>
