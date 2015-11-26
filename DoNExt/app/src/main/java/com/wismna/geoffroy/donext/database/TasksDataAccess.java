@@ -1,10 +1,12 @@
-package com.wismna.geoffroy.donext;
+package com.wismna.geoffroy.donext.database;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.wismna.geoffroy.donext.dao.TaskList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ public class TasksDataAccess {
         dbHelper.close();
     }
 
-    public TaskList createTaskList(String name) {
+    /*public TaskList createTaskList(String name) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
         long insertId = database.insert(DatabaseHelper.TASKLIST_TABLE_NAME, null,
@@ -42,17 +44,33 @@ public class TasksDataAccess {
         TaskList newTaskList = cursorToTaskList(cursor);
         cursor.close();
         return newTaskList;
+    }*/
+
+    public Cursor createTaskList(String name) {
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
+        database.insert(DatabaseHelper.TASKLIST_TABLE_NAME, null, values);
+        return getAllTaskListsCursor();
     }
 
-    public void deleteTaskList(TaskList comment) {
+    /*public void deleteTaskList(TaskList comment) {
         long id = comment.getId();
         System.out.println("Comment deleted with id: " + id);
         database.delete(DatabaseHelper.TASKLIST_TABLE_NAME, DatabaseHelper.COLUMN_ID
                 + " = " + id, null);
+    }*/
+
+    public Cursor deleteTaskList(Cursor taskListCursor) {
+        TaskList taskList = cursorToTaskList(taskListCursor);
+        long id = taskList.getId();
+        System.out.println("Comment deleted with id: " + id);
+        database.delete(DatabaseHelper.TASKLIST_TABLE_NAME, DatabaseHelper.COLUMN_ID
+                + " = " + id, null);
+        return getAllTaskListsCursor();
     }
 
     public List<TaskList> getAllTaskLists() {
-        List<TaskList> taskLists = new ArrayList<TaskList>();
+        List<TaskList> taskLists = new ArrayList<>();
 
         Cursor cursor = getAllTaskListsCursor();
 

@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext;
+package com.wismna.geoffroy.donext.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,8 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-/*import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;*/
+import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.dao.TaskList;
+import com.wismna.geoffroy.donext.database.TasksDataAccess;
+import com.wismna.geoffroy.donext.fragments.NewTaskFragment;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
+    private TasksDataAccess dataAccess;
+    private List<TaskList> taskLists;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,9 +50,17 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        // Access database to retrieve Tabs
+        dataAccess = new TasksDataAccess(this);
+        dataAccess.open();
+
+        taskLists = dataAccess.getAllTaskLists();
+        mSectionsPagerAdapter.notifyDataSetChanged();
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -53,15 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
     }
     /** Called when the user clicks the Settings button  */
@@ -73,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
     public void openTaskLists(MenuItem menuItem) {
         Intent intent = new Intent(this, TaskListActivity.class);
         startActivity(intent);
+    }
+
+    /** Called when the user clicks the New Task button  */
+    public void openNewTaskDialog(MenuItem menuItem) {
+        android.app.FragmentManager manager = getFragmentManager();
+        NewTaskFragment newTaskFragment = new NewTaskFragment();
+        newTaskFragment.show(manager, "Create new task");
     }
 
     @Override
@@ -151,22 +164,17 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 7;
+            if (taskLists != null) {
+                // Show the task lists
+                return taskLists.size();
+            }
+            return 3;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            /*switch (position) {
-                case 0:
-                    return "SECTION 1";
-                case 1:
-                    return "SECTION 2";
-                case 2:
-                    return "SECTION 3";
-            }
-            return null;*/
-            return "List " + position;
+            if (taskLists == null) return "N/A";
+            return taskLists.get(position).getName();
         }
     }
 }

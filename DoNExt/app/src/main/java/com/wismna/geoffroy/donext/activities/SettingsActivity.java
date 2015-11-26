@@ -1,9 +1,11 @@
-package com.wismna.geoffroy.donext;
+package com.wismna.geoffroy.donext.activities;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+
+import com.wismna.geoffroy.donext.R;
 
 public class SettingsActivity extends AppCompatActivity {
 

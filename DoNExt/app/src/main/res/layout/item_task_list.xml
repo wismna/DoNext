@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:padding="6dip">
     <TextView
         android:id="@+id/task_list_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:text="test"
         android:textAppearance="?android:attr/textAppearanceMedium"/>
     <TextView
@@ -14,11 +15,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/task_list_count"
+        android:layout_centerVertical="true"
         android:text="Name"
         android:textAppearance="?android:attr/textAppearanceLarge"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:text="@string/task_list_delete"
         android:onClick="onDeleteTaskList" />
-</LinearLayout>
+</RelativeLayout>

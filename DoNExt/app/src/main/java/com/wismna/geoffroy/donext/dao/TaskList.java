@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext;
+package com.wismna.geoffroy.donext.dao;
 
 /**
  * Created by geoffroy on 15-11-25.
@@ -26,6 +26,6 @@ public class TaskList {
     // Will be used by the ArrayAdapter in the ListView
     @Override
     public String toString() {
-        return name;
+        return String.valueOf(id);
     }
 }

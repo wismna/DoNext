@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext;
+package com.wismna.geoffroy.donext.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -7,6 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
+
+import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.database.DatabaseHelper;
 
 /**
  * Created by geoffroy on 15-11-25.
@@ -37,5 +40,10 @@ public class TaskListCursorAdapter extends ResourceCursorAdapter {
         // Populate fields with extracted properties
         taskListCount.setText(String.valueOf(count));
         taskListName.setText(name);
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        return super.getView(position, convertView, parent);
     }
 }

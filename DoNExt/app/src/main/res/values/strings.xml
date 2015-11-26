@@ -5,6 +5,7 @@
     <string name="action_newTab">New list</string>
     <string name="action_editTabs">Edit lists</string>
     <string name="action_about">About</string>
+    <string name="action_new_task">New task</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="settings_activity_title">Settings</string>
     <string name="task_list_activity_title">List edition</string>
@@ -13,6 +14,18 @@
     <string name="task_list_new_list_hint">New list name</string>
     <string name="task_list_new_list_create">Create</string>
     <string name="task_list_delete">Delete</string>
+
+    <!-- Strings related to new task dialog -->
+    <string name="new_task_list">List</string>
+    <string name="new_task_name">Name</string>
+    <string name="new_task_description">Description</string>
+    <string name="new_task_priority">Priority</string>
+    <string name="new_task_priority_low">Low</string>
+    <string name="new_task_priority_normal">Normal</string>
+    <string name="new_task_priority_high">High</string>
+    <string name="new_task_save">Save</string>
+    <string name="new_task_cancel">Cancel</string>
+
 
     <!-- Strings related to Settings -->
     <string name="settings_confirm_donext">Confirm on DoNext?</string>

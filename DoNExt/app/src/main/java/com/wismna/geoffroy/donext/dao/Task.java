@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext;
+package com.wismna.geoffroy.donext.dao;
 
 /**
  * Created by geoffroy on 15-11-25.

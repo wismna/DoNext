@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext;
+package com.wismna.geoffroy.donext.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
