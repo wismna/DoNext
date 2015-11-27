@@ -26,10 +26,11 @@ public class NewTaskFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
+        View view = inflater.inflate(R.layout.new_task, null);
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        builder.setView(inflater.inflate(R.layout.new_task, null))
+        builder.setView(view)
             // Add action buttons
             .setPositiveButton(R.string.new_task_save, new DialogInterface.OnClickListener() {
                 @Override
@@ -42,12 +43,6 @@ public class NewTaskFragment extends DialogFragment {
                     NewTaskFragment.this.getDialog().cancel();
                 }
             });
-        return builder.create();
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
         // Access database to retrieve task lists
         TasksDataAccess dataAccess = new TasksDataAccess(getActivity());
@@ -62,5 +57,12 @@ public class NewTaskFragment extends DialogFragment {
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
+        // Auto set list value to current tab
+        Bundle args = getArguments();
+        int id = args.getInt("list");
+        spinner.setSelection(id);
+
+        return builder.create();
     }
 }

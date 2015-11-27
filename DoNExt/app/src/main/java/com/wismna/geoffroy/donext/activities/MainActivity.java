@@ -85,6 +85,12 @@ public class MainActivity extends AppCompatActivity {
     public void openNewTaskDialog(MenuItem menuItem) {
         android.app.FragmentManager manager = getFragmentManager();
         NewTaskFragment newTaskFragment = new NewTaskFragment();
+
+        // Set current tab value to new task dialog
+        Bundle args = new Bundle();
+        args.putInt("list", mViewPager.getCurrentItem());
+        newTaskFragment.setArguments(args);
+
         newTaskFragment.show(manager, "Create new task");
     }
 
@@ -141,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
             textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+
+            // TODO: implement task list
             return rootView;
         }
     }
@@ -161,6 +169,12 @@ public class MainActivity extends AppCompatActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
         }
+
+        /*@Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            return super.instantiateItem(container, position);
+
+        }*/
 
         @Override
         public int getCount() {

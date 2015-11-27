@@ -26,6 +26,6 @@ public class TaskList {
     // Will be used by the ArrayAdapter in the ListView
     @Override
     public String toString() {
-        return String.valueOf(id);
+        return name;
     }
 }
