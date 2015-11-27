@@ -1,6 +1,9 @@
 package com.wismna.geoffroy.donext.activities;
 
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -14,17 +17,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.adapters.TaskCursorAdapter;
 import com.wismna.geoffroy.donext.dao.TaskList;
-import com.wismna.geoffroy.donext.database.TasksDataAccess;
+import com.wismna.geoffroy.donext.database.TaskDataAccess;
+import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.fragments.NewTaskFragment;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NewTaskFragment.NewTaskListener {
 
+    protected TaskDataAccess taskDataAccess;
+    protected TaskCursorAdapter adapter;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -40,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
-    private TasksDataAccess dataAccess;
+    private TaskListDataAccess taskListDataAccess;
     private List<TaskList> taskLists;
 
     @Override
@@ -55,11 +66,15 @@ public class MainActivity extends AppCompatActivity {
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Access database to retrieve Tabs
-        dataAccess = new TasksDataAccess(this);
-        dataAccess.open();
+        // Access database to retrieve tasks
+        taskDataAccess = new TaskDataAccess(this);
+        taskDataAccess.open();
 
-        taskLists = dataAccess.getAllTaskLists();
+        // Access database to retrieve Tabs
+        taskListDataAccess = new TaskListDataAccess(this);
+        taskListDataAccess.open();
+
+        taskLists = taskListDataAccess.getAllTaskLists();
         mSectionsPagerAdapter.notifyDataSetChanged();
 
         // Set up the ViewPager with the sections adapter.
@@ -70,6 +85,68 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
 
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        taskDataAccess.open();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        taskDataAccess.close();
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        taskDataAccess.close();
+    }
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        Dialog dialogView = dialog.getDialog();
+        Spinner listSpinner = (Spinner) dialogView.findViewById(R.id.new_task_list);
+        EditText nameText = (EditText) dialogView.findViewById(R.id.new_task_name);
+        EditText descText = (EditText) dialogView.findViewById(R.id.new_task_description);
+        RadioGroup priorityGroup = (RadioGroup) dialogView.findViewById(R.id.new_task_priority);
+        RadioButton priorityRadio = (RadioButton) dialogView.findViewById(priorityGroup.getCheckedRadioButtonId());
+        Cursor cursor = taskDataAccess.createTask(
+                nameText.getText().toString(),
+                descText.getText().toString(),
+                priorityRadio.getText().toString(),
+                ((TaskList) listSpinner.getSelectedItem()).getId());
+
+        // TODO: uncomment after successfully creating adapter
+        //adapter.changeCursor(cursor);
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+
+    }
+
     /** Called when the user clicks the Settings button  */
     public void openSettings(MenuItem menuItem) {
         Intent intent = new Intent(this, SettingsActivity.class);
@@ -92,28 +169,6 @@ public class MainActivity extends AppCompatActivity {
         newTaskFragment.setArguments(args);
 
         newTaskFragment.show(manager, "Create new task");
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -149,6 +204,12 @@ public class MainActivity extends AppCompatActivity {
             textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
 
             // TODO: implement task list
+
+            /*ListView listView = (ListView) rootView.findViewById(android.R.id.list);
+
+            adapter = new TaskCursorAdapter(
+                    rootView.getContext(), R.layout.item_task, taskDataAccess.getAllTasksCursor(), 0);
+            listView.setAdapter(adapter);*/
             return rootView;
         }
     }
@@ -169,12 +230,6 @@ public class MainActivity extends AppCompatActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
         }
-
-        /*@Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            return super.instantiateItem(container, position);
-
-        }*/
 
         @Override
         public int getCount() {

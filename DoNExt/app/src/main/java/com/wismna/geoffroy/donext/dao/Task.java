@@ -7,10 +7,24 @@ public class Task {
     private long id;
     private String name;
     private String description;
+    private int priority;
     private int cycle;
-    private boolean deleted;
+    private int done;
+    private int deleted;
     private long taskList;
     private String taskListName;
+
+    public enum TaskPriority {
+        LOW(0),
+        NORMAL(1),
+        HIGH(2);
+
+        private int value;
+
+        private TaskPriority(int value) {
+            this.value = value;
+        }
+    }
 
     public long getId() {
         return id;
@@ -36,6 +50,14 @@ public class Task {
         this.description = description;
     }
 
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
     public int getCycle() {
         return cycle;
     }
@@ -44,11 +66,19 @@ public class Task {
         this.cycle = cycle;
     }
 
-    public boolean isDeleted() {
-        return deleted;
+    public boolean isDone() {
+        return done != 0;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDone(int done) {
+        this.done = done;
+    }
+
+    public boolean isDeleted() {
+        return deleted != 0;
+    }
+
+    public void setDeleted(int deleted) {
         this.deleted = deleted;
     }
 

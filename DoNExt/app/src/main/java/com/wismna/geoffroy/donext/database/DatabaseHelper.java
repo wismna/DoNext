@@ -14,6 +14,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String TASKLIST_TABLE_NAME = "tasklist";
     public static final String TASKLIST_COLUMN_NAME = "name";
+    public static final String TASKLIST_COLUMN_TASK_COUNT = "taskcount";
     private static final String TASKLIST_TABLE_CREATE =
             "CREATE TABLE " + TASKLIST_TABLE_NAME + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -32,10 +33,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     TASKS_COLUMN_NAME + " TEXT NOT NULL, " +
                     TASKS_COLUMN_DESC + " TEXT, " +
-                    TASKS_COLUMN_CYCLE + " INTEGER NOT NULL, " +
-                    TASKS_COLUMN_DONE + " INTEGER, " +
-                    TASKS_COLUMN_DELETED + " INTEGER, " +
                     TASKS_COLUMN_PRIORITY + " INTEGER, " +
+                    TASKS_COLUMN_CYCLE + " INTEGER DEFAULT 0, " +
+                    TASKS_COLUMN_DONE + " INTEGER DEFAULT 0, " +
+                    TASKS_COLUMN_DELETED + " INTEGER DEFAULT 0, " +
                     TASKS_COLUMN_LIST + " INTEGER NOT NULL, " +
                     "FOREIGN KEY(" + TASKS_COLUMN_LIST + ") REFERENCES " +
                     TASKLIST_TABLE_NAME + "(" + COLUMN_ID + ")" +

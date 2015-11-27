@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -12,7 +13,8 @@ import android.widget.Spinner;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.TaskList;
-import com.wismna.geoffroy.donext.database.TasksDataAccess;
+import com.wismna.geoffroy.donext.database.TaskDataAccess;
+import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 
 import java.util.List;
 
@@ -20,6 +22,33 @@ import java.util.List;
  * Created by geoffroy on 15-11-26.
  */
 public class NewTaskFragment extends DialogFragment {
+
+    /** The activity that creates an instance of this dialog fragment must
+     * implement this interface in order to receive event callbacks.
+     * Each method passes the DialogFragment in case the host needs to query it. */
+    public interface NewTaskListener {
+        public void onDialogPositiveClick(DialogFragment dialog);
+        public void onDialogNegativeClick(DialogFragment dialog);
+    }
+
+    private TaskDataAccess taskDataAccess;
+    // Use this instance of the interface to deliver action events
+    private NewTaskListener mListener;
+
+    /** Override the Fragment.onAttach() method to instantiate the NoticeDialogListener */
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the NoticeDialogListener so we can send events to the host
+            mListener = (NewTaskListener) activity;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(activity.toString()
+                    + " must implement NewTaskListener");
+        }
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -35,17 +64,21 @@ public class NewTaskFragment extends DialogFragment {
             .setPositiveButton(R.string.new_task_save, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {
-                    // TODO: create the task in DB
+                    // Send the positive button event back to the host activity
+                    mListener.onDialogPositiveClick(NewTaskFragment.this);
                 }
             })
             .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
+                    // Send the negative button event back to the host activity
+                    //mListener.onDialogNegativeClick(NoticeDialogFragment.this);
+                    // Canceled creation, nothing to do
                     NewTaskFragment.this.getDialog().cancel();
                 }
             });
 
         // Access database to retrieve task lists
-        TasksDataAccess dataAccess = new TasksDataAccess(getActivity());
+        TaskListDataAccess dataAccess = new TaskListDataAccess(getActivity());
         dataAccess.open();
 
         // Populate spinner with task lists

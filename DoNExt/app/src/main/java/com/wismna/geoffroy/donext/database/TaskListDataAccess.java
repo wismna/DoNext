@@ -14,13 +14,13 @@ import java.util.List;
 /**
  * Created by geoffroy on 15-11-25.
  */
-public class TasksDataAccess {
+public class TaskListDataAccess {
     // Database fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
     private String[] taskListColumns = {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME};
 
-    public TasksDataAccess(Context context) {
+    public TaskListDataAccess(Context context) {
         dbHelper = new DatabaseHelper(context);
     }
 
@@ -63,7 +63,9 @@ public class TasksDataAccess {
     public Cursor deleteTaskList(Cursor taskListCursor) {
         TaskList taskList = cursorToTaskList(taskListCursor);
         long id = taskList.getId();
-        System.out.println("Comment deleted with id: " + id);
+        System.out.println("Task list deleted with id: " + id);
+        database.delete(DatabaseHelper.TASKS_TABLE_NAME, DatabaseHelper.TASKS_COLUMN_LIST
+                + " = " + id, null);
         database.delete(DatabaseHelper.TASKLIST_TABLE_NAME, DatabaseHelper.COLUMN_ID
                 + " = " + id, null);
         return getAllTaskListsCursor();
@@ -86,8 +88,15 @@ public class TasksDataAccess {
     }
 
     public Cursor getAllTaskListsCursor() {
-        return database.query(DatabaseHelper.TASKLIST_TABLE_NAME,
-                taskListColumns, null, null, null, null, null);
+        //return database.query(DatabaseHelper.TASKLIST_TABLE_NAME,
+        //        taskListColumns, null, null, null, null, null);
+        return database.rawQuery("SELECT *," +
+                " (SELECT COUNT(*) " +
+                    " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
+                    " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
+                      DatabaseHelper.TASKLIST_TABLE_NAME + "._id) AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
+                " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME,
+                null);
     }
 
     private TaskList cursorToTaskList(Cursor cursor) {

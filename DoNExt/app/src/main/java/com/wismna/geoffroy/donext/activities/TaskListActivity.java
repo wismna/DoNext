@@ -12,10 +12,10 @@ import android.widget.RelativeLayout;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.TaskListCursorAdapter;
-import com.wismna.geoffroy.donext.database.TasksDataAccess;
+import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 
 public class TaskListActivity extends AppCompatActivity {
-    private TasksDataAccess dataAccess;
+    private TaskListDataAccess dataAccess;
     private TaskListCursorAdapter adapter;
     private ListView listView;
 
@@ -25,7 +25,7 @@ public class TaskListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_task_list);
 
         listView = (ListView) findViewById(android.R.id.list);
-        dataAccess = new TasksDataAccess(this);
+        dataAccess = new TaskListDataAccess(this);
         dataAccess.open();
 
         adapter = new TaskListCursorAdapter(
@@ -66,6 +66,11 @@ public class TaskListActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dataAccess.close();
+    }
     private void updateCreateButtonEnabled() {
         //Button createButton = (Button) findViewById(R.id.new_task_list_button);
         //EditText editText = (EditText) findViewById(R.id.new_task_list_name);
@@ -80,9 +85,4 @@ public class TaskListActivity extends AppCompatActivity {
         else layout.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        dataAccess.close();
-    }
 }

@@ -12,10 +12,10 @@ import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.database.DatabaseHelper;
 
 /**
- * Created by geoffroy on 15-11-25.
+ * Created by geoffroy on 15-11-27.
  */
-public class TaskListCursorAdapter extends ResourceCursorAdapter {
-    public TaskListCursorAdapter(Context context, int layout, Cursor cursor, int flags) {
+public class TaskCursorAdapter  extends ResourceCursorAdapter {
+    public TaskCursorAdapter(Context context, int layout, Cursor cursor, int flags) {
         super(context, layout, cursor, flags);
     }
 
@@ -23,7 +23,7 @@ public class TaskListCursorAdapter extends ResourceCursorAdapter {
     // you don't bind any data to the view at this point.
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return LayoutInflater.from(context).inflate(R.layout.item_task_list, parent, false);
+        return LayoutInflater.from(context).inflate(R.layout.item_task, parent, false);
     }
 
     // The bindView method is used to bind all data to a given view
@@ -31,13 +31,10 @@ public class TaskListCursorAdapter extends ResourceCursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         // Find fields to populate in inflated template
-        TextView taskListCount = (TextView) view.findViewById(R.id.task_list_count);
-        TextView taskListName = (TextView) view.findViewById(R.id.task_list_name);
+        TextView taskListName = (TextView) view.findViewById(R.id.task_name);
         // Extract properties from cursor
-        String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.TASKLIST_COLUMN_NAME));
-        long count = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT));
+        String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.TASKS_COLUMN_NAME));
         // Populate fields with extracted properties
-        taskListCount.setText(String.valueOf(count));
         taskListName.setText(name);
     }
 
