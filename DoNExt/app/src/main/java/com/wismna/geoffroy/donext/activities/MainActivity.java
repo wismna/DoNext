@@ -3,7 +3,6 @@ package com.wismna.geoffroy.donext.activities;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -11,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,16 +20,18 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.adapters.SmartFragmentStatePagerAdapter;
+import com.wismna.geoffroy.donext.adapters.TaskAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.fragments.NewTaskFragment;
-import com.wismna.geoffroy.donext.fragments.TaskFragment;
+import com.wismna.geoffroy.donext.fragments.TasksFragment;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NewTaskFragment.NewTaskListener, TaskFragment.OnListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements NewTaskFragment.NewTaskListener, TasksFragment.OnListFragmentInteractionListener {
 
     protected TaskDataAccess taskDataAccess;
     /**
@@ -122,20 +124,26 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
     }
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
+        // Get the dialog fragment
         Dialog dialogView = dialog.getDialog();
+        // Get the controls
         Spinner listSpinner = (Spinner) dialogView.findViewById(R.id.new_task_list);
         EditText nameText = (EditText) dialogView.findViewById(R.id.new_task_name);
         EditText descText = (EditText) dialogView.findViewById(R.id.new_task_description);
         RadioGroup priorityGroup = (RadioGroup) dialogView.findViewById(R.id.new_task_priority);
         RadioButton priorityRadio = (RadioButton) dialogView.findViewById(priorityGroup.getCheckedRadioButtonId());
-        Cursor cursor = taskDataAccess.createTask(
+        TaskList taskList = (TaskList) listSpinner.getSelectedItem();
+        // Add the task to the database
+        Task task = taskDataAccess.createTask(
                 nameText.getText().toString(),
                 descText.getText().toString(),
                 priorityRadio.getText().toString(),
-                ((TaskList) listSpinner.getSelectedItem()).getId());
+                taskList.getId());
 
-        // TODO: uncomment after successfully creating adapter
-        //adapter.changeCursor(cursor);
+        // Update the corresponding tab adapter
+        TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(listSpinner.getSelectedItemPosition());
+        TaskAdapter taskAdapter = ((TaskAdapter)((RecyclerView)taskFragment.getView()).getAdapter());
+        taskAdapter.add(task, taskAdapter.getItemCount());
     }
 
     @Override
@@ -176,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class SectionsPagerAdapter extends SmartFragmentStatePagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -186,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return TaskFragment.newInstance(taskLists.get(position).getId());
+            return TasksFragment.newInstance(taskLists.get(position).getId());
         }
 
         @Override

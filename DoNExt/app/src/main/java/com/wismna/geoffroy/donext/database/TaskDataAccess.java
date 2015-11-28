@@ -40,14 +40,21 @@ public class TaskDataAccess {
     public void close() {
         dbHelper.close();
     }
-    public Cursor createTask(String name, String description, String priority, long taskList) {
+    public Task createTask(String name, String description, String priority, long taskList) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
         values.put(DatabaseHelper.TASKS_COLUMN_DESC, description);
         values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priorities.indexOf(priority));
         values.put(DatabaseHelper.TASKS_COLUMN_LIST, taskList);
-        database.insert(DatabaseHelper.TASKS_TABLE_NAME, null, values);
-        return getAllTasksCursor();
+        long insertId = database.insert(DatabaseHelper.TASKS_TABLE_NAME, null, values);
+
+        Cursor cursor = database.query(DatabaseHelper.TASKS_TABLE_NAME,
+                taskColumns, DatabaseHelper.COLUMN_ID + " = " + insertId, null,
+                null, null, null);
+        cursor.moveToFirst();
+        Task newTask = cursorToTask(cursor);
+        cursor.close();
+        return newTask;
     }
 
     public Cursor deleteTask(Cursor taskCursor) {

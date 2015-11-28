@@ -8,14 +8,13 @@ import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.Task;
-import com.wismna.geoffroy.donext.fragments.TaskFragment.OnListFragmentInteractionListener;
+import com.wismna.geoffroy.donext.fragments.TasksFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Task} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
  */
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
@@ -55,6 +54,17 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return mValues.size();
+    }
+
+    public void add(Task item, int position) {
+        mValues.add(position, item);
+        notifyItemInserted(position);
+    }
+
+    public void remove(Task item) {
+        int position = mValues.indexOf(item);
+        mValues.remove(position);
+        notifyItemRemoved(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

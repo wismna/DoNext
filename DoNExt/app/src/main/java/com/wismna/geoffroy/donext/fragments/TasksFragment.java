@@ -20,7 +20,7 @@ import com.wismna.geoffroy.donext.database.TaskDataAccess;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class TaskFragment extends Fragment {
+public class TasksFragment extends Fragment {
 
     private TaskDataAccess taskDataAccess;
     private static final String TASK_LIST_ID = "task_list_id";
@@ -31,12 +31,12 @@ public class TaskFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public TaskFragment() {
+    public TasksFragment() {
     }
 
     @SuppressWarnings("unused")
-    public static TaskFragment newInstance(long taskListId) {
-        TaskFragment fragment = new TaskFragment();
+    public static TasksFragment newInstance(long taskListId) {
+        TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
         args.putLong(TASK_LIST_ID, taskListId);
         fragment.setArguments(args);
