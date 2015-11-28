@@ -59,10 +59,10 @@ public class TaskDataAccess {
         return getAllTasksCursor();
     }
 
-    public List<Task> getAllTasks() {
+    public List<Task> getAllTasks(long id) {
         List<Task> tasks = new ArrayList<>();
 
-        Cursor cursor = getAllTasksCursor();
+        Cursor cursor = id != -1 ? getAllTasksCursor(id) : getAllTasksCursor();
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -78,6 +78,11 @@ public class TaskDataAccess {
     public Cursor getAllTasksCursor() {
         return database.query(DatabaseHelper.TASKS_TABLE_NAME,
                 taskColumns, null, null, null, null, null);
+    }
+
+    public Cursor getAllTasksCursor(long id) {
+        return database.query(DatabaseHelper.TASKS_TABLE_NAME,
+                taskColumns, DatabaseHelper.TASKS_COLUMN_LIST + " = " + id, null, null, null, null);
     }
 
     private Task cursorToTask(Cursor cursor) {

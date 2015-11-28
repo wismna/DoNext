@@ -14,6 +14,8 @@ import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.TaskListCursorAdapter;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 
+// TODO: create a fragment
+// TODO: replace ListView with RecycleView
 public class TaskListActivity extends AppCompatActivity {
     private TaskListDataAccess dataAccess;
     private TaskListCursorAdapter adapter;

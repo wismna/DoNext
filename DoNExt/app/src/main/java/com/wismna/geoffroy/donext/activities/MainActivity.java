@@ -12,30 +12,26 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.adapters.TaskCursorAdapter;
+import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.fragments.NewTaskFragment;
+import com.wismna.geoffroy.donext.fragments.TaskFragment;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NewTaskFragment.NewTaskListener {
+public class MainActivity extends AppCompatActivity implements NewTaskFragment.NewTaskListener, TaskFragment.OnListFragmentInteractionListener {
 
     protected TaskDataAccess taskDataAccess;
-    protected TaskCursorAdapter adapter;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -171,47 +167,9 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
         newTaskFragment.show(manager, "Create new task");
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+    @Override
+    public void onListFragmentInteraction(Task item) {
 
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-
-            // TODO: implement task list
-
-            /*ListView listView = (ListView) rootView.findViewById(android.R.id.list);
-
-            adapter = new TaskCursorAdapter(
-                    rootView.getContext(), R.layout.item_task, taskDataAccess.getAllTasksCursor(), 0);
-            listView.setAdapter(adapter);*/
-            return rootView;
-        }
     }
 
     /**
@@ -228,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            return TaskFragment.newInstance(taskLists.get(position).getId());
         }
 
         @Override
