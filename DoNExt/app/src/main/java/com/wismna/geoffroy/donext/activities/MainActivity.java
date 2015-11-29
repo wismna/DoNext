@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -173,6 +174,12 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
         newTaskFragment.setArguments(args);
 
         newTaskFragment.show(manager, "Create new task");
+    }
+
+    /** Will be called when the delete Task button is clicked */
+    public void onDeleteTask(View view) {
+        RecyclerView recyclerView = (RecyclerView) view;
+
     }
 
     @Override

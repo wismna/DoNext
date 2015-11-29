@@ -94,7 +94,7 @@ public class TaskListDataAccess {
                 " (SELECT COUNT(*) " +
                     " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
                     " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
-                      DatabaseHelper.TASKLIST_TABLE_NAME + "._id) AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
+                      DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID + ") AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
                 " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME,
                 null);
     }

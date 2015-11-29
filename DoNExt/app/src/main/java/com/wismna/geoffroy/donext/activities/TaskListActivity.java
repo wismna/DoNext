@@ -37,7 +37,7 @@ public class TaskListActivity extends AppCompatActivity {
         updateCreateButtonEnabled();
     }
 
-    // Will be called when the create Task List button is clicked
+    /** Will be called when the create Task List button is clicked */
     public void onCreateTaskList(View view) {
         @SuppressWarnings("unchecked")
         EditText editText = (EditText) findViewById(R.id.new_task_list_name);
@@ -48,6 +48,7 @@ public class TaskListActivity extends AppCompatActivity {
         updateCreateButtonEnabled();
     }
 
+    /** Will be called when the delete Task List button is clicked */
     public void onDeleteTaskList(View view) {
         @SuppressWarnings("unchecked")
         final int position = listView.getPositionForView((View) view.getParent());

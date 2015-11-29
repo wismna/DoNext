@@ -16,7 +16,7 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link Task} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
+public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> implements View.OnClickListener {
 
     private final List<Task> mValues;
     private final OnListFragmentInteractionListener mListener;
@@ -30,14 +30,17 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_task, parent, false);
-        return new ViewHolder(view);
+
+        ViewHolder holder = new ViewHolder(view);
+        holder.mTitleView.setOnClickListener(TaskAdapter.this);
+        return holder;
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(String.valueOf(holder.mItem.getCycle()));
-        holder.mContentView.setText(holder.mItem.getName());
+        holder.mCycleView.setText(String.valueOf(holder.mItem.getCycle()));
+        holder.mTitleView.setText(holder.mItem.getName());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,6 +59,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         return mValues.size();
     }
 
+    @Override
+    public void onClick(View view) {
+        /*ViewHolder holder = (ViewHolder) view.getTag();
+        if (view.getId() == holder.mTitleView.getId()) {
+            Toast.makeText(view.getContext(), holder.mTitleView.getText(), Toast.LENGTH_SHORT).show();
+        }*/
+    }
     public void add(Task item, int position) {
         mValues.add(position, item);
         notifyItemInserted(position);
@@ -69,20 +79,20 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
+        public final TextView mCycleView;
+        public final TextView mTitleView;
         public Task mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.task_cycle);
-            mContentView = (TextView) view.findViewById(R.id.task_name);
+            mCycleView = (TextView) view.findViewById(R.id.task_cycle);
+            mTitleView = (TextView) view.findViewById(R.id.task_name);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            return super.toString() + " '" + mTitleView.getText() + "'";
         }
     }
 }
