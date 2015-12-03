@@ -9,11 +9,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.TaskAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
+import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
 
 /**
  * A fragment representing a list of Items.
@@ -59,10 +61,22 @@ public class TasksFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_task_list, container, false);
 
         // Set the adapter
-        Context context = view.getContext();
+        final Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
 
+        final Toast mToast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.addOnItemTouchListener(
+            new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, int position) {
+                    // TODO: implement on item click event
+                    TextView editText = (TextView) view.findViewById(R.id.task_id);
+                    mToast.setText("Item " + editText.getText() + " clicked!");
+                    mToast.show();
+                }
+            })
+        );
 
         taskDataAccess = new TaskDataAccess(view.getContext());
         taskDataAccess.open();

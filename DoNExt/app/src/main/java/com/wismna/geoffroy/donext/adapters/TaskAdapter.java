@@ -16,7 +16,7 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link Task} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> implements View.OnClickListener {
+public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
     private final List<Task> mValues;
     private final OnListFragmentInteractionListener mListener;
@@ -32,13 +32,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
                 .inflate(R.layout.fragment_task, parent, false);
 
         ViewHolder holder = new ViewHolder(view);
-        holder.mTitleView.setOnClickListener(TaskAdapter.this);
         return holder;
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
+        holder.mIdView.setText(String.valueOf(holder.mItem.getId()));
         holder.mCycleView.setText(String.valueOf(holder.mItem.getCycle()));
         holder.mTitleView.setText(holder.mItem.getName());
 
@@ -59,13 +59,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
         return mValues.size();
     }
 
-    @Override
-    public void onClick(View view) {
-        /*ViewHolder holder = (ViewHolder) view.getTag();
-        if (view.getId() == holder.mTitleView.getId()) {
-            Toast.makeText(view.getContext(), holder.mTitleView.getText(), Toast.LENGTH_SHORT).show();
-        }*/
-    }
     public void add(Task item, int position) {
         mValues.add(position, item);
         notifyItemInserted(position);
@@ -79,6 +72,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
+        public final TextView mIdView;
         public final TextView mCycleView;
         public final TextView mTitleView;
         public Task mItem;
@@ -86,6 +80,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
         public ViewHolder(View view) {
             super(view);
             mView = view;
+
+            mIdView = (TextView) view.findViewById(R.id.task_id);
             mCycleView = (TextView) view.findViewById(R.id.task_cycle);
             mTitleView = (TextView) view.findViewById(R.id.task_name);
         }
