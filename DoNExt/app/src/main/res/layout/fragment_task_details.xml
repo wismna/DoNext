@@ -1,0 +1,18 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.wismna.geoffroy.donext.fragments.TaskDetailsFragment">
+
+    <EditText
+        android:id="@+id/task_details_name"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:text="@string/hello_blank_fragment" />
+    <EditText
+        android:id="@+id/task_details_description"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/task_details_name"
+        android:text="@string/hello_blank_fragment" />
+</RelativeLayout>

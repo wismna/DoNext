@@ -26,6 +26,16 @@
     <string name="new_task_save">Save</string>
     <string name="new_task_cancel">Cancel</string>
 
+    <!-- String related to task details activity -->
+    <string name="task_details_activity_title">Details</string>
+
+    <!-- String related to task list Recycler View -->
+    <string name="task_swipe_confirmation_title">Confirm</string>
+    <string name="task_swipe_confirmation_done">Mark task as Done?</string>
+    <string name="task_swipe_confirmation_next">Mark task as Nexted?</string>
+    <string name="task_swipe_confirmation_yes">Yes</string>
+    <string name="task_swipe_confirmation_no">No</string>
+    <string name="task_swipe_confirmation_never">Never ask again</string>
 
     <!-- Strings related to Settings -->
     <string name="settings_confirm_donext">Confirm on DoNext?</string>
@@ -42,4 +52,7 @@
         <item>7</item>
     </string-array>
     <string name="title_activity_task_list">TaskListActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

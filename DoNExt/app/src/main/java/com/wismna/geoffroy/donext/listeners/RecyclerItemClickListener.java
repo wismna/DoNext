@@ -31,14 +31,17 @@ public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListen
     @Override
     public boolean onInterceptTouchEvent(RecyclerView view, MotionEvent e) {
         View childView = view.findChildViewUnder(e.getX(), e.getY());
+        int childId = view.getChildAdapterPosition(childView);
         if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
             mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
         }
-        return false;
+        // Allows swipe moves only on first element of the list
+        return childId != 0;
     }
 
     @Override
     public void onTouchEvent(RecyclerView view, MotionEvent motionEvent) {
+
     }
 
     @Override

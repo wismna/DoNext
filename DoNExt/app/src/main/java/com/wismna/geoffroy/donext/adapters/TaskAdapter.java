@@ -45,11 +45,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
+            if (null != mListener) {
+                // Notify the active callbacks interface (the activity, if the
+                // fragment is attached to one) that an item has been selected.
+                mListener.onListFragmentInteraction(holder.mItem);
+            }
             }
         });
     }
@@ -59,15 +59,30 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         return mValues.size();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return getItem(position).getId();
+    }
+
     public void add(Task item, int position) {
         mValues.add(position, item);
         notifyItemInserted(position);
     }
 
-    public void remove(Task item) {
-        int position = mValues.indexOf(item);
+    public void remove(int position) {
+        //int position = mValues.indexOf(item);
         mValues.remove(position);
         notifyItemRemoved(position);
+    }
+
+    public void update(Task item, int position)
+    {
+        mValues.set(position, item);
+        notifyItemChanged(position);
+    }
+
+    public Task getItem(int position) {
+        return mValues.get(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

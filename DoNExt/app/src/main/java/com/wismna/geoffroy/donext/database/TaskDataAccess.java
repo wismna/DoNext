@@ -40,6 +40,7 @@ public class TaskDataAccess {
     public void close() {
         dbHelper.close();
     }
+
     public Task createTask(String name, String description, String priority, long taskList) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
@@ -55,6 +56,10 @@ public class TaskDataAccess {
         Task newTask = cursorToTask(cursor);
         cursor.close();
         return newTask;
+    }
+
+    public void deleteTask(long taskId) {
+
     }
 
     /*public Cursor deleteTask(Cursor taskCursor) {
@@ -97,7 +102,9 @@ public class TaskDataAccess {
         Cursor cursor = database.rawQuery(
                 "SELECT COUNT(*) " +
                         " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
-                        " WHERE " + DatabaseHelper.TASKS_COLUMN_LIST + " = " + id, null);
+                        " WHERE " + DatabaseHelper.TASKS_COLUMN_LIST + " = " + id +
+                        " AND " + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
+                        " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0, null);
         cursor.moveToFirst();
         taskCount = cursor.getInt(0);
         cursor.close();
@@ -107,8 +114,10 @@ public class TaskDataAccess {
         int totalCycles = 0;
         Cursor cursor = database.rawQuery(
                 "SELECT SUM(" + DatabaseHelper.TASKS_COLUMN_CYCLE + ") " +
-                        " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
-                        " WHERE " + DatabaseHelper.TASKS_COLUMN_LIST + " = " + id, null);
+                    " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
+                    " WHERE " + DatabaseHelper.TASKS_COLUMN_LIST + " = " + id +
+                    " AND " + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
+                    " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0, null);
         cursor.moveToFirst();
         totalCycles = cursor.getInt(0);
         cursor.close();
@@ -120,8 +129,24 @@ public class TaskDataAccess {
                 taskColumns, DatabaseHelper.COLUMN_ID + " = " + id, null, null, null, null);
     }
     public Cursor getAllTasksCursor(long id) {
-        return database.query(DatabaseHelper.TASKS_TABLE_NAME,
-                taskColumns, DatabaseHelper.TASKS_COLUMN_LIST + " = " + id, null, null, null, null);
+        return database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
+                DatabaseHelper.TASKS_COLUMN_LIST + " = " + id +
+                    " AND " + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
+                    " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0,
+                null, null, null,
+                DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " ASC");
+    }
+
+    public int setDone(long id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseHelper.TASKS_COLUMN_DONE, 1);
+        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+    }
+
+    public int increaseCycle(int currentCycle, long id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseHelper.TASKS_COLUMN_CYCLE, currentCycle + 1);
+        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
     }
 
     private Task cursorToTask(Cursor cursor) {

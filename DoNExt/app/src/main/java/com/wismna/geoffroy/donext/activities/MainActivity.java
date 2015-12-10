@@ -3,7 +3,9 @@ package com.wismna.geoffroy.donext.activities;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,6 +14,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,12 +30,17 @@ import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
+import com.wismna.geoffroy.donext.fragments.ConfirmDialogFragment;
 import com.wismna.geoffroy.donext.fragments.NewTaskFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NewTaskFragment.NewTaskListener, TasksFragment.OnListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements
+        NewTaskFragment.NewTaskListener,
+        TasksFragment.OnListFragmentInteractionListener,
+        ConfirmDialogFragment.ConfirmDialogListener
+{
 
     protected TaskDataAccess taskDataAccess;
     /**
@@ -50,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
      */
     private ViewPager mViewPager;
 
-    private TaskListDataAccess taskListDataAccess;
     private List<TaskList> taskLists;
 
     @Override
@@ -70,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
         taskDataAccess.open();
 
         // Access database to retrieve Tabs
-        taskListDataAccess = new TaskListDataAccess(this);
+        TaskListDataAccess taskListDataAccess = new TaskListDataAccess(this);
         taskListDataAccess.open();
 
         taskLists = taskListDataAccess.getAllTaskLists();
@@ -82,6 +89,16 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        // Add Task floating button
+        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });*/
 
     }
     @Override
@@ -136,22 +153,20 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
         // Add the task to the database
         Task task = taskDataAccess.createTask(
-                nameText.getText().toString(),
-                descText.getText().toString(),
-                priorityRadio.getText().toString(),
-                taskList.getId());
+            nameText.getText().toString(),
+            descText.getText().toString(),
+            priorityRadio.getText().toString(),
+            taskList.getId());
 
         // Update the corresponding tab adapter
         TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(listSpinner.getSelectedItemPosition());
-        TaskAdapter taskAdapter = ((TaskAdapter)((RecyclerView)taskFragment.getView()).getAdapter());
+        TaskAdapter taskAdapter = ((TaskAdapter)((RecyclerView)taskFragment.getView().findViewById(R.id.task_list_view)).getAdapter());
         taskAdapter.add(task, taskAdapter.getItemCount());
     }
-
-    @Override
-    public void onDialogNegativeClick(DialogFragment dialog) {
-
+    /** Called when user clicks on the New Task floating button */
+    public void onNewTaskClick(View view) {
+        OpenNewTaskDialog();
     }
-
     /** Called when the user clicks the Settings button  */
     public void openSettings(MenuItem menuItem) {
         Intent intent = new Intent(this, SettingsActivity.class);
@@ -165,15 +180,7 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
 
     /** Called when the user clicks the New Task button  */
     public void openNewTaskDialog(MenuItem menuItem) {
-        android.app.FragmentManager manager = getFragmentManager();
-        NewTaskFragment newTaskFragment = new NewTaskFragment();
-
-        // Set current tab value to new task dialog
-        Bundle args = new Bundle();
-        args.putInt("list", mViewPager.getCurrentItem());
-        newTaskFragment.setArguments(args);
-
-        newTaskFragment.show(manager, "Create new task");
+        OpenNewTaskDialog();
     }
 
     /** Will be called when the delete Task button is clicked */
@@ -187,6 +194,78 @@ public class MainActivity extends AppCompatActivity implements NewTaskFragment.N
 
     }
 
+    @Override
+    public void onDialogPositiveClick(android.support.v4.app.DialogFragment dialog) {
+        Bundle args = dialog.getArguments();
+        int itemPosition = args.getInt("ItemPosition");
+        int direction = args.getInt("Direction");
+
+        TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
+        PerformSwipe(taskDataAccess, taskAdapter, itemPosition, direction);
+
+    }
+
+    @Override
+    public void onDialogNeutralClick(android.support.v4.app.DialogFragment dialog) {
+        Bundle args = dialog.getArguments();
+        int itemPosition = args.getInt("ItemPosition");
+        int direction = args.getInt("Direction");
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("pref_conf_next", false);
+
+        switch (direction)
+        {
+            // Mark item as Done
+            case ItemTouchHelper.LEFT:
+                editor.putBoolean("pref_conf_done", false);
+                break;
+            // Increase task cycle count
+            case ItemTouchHelper.RIGHT:
+                editor.putBoolean("pref_conf_next", false);
+                break;
+        }
+        editor.commit();
+        TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
+        PerformSwipe(taskDataAccess, taskAdapter, itemPosition, direction);
+    }
+
+    private void OpenNewTaskDialog() {
+        android.app.FragmentManager manager = getFragmentManager();
+        NewTaskFragment newTaskFragment = new NewTaskFragment();
+
+        // Set current tab value to new task dialog
+        Bundle args = new Bundle();
+        args.putInt("list", mViewPager.getCurrentItem());
+        newTaskFragment.setArguments(args);
+
+        newTaskFragment.show(manager, "Create new task");
+    }
+
+    public static void PerformSwipe(TaskDataAccess taskDataAccess, TaskAdapter taskAdapter, int itemPosition, int direction) {
+        long itemId = taskAdapter.getItemId(itemPosition);
+        taskDataAccess.open();
+        Task task = taskAdapter.getItem(itemPosition);
+        taskAdapter.remove(itemPosition);
+
+        switch (direction)
+        {
+            // Mark item as Done
+            case ItemTouchHelper.LEFT:
+                taskDataAccess.setDone(itemId);
+                break;
+            // Increase task cycle count
+            case ItemTouchHelper.RIGHT:
+                int cycle = task.getCycle();
+                taskDataAccess.increaseCycle(cycle, itemId);
+                task.setCycle(cycle + 1);
+                int lastPosition = taskAdapter.getItemCount();
+                taskAdapter.add(task, lastPosition);
+                break;
+        }
+        taskDataAccess.close();
+    }
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.

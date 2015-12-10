@@ -13,7 +13,6 @@ import android.widget.Spinner;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.TaskList;
-import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 
 import java.util.List;
@@ -27,11 +26,11 @@ public class NewTaskFragment extends DialogFragment {
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface NewTaskListener {
-        public void onDialogPositiveClick(DialogFragment dialog);
-        public void onDialogNegativeClick(DialogFragment dialog);
+        void onDialogPositiveClick(DialogFragment dialog);
+        //void onDialogNegativeClick(DialogFragment dialog);
     }
 
-    private TaskDataAccess taskDataAccess;
+    //private TaskDataAccess taskDataAccess;
     // Use this instance of the interface to deliver action events
     private NewTaskListener mListener;
 
