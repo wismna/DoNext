@@ -14,6 +14,7 @@ public class ConfirmDialogFragment extends DialogFragment {
     public interface ConfirmDialogListener {
         void onDialogPositiveClick(DialogFragment dialog);
         void onDialogNeutralClick(DialogFragment dialog);
+        void onDialogNegativeClick(DialogFragment dialog);
     }
 
     private ConfirmDialogListener confirmDialogListener;
@@ -63,6 +64,7 @@ public class ConfirmDialogFragment extends DialogFragment {
             .setNegativeButton(R.string.task_swipe_confirmation_no, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // User cancelled the dialog
+                    confirmDialogListener.onDialogNegativeClick(ConfirmDialogFragment.this);
                 }
             }).setNeutralButton(R.string.task_swipe_confirmation_never, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {

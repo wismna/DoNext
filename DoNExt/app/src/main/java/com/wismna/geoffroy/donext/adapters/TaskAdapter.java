@@ -1,5 +1,7 @@
 package com.wismna.geoffroy.donext.adapters;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +43,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         holder.mIdView.setText(String.valueOf(holder.mItem.getId()));
         holder.mCycleView.setText(String.valueOf(holder.mItem.getCycle()));
         holder.mTitleView.setText(holder.mItem.getName());
+        holder.mDescriptionView.setText(holder.mItem.getDescription());
+        int priority = holder.mItem.getPriority();
+
+        switch (priority)
+        {
+            case 0:
+                holder.mTitleView.setTextColor(Color.LTGRAY);
+                break;
+            case 2:
+                holder.mTitleView.setTypeface(holder.mTitleView.getTypeface(), Typeface.BOLD);
+                break;
+        }
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +104,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         public final TextView mIdView;
         public final TextView mCycleView;
         public final TextView mTitleView;
+        public final TextView mDescriptionView;
         public Task mItem;
 
         public ViewHolder(View view) {
@@ -99,6 +114,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             mIdView = (TextView) view.findViewById(R.id.task_id);
             mCycleView = (TextView) view.findViewById(R.id.task_cycle);
             mTitleView = (TextView) view.findViewById(R.id.task_name);
+            mDescriptionView = (TextView) view.findViewById(R.id.task_description);
         }
 
         @Override

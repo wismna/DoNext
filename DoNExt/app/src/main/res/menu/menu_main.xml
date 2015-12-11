@@ -2,12 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.MainActivity">
-    <item
+    <!--<item
         android:id="@+id/action_newTask"
         android:orderInCategory="10"
         android:title="@string/action_new_task"
         android:onClick="openNewTaskDialog"
-        app:showAsAction="never" />
+        app:showAsAction="never" />-->
     <item
         android:id="@+id/action_editTabs"
         android:orderInCategory="20"

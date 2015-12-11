@@ -231,6 +231,15 @@ public class MainActivity extends AppCompatActivity implements
         PerformSwipe(taskDataAccess, taskAdapter, itemPosition, direction);
     }
 
+    @Override
+    public void onDialogNegativeClick(android.support.v4.app.DialogFragment dialog) {
+        Bundle args = dialog.getArguments();
+        int itemPosition = args.getInt("ItemPosition");
+
+        TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
+        taskAdapter.notifyItemChanged(itemPosition);
+    }
+
     private void OpenNewTaskDialog() {
         android.app.FragmentManager manager = getFragmentManager();
         NewTaskFragment newTaskFragment = new NewTaskFragment();

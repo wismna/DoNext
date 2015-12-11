@@ -1,29 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?listPreferredItemHeight"
+    android:layout_height="70dp"
     android:orientation="horizontal"
     android:foreground="?selectableItemBackground" >
+    <TextView
+        android:id="@+id/task_cycle"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:textAppearance="?attr/textAppearanceListItem" />
     <TextView
         android:id="@+id/task_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone" />
-    <TextView
-        android:id="@+id/task_cycle"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
-    <TextView
-        android:id="@+id/task_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
-    <!--<Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/task_list_delete"
-        android:onClick="onDeleteTask"/>-->
+        android:layout_height="?listPreferredItemHeight"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/task_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem" />
+        <TextView
+            android:id="@+id/task_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14dp"
+            android:textAppearance="?attr/textAppearanceListItemSmall" />
+    </LinearLayout>
 </LinearLayout>
