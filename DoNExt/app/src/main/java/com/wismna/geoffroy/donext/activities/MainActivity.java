@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -201,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements
         int direction = args.getInt("Direction");
 
         TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
-        PerformSwipe(taskDataAccess, taskAdapter, itemPosition, direction);
+        PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, direction, ((ConfirmDialogFragment) dialog).getRecyclerView());
 
     }
 
@@ -226,9 +227,9 @@ public class MainActivity extends AppCompatActivity implements
                 editor.putBoolean("pref_conf_next", false);
                 break;
         }
-        editor.commit();
+        editor.apply();
         TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
-        PerformSwipe(taskDataAccess, taskAdapter, itemPosition, direction);
+        PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, direction, ((ConfirmDialogFragment) dialog).getRecyclerView());
     }
 
     @Override
@@ -252,28 +253,75 @@ public class MainActivity extends AppCompatActivity implements
         newTaskFragment.show(manager, "Create new task");
     }
 
-    public static void PerformSwipe(TaskDataAccess taskDataAccess, TaskAdapter taskAdapter, int itemPosition, int direction) {
-        long itemId = taskAdapter.getItemId(itemPosition);
-        taskDataAccess.open();
-        Task task = taskAdapter.getItem(itemPosition);
+    public static void PerformSwipeAction(final TaskDataAccess taskDataAccess,
+                                          final TaskAdapter taskAdapter,
+                                          final int itemPosition,
+                                          final int direction,
+                                          final View view) {
+        final long itemId = taskAdapter.getItemId(itemPosition);
+        final Task task = taskAdapter.getItem(itemPosition);
+        String title = "";
         taskAdapter.remove(itemPosition);
 
         switch (direction)
         {
             // Mark item as Done
             case ItemTouchHelper.LEFT:
-                taskDataAccess.setDone(itemId);
+                title = "Done";
                 break;
             // Increase task cycle count
             case ItemTouchHelper.RIGHT:
-                int cycle = task.getCycle();
-                taskDataAccess.increaseCycle(cycle, itemId);
-                task.setCycle(cycle + 1);
-                int lastPosition = taskAdapter.getItemCount();
-                taskAdapter.add(task, lastPosition);
+                title = "Nexted";
+                task.setCycle(task.getCycle() + 1);
+                taskAdapter.add(task, taskAdapter.getItemCount());
                 break;
         }
-        taskDataAccess.close();
+
+        // Setup the snack bar
+        Snackbar.make(view, "Task marked as " + title, Snackbar.LENGTH_LONG)
+            .setAction("Undo", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Undo adapter changes
+                    switch (direction)
+                    {
+                        // Nothing special to do yet
+                        case ItemTouchHelper.LEFT:
+                            break;
+                        // Remove the last item
+                        case ItemTouchHelper.RIGHT:
+                            taskAdapter.remove(taskAdapter.getItemCount() - 1);
+                            task.setCycle(task.getCycle() - 1);
+                            break;
+                    }
+                    // Reset the first item
+                    taskAdapter.add(task, 0);
+                    ((RecyclerView)view).scrollToPosition(0);
+                }
+            }).setCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+                    super.onDismissed(snackbar, event);
+
+                    // When clicked on undo, do not write to DB
+                    if (event == DISMISS_EVENT_ACTION) return;
+
+                    taskDataAccess.open();
+                    // Commit the changes to DB
+                    switch (direction)
+                    {
+                        // Mark item as Done
+                        case ItemTouchHelper.LEFT:
+                            taskDataAccess.setDone(itemId);
+                            break;
+                        // Increase task cycle count
+                        case ItemTouchHelper.RIGHT:
+                            taskDataAccess.increaseCycle(task.getCycle(), itemId);
+                            break;
+                    }
+                    taskDataAccess.close();
+                }
+        }).show();
     }
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

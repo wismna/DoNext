@@ -22,13 +22,16 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     private TaskAdapter taskAdapter;
     private TaskDataAccess taskDataAccess;
     private FragmentManager fragmentManager;
+    private RecyclerView recyclerView;
 
-    public TaskTouchHelper(TaskAdapter taskAdapter, TaskDataAccess taskDataAccess, FragmentManager fragmentManager){
+    public TaskTouchHelper(TaskAdapter taskAdapter, TaskDataAccess taskDataAccess,
+                           FragmentManager fragmentManager, RecyclerView recyclerView){
         // No drag moves, only swipes
         super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
         this.taskAdapter = taskAdapter;
         this.taskDataAccess = taskDataAccess;
         this.fragmentManager = fragmentManager;
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -40,33 +43,33 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(viewHolder.itemView.getContext());
-
         int itemPosition = viewHolder.getAdapterPosition();
-
-        ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(taskAdapter);
-        Bundle args = new Bundle();
-        args.putInt("ItemPosition", itemPosition);
-        args.putInt("Direction", direction);
-        confirmDialogFragment.setArguments(args);
-
         String title = "Confirm";
+        boolean showDialog = false;
+
         switch (direction)
         {
             // Mark item as Done
             case ItemTouchHelper.LEFT:
-                boolean prefConfDone = sharedPref.getBoolean("pref_conf_done", true);
                 title = "Done";
-                if (prefConfDone) confirmDialogFragment.show(fragmentManager, title);
-                else MainActivity.PerformSwipe(taskDataAccess, taskAdapter, itemPosition, direction);
+                showDialog = sharedPref.getBoolean("pref_conf_done", true);
                 break;
             // Increase task cycle count
             case ItemTouchHelper.RIGHT:
                 title = "Next";
-                boolean prefConfNext = sharedPref.getBoolean("pref_conf_next", true);
-                if (prefConfNext) confirmDialogFragment.show(fragmentManager, title);
-                else MainActivity.PerformSwipe(taskDataAccess, taskAdapter, itemPosition, direction);
+                showDialog = sharedPref.getBoolean("pref_conf_next", true);
                 break;
         }
+        if (showDialog) {
+            ConfirmDialogFragment confirmDialogFragment =
+                    ConfirmDialogFragment.newInstance(taskAdapter, title, recyclerView);
+            Bundle args = new Bundle();
+            args.putInt("ItemPosition", itemPosition);
+            args.putInt("Direction", direction);
+            confirmDialogFragment.setArguments(args);
+            confirmDialogFragment.show(fragmentManager, title);
+        }
+        else MainActivity.PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, direction, recyclerView);
     }
 
     @Override

@@ -85,7 +85,8 @@ public class TasksFragment extends Fragment {
 
         // Set ItemTouch helper in RecyclerView to handle swipe move on elements
         // TODO: conflicts with ItemTouchListener, see why
-        ItemTouchHelper.Callback callback = new TaskTouchHelper(taskAdapter, taskDataAccess, getFragmentManager());
+        ItemTouchHelper.Callback callback = new TaskTouchHelper(
+                taskAdapter, taskDataAccess, getFragmentManager(), recyclerView);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(recyclerView);
 

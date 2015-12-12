@@ -38,6 +38,7 @@
     <string name="task_swipe_confirmation_never">Never ask again</string>
 
     <!-- Strings related to Settings -->
+    <string name="settings_confirm_message">Mark task as</string>
     <string name="settings_confirm_donext">Confirm on DoNext?</string>
     <string name="settings_confirm_markdone">Confirm on mark Done?</string>
     <string name="settings_confirm_delete">Confirm on delete?</string>
