@@ -3,12 +3,14 @@ package com.wismna.geoffroy.donext.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import com.wismna.geoffroy.donext.R;
@@ -26,7 +28,7 @@ public class NewTaskFragment extends DialogFragment {
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface NewTaskListener {
-        void onDialogPositiveClick(DialogFragment dialog);
+        void onNewTaskDialogPositiveClick(DialogFragment dialog);
         //void onDialogNegativeClick(DialogFragment dialog);
     }
 
@@ -64,7 +66,7 @@ public class NewTaskFragment extends DialogFragment {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {
                     // Send the positive button event back to the host activity
-                    mListener.onDialogPositiveClick(NewTaskFragment.this);
+                    mListener.onNewTaskDialogPositiveClick(NewTaskFragment.this);
                 }
             })
             .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
@@ -89,11 +91,33 @@ public class NewTaskFragment extends DialogFragment {
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        dataAccess.close();
 
         // Auto set list value to current tab
         Bundle args = getArguments();
         int id = args.getInt("list");
         spinner.setSelection(id);
+
+        // Set other properties
+        EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
+        titleText.setText(args.getString("title"));
+        EditText descText = (EditText) view.findViewById(R.id.new_task_description);
+        descText.setText(args.getString("description"));
+        RadioGroup priorityGroup = (RadioGroup) view.findViewById(R.id.new_task_priority);
+        int priority = args.getInt("priority");
+        switch (priority)
+        {
+            case 0:
+                priorityGroup.check(R.id.new_task_priority_low);
+                break;
+            case 1:
+                priorityGroup.check(R.id.new_task_priority_normal);
+                break;
+            case 2:
+                priorityGroup.check(R.id.new_task_priority_high);
+                break;
+        }
+
 
         return builder.create();
     }

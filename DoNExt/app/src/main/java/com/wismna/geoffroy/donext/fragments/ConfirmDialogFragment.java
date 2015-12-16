@@ -7,15 +7,17 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.TaskAdapter;
 
 public class ConfirmDialogFragment extends DialogFragment {
     public interface ConfirmDialogListener {
-        void onDialogPositiveClick(DialogFragment dialog);
-        void onDialogNeutralClick(DialogFragment dialog);
-        void onDialogNegativeClick(DialogFragment dialog);
+        void onConfirmDialogPositiveClick(DialogFragment dialog);
+        void onConfirmDialogNeutralClick(DialogFragment dialog);
+        void onConfirmDialogNegativeClick(DialogFragment dialog);
+        boolean onConfirmDialogKeyListener(DialogFragment dialog, int keyCode, KeyEvent event);
     }
 
     private ConfirmDialogListener confirmDialogListener;
@@ -45,6 +47,11 @@ public class ConfirmDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onCancel(DialogInterface dialog) {
+        super.onCancel(dialog);
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         // Verify that the host activity implements the callback interface
@@ -63,23 +70,31 @@ public class ConfirmDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // TODO: Handle on dismiss or similar
         builder.setMessage(getResources().getString(R.string.settings_confirm_message) + " " + message + "?")
-                .setPositiveButton(R.string.task_swipe_confirmation_yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        confirmDialogListener.onDialogPositiveClick(ConfirmDialogFragment.this);
-                    }
+            .setPositiveButton(R.string.task_swipe_confirmation_yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    confirmDialogListener.onConfirmDialogPositiveClick(ConfirmDialogFragment.this);
+                }
             })
             .setNegativeButton(R.string.task_swipe_confirmation_no, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // User cancelled the dialog
-                    confirmDialogListener.onDialogNegativeClick(ConfirmDialogFragment.this);
+                    confirmDialogListener.onConfirmDialogNegativeClick(ConfirmDialogFragment.this);
                 }
             }).setNeutralButton(R.string.task_swipe_confirmation_never, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    confirmDialogListener.onDialogNeutralClick(ConfirmDialogFragment.this);
+                    confirmDialogListener.onConfirmDialogNeutralClick(ConfirmDialogFragment.this);
                 }
-            }
-        );
+            })
+            .setOnKeyListener(new DialogInterface.OnKeyListener() {
+                @Override
+                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                    //return false;
+                    return confirmDialogListener.onConfirmDialogKeyListener(ConfirmDialogFragment.this, keyCode, event);
+                }
+            });
         // Create the AlertDialog object and return it
-        return builder.create();
+        Dialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(true);
+        return dialog;
     }
 }

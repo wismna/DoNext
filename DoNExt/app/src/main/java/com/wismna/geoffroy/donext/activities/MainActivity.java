@@ -1,13 +1,13 @@
 package com.wismna.geoffroy.donext.activities;
 
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements
         tabLayout.setupWithViewPager(mViewPager);
 
         // Add Task floating button
+        // TODO: disable or hide button when no lists exist
         /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,8 +143,9 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
         taskDataAccess.close();
     }
+    // TODO: change add methods to add or update
     @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
+    public void onNewTaskDialogPositiveClick(DialogFragment dialog) {
         // Get the dialog fragment
         Dialog dialogView = dialog.getDialog();
         // Get the controls
@@ -153,11 +156,11 @@ public class MainActivity extends AppCompatActivity implements
         RadioButton priorityRadio = (RadioButton) dialogView.findViewById(priorityGroup.getCheckedRadioButtonId());
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
         // Add the task to the database
-        Task task = taskDataAccess.createTask(
-            nameText.getText().toString(),
-            descText.getText().toString(),
-            priorityRadio.getText().toString(),
-            taskList.getId());
+        Task task = taskDataAccess.createOrUpdateTask(
+                nameText.getText().toString(),
+                descText.getText().toString(),
+                priorityRadio.getText().toString(),
+                taskList.getId());
 
         // Update the corresponding tab adapter
         TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(listSpinner.getSelectedItemPosition());
@@ -196,18 +199,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDialogPositiveClick(android.support.v4.app.DialogFragment dialog) {
+    public void onConfirmDialogPositiveClick(DialogFragment dialog) {
         Bundle args = dialog.getArguments();
         int itemPosition = args.getInt("ItemPosition");
         int direction = args.getInt("Direction");
 
         TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
         PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, direction, ((ConfirmDialogFragment) dialog).getRecyclerView());
-
     }
 
     @Override
-    public void onDialogNeutralClick(android.support.v4.app.DialogFragment dialog) {
+    public void onConfirmDialogNeutralClick(android.support.v4.app.DialogFragment dialog) {
         Bundle args = dialog.getArguments();
         int itemPosition = args.getInt("ItemPosition");
         int direction = args.getInt("Direction");
@@ -233,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDialogNegativeClick(android.support.v4.app.DialogFragment dialog) {
+    public void onConfirmDialogNegativeClick(android.support.v4.app.DialogFragment dialog) {
         Bundle args = dialog.getArguments();
         int itemPosition = args.getInt("ItemPosition");
 
@@ -241,8 +243,14 @@ public class MainActivity extends AppCompatActivity implements
         taskAdapter.notifyItemChanged(itemPosition);
     }
 
+    @Override
+    public boolean onConfirmDialogKeyListener(android.support.v4.app.DialogFragment dialog, int keyCode, KeyEvent event) {
+        onConfirmDialogNegativeClick(dialog);
+        return keyCode != KeyEvent.KEYCODE_BACK;
+    }
+
     private void OpenNewTaskDialog() {
-        android.app.FragmentManager manager = getFragmentManager();
+        FragmentManager manager = getSupportFragmentManager();
         NewTaskFragment newTaskFragment = new NewTaskFragment();
 
         // Set current tab value to new task dialog

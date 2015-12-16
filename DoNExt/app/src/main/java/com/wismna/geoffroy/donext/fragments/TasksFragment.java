@@ -1,8 +1,11 @@
 package com.wismna.geoffroy.donext.fragments;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -10,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wismna.geoffroy.donext.ItemTouchHelpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.R;
@@ -27,8 +29,13 @@ import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
  */
 public class TasksFragment extends Fragment {
 
+    /*public interface TasksFragmentListener {
+        void onItemClick(View view, int position);
+    }*/
+
     private static final String TASK_LIST_ID = "task_list_id";
     private long taskListId = -1;
+    //private TasksFragmentListener tasksFragmentListener;
     private OnListFragmentInteractionListener mListener;
 
     /**
@@ -92,16 +99,40 @@ public class TasksFragment extends Fragment {
 
         // Implements touch listener to add click detection
         // TODO: conflicts with ItemTouchHelper (maybe add swipe detection there with onFling?)
-        final Toast mToast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+        //final Toast mToast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         recyclerView.addOnItemTouchListener(
             new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
                 @Override
                 public void onItemClick(View view, int position) {
-                    // TODO: implement on item click event
-                    TextView editText = (TextView) view.findViewById(R.id.task_id);
-                    //Toast mToast = Toast.makeText(context, "Item " + editText.getText() + " clicked!", Toast.LENGTH_SHORT);
-                    mToast.setText("Item " + editText.getText() + " clicked!");
-                    mToast.show();
+                    //tasksFragmentListener.onItemClick(view, position);
+
+                    /*TextView idTextView = (TextView) view.findViewById(R.id.task_id);
+                    mToast.setText("Item " + idTextView.getText() + " clicked!");
+                    mToast.show();*/
+
+                    FragmentManager manager = getFragmentManager();
+                    NewTaskFragment newTaskFragment = new NewTaskFragment();
+
+                    Bundle args = new Bundle();
+
+                    // Set current tab value to new task dialog
+                    ViewPager viewPager =(ViewPager) getActivity().findViewById(R.id.container);
+                    args.putInt("list", viewPager.getCurrentItem());
+
+                    // Set title
+                    TextView titleTextView = (TextView) view.findViewById(R.id.task_name);
+                    args.putString("title", titleTextView.getText().toString());
+                    // Set description
+                    TextView descTextView = (TextView) view.findViewById(R.id.task_description);
+                    args.putString("description", descTextView.getText().toString());
+                    // Set priority
+                    int priority = 1;
+                    if (titleTextView.getCurrentTextColor() == Color.LTGRAY) priority = 0;
+                    if (titleTextView.getTypeface().isBold()) priority = 2;
+                    args.putInt("priority", priority);
+
+                    newTaskFragment.setArguments(args);
+                    newTaskFragment.show(manager, "Edit task");
                 }
             })
         );

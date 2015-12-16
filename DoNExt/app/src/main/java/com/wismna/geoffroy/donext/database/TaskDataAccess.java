@@ -41,7 +41,8 @@ public class TaskDataAccess {
         dbHelper.close();
     }
 
-    public Task createTask(String name, String description, String priority, long taskList) {
+    // TODO: add taskID
+    public Task createOrUpdateTask(String name, String description, String priority, long taskList) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
         values.put(DatabaseHelper.TASKS_COLUMN_DESC, description);
