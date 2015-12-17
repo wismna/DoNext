@@ -25,6 +25,7 @@
     <string name="new_task_priority_high">High</string>
     <string name="new_task_save">Save</string>
     <string name="new_task_cancel">Cancel</string>
+    <string name="new_task_delete">Delete</string>
 
     <!-- String related to task details activity -->
     <string name="task_details_activity_title">Details</string>
@@ -39,8 +40,8 @@
 
     <!-- Strings related to Settings -->
     <string name="settings_confirm_message">Mark task as</string>
-    <string name="settings_confirm_donext">Confirm on DoNext?</string>
-    <string name="settings_confirm_markdone">Confirm on mark Done?</string>
+    <string name="settings_confirm_donext">Confirm on next?</string>
+    <string name="settings_confirm_markdone">Confirm on done?</string>
     <string name="settings_confirm_delete">Confirm on delete?</string>
     <string name="settings_max_lists_label">Maximum number of lists:</string>
     <string-array name="settings_max_lists_number">
@@ -53,7 +54,4 @@
         <item>7</item>
     </string-array>
     <string name="title_activity_task_list">TaskListActivity</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

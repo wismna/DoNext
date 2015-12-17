@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -16,8 +17,6 @@ public class ConfirmDialogFragment extends DialogFragment {
     public interface ConfirmDialogListener {
         void onConfirmDialogPositiveClick(DialogFragment dialog);
         void onConfirmDialogNeutralClick(DialogFragment dialog);
-        void onConfirmDialogNegativeClick(DialogFragment dialog);
-        boolean onConfirmDialogKeyListener(DialogFragment dialog, int keyCode, KeyEvent event);
     }
 
     private ConfirmDialogListener confirmDialogListener;
@@ -38,6 +37,15 @@ public class ConfirmDialogFragment extends DialogFragment {
         return fragment;
     }
 
+    /** Allows refreshing the first item of the adapter */
+    private void RefreshAdapter()
+    {
+        Bundle args = getArguments();
+        int itemPosition = args.getInt("ItemPosition");
+
+        getTaskAdapter().notifyItemChanged(itemPosition);
+    }
+
     public TaskAdapter getTaskAdapter() {
         return taskAdapter;
     }
@@ -49,6 +57,7 @@ public class ConfirmDialogFragment extends DialogFragment {
     @Override
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
+        RefreshAdapter();
     }
 
     @Override
@@ -66,9 +75,9 @@ public class ConfirmDialogFragment extends DialogFragment {
     }
 
     @Override
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        // TODO: Handle on dismiss or similar
         builder.setMessage(getResources().getString(R.string.settings_confirm_message) + " " + message + "?")
             .setPositiveButton(R.string.task_swipe_confirmation_yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
@@ -78,7 +87,7 @@ public class ConfirmDialogFragment extends DialogFragment {
             .setNegativeButton(R.string.task_swipe_confirmation_no, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // User cancelled the dialog
-                    confirmDialogListener.onConfirmDialogNegativeClick(ConfirmDialogFragment.this);
+                    RefreshAdapter();
                 }
             }).setNeutralButton(R.string.task_swipe_confirmation_never, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
@@ -89,7 +98,7 @@ public class ConfirmDialogFragment extends DialogFragment {
                 @Override
                 public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                     //return false;
-                    return confirmDialogListener.onConfirmDialogKeyListener(ConfirmDialogFragment.this, keyCode, event);
+                    return keyCode != KeyEvent.KEYCODE_BACK;
                 }
             });
         // Create the AlertDialog object and return it

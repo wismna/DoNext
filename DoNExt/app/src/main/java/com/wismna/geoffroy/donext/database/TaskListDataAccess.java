@@ -13,12 +13,13 @@ import java.util.List;
 
 /**
  * Created by geoffroy on 15-11-25.
+ * Data access class that handles Task Lists
  */
 public class TaskListDataAccess {
     // Database fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    private String[] taskListColumns = {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME};
+    //private String[] taskListColumns = {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME};
 
     public TaskListDataAccess(Context context) {
         dbHelper = new DatabaseHelper(context);

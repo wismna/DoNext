@@ -8,6 +8,8 @@ import android.view.View;
 
 /**
  * Created by geoffroy on 15-12-02.
+ * Listener class on RecyclerView to intercept touch events
+ * This allows disabling swipe on any other element than the first one
  */
 public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
     private OnItemClickListener mListener;

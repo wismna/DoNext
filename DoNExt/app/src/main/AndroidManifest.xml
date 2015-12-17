@@ -34,14 +34,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MainActivity" />
         </activity>
-        <activity
-            android:name=".activities.TaskDetailsActivity"
-            android:label="@string/task_details_activity_title"
-            android:parentActivityName=".activities.MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.MainActivity" />
-        </activity>
     </application>
 
 </manifest>

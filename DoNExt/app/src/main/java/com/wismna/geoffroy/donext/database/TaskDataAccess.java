@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * Created by geoffroy on 15-11-27.
+ * Data access class that handles Tasks
  */
 public class TaskDataAccess {
     private SQLiteDatabase database;
@@ -41,15 +42,20 @@ public class TaskDataAccess {
         dbHelper.close();
     }
 
-    // TODO: add taskID
-    public Task createOrUpdateTask(String name, String description, String priority, long taskList) {
+    /** Adds or update a task in the database */
+    public Task createOrUpdateTask(long id, String name, String description, String priority, long taskList) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
         values.put(DatabaseHelper.TASKS_COLUMN_DESC, description);
         values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priorities.indexOf(priority));
         values.put(DatabaseHelper.TASKS_COLUMN_LIST, taskList);
-        long insertId = database.insert(DatabaseHelper.TASKS_TABLE_NAME, null, values);
-
+        long insertId;
+        if (id == 0)
+            insertId = database.insert(DatabaseHelper.TASKS_TABLE_NAME, null, values);
+        else {
+            database.update(DatabaseHelper.TASKS_TABLE_NAME, values, DatabaseHelper.COLUMN_ID + " == " + id, null);
+            insertId = id;
+        }
         Cursor cursor = database.query(DatabaseHelper.TASKS_TABLE_NAME,
                 taskColumns, DatabaseHelper.COLUMN_ID + " = " + insertId, null,
                 null, null, null);
@@ -60,7 +66,8 @@ public class TaskDataAccess {
     }
 
     public void deleteTask(long taskId) {
-
+        database.delete(DatabaseHelper.TASKS_TABLE_NAME,
+                DatabaseHelper.COLUMN_ID + " = " + taskId, null);
     }
 
     /*public Cursor deleteTask(Cursor taskCursor) {

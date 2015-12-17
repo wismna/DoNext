@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -14,6 +16,7 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.adapters.TaskAdapter;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 
@@ -21,20 +24,50 @@ import java.util.List;
 
 /**
  * Created by geoffroy on 15-11-26.
+ * Represents a New or Edit Task dialog
  */
-public class NewTaskFragment extends DialogFragment {
+public class TaskDialogFragment extends DialogFragment {
+
+    public TaskAdapter getTaskAdapter() {
+        return taskAdapter;
+    }
+
+    public void setTaskAdapter(TaskAdapter taskAdapter) {
+        this.taskAdapter = taskAdapter;
+    }
+
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
+    }
 
     /** The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface NewTaskListener {
         void onNewTaskDialogPositiveClick(DialogFragment dialog);
+        void onNewTaskDialogNeutralClick(DialogFragment dialog);
         //void onDialogNegativeClick(DialogFragment dialog);
     }
 
-    //private TaskDataAccess taskDataAccess;
+    private TaskAdapter taskAdapter;
+    private RecyclerView recyclerView;
     // Use this instance of the interface to deliver action events
     private NewTaskListener mListener;
+
+    public static TaskDialogFragment newInstance(TaskAdapter taskAdapter, RecyclerView recyclerView) {
+
+        Bundle args = new Bundle();
+
+        TaskDialogFragment fragment = new TaskDialogFragment();
+        fragment.setTaskAdapter(taskAdapter);
+        fragment.setRecyclerView(recyclerView);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     /** Override the Fragment.onAttach() method to instantiate the NoticeDialogListener */
     @Override
@@ -52,6 +85,7 @@ public class NewTaskFragment extends DialogFragment {
     }
 
     @Override
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Get the layout inflater
@@ -66,7 +100,7 @@ public class NewTaskFragment extends DialogFragment {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {
                     // Send the positive button event back to the host activity
-                    mListener.onNewTaskDialogPositiveClick(NewTaskFragment.this);
+                    mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this);
                 }
             })
             .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
@@ -74,7 +108,7 @@ public class NewTaskFragment extends DialogFragment {
                     // Send the negative button event back to the host activity
                     //mListener.onDialogNegativeClick(NoticeDialogFragment.this);
                     // Canceled creation, nothing to do
-                    NewTaskFragment.this.getDialog().cancel();
+                    TaskDialogFragment.this.getDialog().cancel();
                 }
             });
 
@@ -98,7 +132,7 @@ public class NewTaskFragment extends DialogFragment {
         int id = args.getInt("list");
         spinner.setSelection(id);
 
-        // Set other properties
+        // Set other properties if they exist
         EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
         titleText.setText(args.getString("title"));
         EditText descText = (EditText) view.findViewById(R.id.new_task_description);
@@ -117,7 +151,14 @@ public class NewTaskFragment extends DialogFragment {
                 priorityGroup.check(R.id.new_task_priority_high);
                 break;
         }
-
+        // Add a Delete button in Edit mode
+        if (args.getLong("id") != 0)
+            builder.setNeutralButton(R.string.new_task_delete, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
+                }
+            });
 
         return builder.create();
     }

@@ -2,6 +2,7 @@ package com.wismna.geoffroy.donext.dao;
 
 /**
  * Created by geoffroy on 15-11-25.
+ * Data access object class that represents a Task
  */
 public class Task {
     private long id;
@@ -13,18 +14,6 @@ public class Task {
     private int deleted;
     private long taskList;
     private String taskListName;
-
-    public enum TaskPriority {
-        LOW(0),
-        NORMAL(1),
-        HIGH(2);
-
-        private int value;
-
-        private TaskPriority(int value) {
-            this.value = value;
-        }
-    }
 
     public long getId() {
         return id;

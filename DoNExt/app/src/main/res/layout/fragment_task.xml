@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:maxLines="2"
             android:textColor="@color/colorPrimary"
-            android:textSize="14dp"
+            android:textSize="14sp"
             android:textAppearance="?attr/textAppearanceListItemSmall" />
     </LinearLayout>
 </LinearLayout>

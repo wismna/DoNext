@@ -17,6 +17,7 @@ import com.wismna.geoffroy.donext.fragments.ConfirmDialogFragment;
 
 /**
  * Created by geoffroy on 15-12-04.
+ * Helper class that handles all swipe events on a Task
  */
 public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     private TaskAdapter taskAdapter;

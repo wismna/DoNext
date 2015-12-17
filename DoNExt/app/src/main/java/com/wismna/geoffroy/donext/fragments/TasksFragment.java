@@ -45,7 +45,6 @@ public class TasksFragment extends Fragment {
     public TasksFragment() {
     }
 
-    @SuppressWarnings("unused")
     public static TasksFragment newInstance(long taskListId) {
         TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
@@ -70,7 +69,7 @@ public class TasksFragment extends Fragment {
         final Context context = view.getContext();
 
         // Set the Recycler view
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
+        final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext());
@@ -85,7 +84,7 @@ public class TasksFragment extends Fragment {
         totalTasksView.setText(String.valueOf(taskDataAccess.getTaskCount(taskListId)));
 
         // Set RecyclerView Adapter
-        TaskAdapter taskAdapter = new TaskAdapter(taskDataAccess.getAllTasks(taskListId), mListener);
+        final TaskAdapter taskAdapter = new TaskAdapter(taskDataAccess.getAllTasks(taskListId), mListener);
         recyclerView.setAdapter(taskAdapter);
 
         taskDataAccess.close();
@@ -106,14 +105,16 @@ public class TasksFragment extends Fragment {
                 public void onItemClick(View view, int position) {
                     //tasksFragmentListener.onItemClick(view, position);
 
-                    /*TextView idTextView = (TextView) view.findViewById(R.id.task_id);
-                    mToast.setText("Item " + idTextView.getText() + " clicked!");
+                    TextView idTextView = (TextView) view.findViewById(R.id.task_id);
+                    /*mToast.setText("Item " + idTextView.getText() + " clicked!");
                     mToast.show();*/
 
                     FragmentManager manager = getFragmentManager();
-                    NewTaskFragment newTaskFragment = new NewTaskFragment();
+                    TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(taskAdapter, recyclerView);
 
                     Bundle args = new Bundle();
+                    args.putLong("id", Long.valueOf(idTextView.getText().toString()));
+                    args.putInt("position", position);
 
                     // Set current tab value to new task dialog
                     ViewPager viewPager =(ViewPager) getActivity().findViewById(R.id.container);
@@ -131,8 +132,8 @@ public class TasksFragment extends Fragment {
                     if (titleTextView.getTypeface().isBold()) priority = 2;
                     args.putInt("priority", priority);
 
-                    newTaskFragment.setArguments(args);
-                    newTaskFragment.show(manager, "Edit task");
+                    taskDialogFragment.setArguments(args);
+                    taskDialogFragment.show(manager, "Edit task");
                 }
             })
         );

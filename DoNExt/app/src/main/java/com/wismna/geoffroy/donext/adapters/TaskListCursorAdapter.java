@@ -13,6 +13,7 @@ import com.wismna.geoffroy.donext.database.DatabaseHelper;
 
 /**
  * Created by geoffroy on 15-11-25.
+ * DEPRECATED
  */
 public class TaskListCursorAdapter extends ResourceCursorAdapter {
     public TaskListCursorAdapter(Context context, int layout, Cursor cursor, int flags) {

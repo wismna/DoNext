@@ -33,8 +33,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_task, parent, false);
 
-        ViewHolder holder = new ViewHolder(view);
-        return holder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -84,7 +83,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     }
 
     public void remove(int position) {
-        //int position = mValues.indexOf(item);
         mValues.remove(position);
         notifyItemRemoved(position);
     }

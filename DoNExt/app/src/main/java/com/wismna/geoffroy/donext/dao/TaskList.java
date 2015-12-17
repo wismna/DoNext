@@ -2,6 +2,7 @@ package com.wismna.geoffroy.donext.dao;
 
 /**
  * Created by geoffroy on 15-11-25.
+ * Data access object class that represents a Task List
  */
 public class TaskList {
     private long id;
@@ -22,14 +23,6 @@ public class TaskList {
 
     public void setName(String comment) {
         this.name = comment;
-    }
-
-    public long getTaskCount() {
-        return taskCount;
-    }
-
-    public void setTaskCount(long taskCount) {
-        this.taskCount = taskCount;
     }
 
     // Will be used by the ArrayAdapter in the ListView

@@ -16,7 +16,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,13 +32,13 @@ import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.fragments.ConfirmDialogFragment;
-import com.wismna.geoffroy.donext.fragments.NewTaskFragment;
+import com.wismna.geoffroy.donext.fragments.TaskDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-        NewTaskFragment.NewTaskListener,
+        TaskDialogFragment.NewTaskListener,
         TasksFragment.OnListFragmentInteractionListener,
         ConfirmDialogFragment.ConfirmDialogListener
 {
@@ -53,13 +52,11 @@ public class MainActivity extends AppCompatActivity implements
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-
     private List<TaskList> taskLists;
 
     @Override
@@ -72,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Access database to retrieve tasks
         taskDataAccess = new TaskDataAccess(this);
@@ -148,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements
     public void onNewTaskDialogPositiveClick(DialogFragment dialog) {
         // Get the dialog fragment
         Dialog dialogView = dialog.getDialog();
+        Bundle args = dialog.getArguments();
+        long id = args.getLong("id");
         // Get the controls
         Spinner listSpinner = (Spinner) dialogView.findViewById(R.id.new_task_list);
         EditText nameText = (EditText) dialogView.findViewById(R.id.new_task_name);
@@ -156,17 +155,64 @@ public class MainActivity extends AppCompatActivity implements
         RadioButton priorityRadio = (RadioButton) dialogView.findViewById(priorityGroup.getCheckedRadioButtonId());
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
         // Add the task to the database
-        Task task = taskDataAccess.createOrUpdateTask(
+        taskDataAccess.open();
+        Task task = taskDataAccess.createOrUpdateTask(id,
                 nameText.getText().toString(),
                 descText.getText().toString(),
                 priorityRadio.getText().toString(),
                 taskList.getId());
-
+        taskDataAccess.close();
         // Update the corresponding tab adapter
-        TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(listSpinner.getSelectedItemPosition());
-        TaskAdapter taskAdapter = ((TaskAdapter)((RecyclerView)taskFragment.getView().findViewById(R.id.task_list_view)).getAdapter());
-        taskAdapter.add(task, taskAdapter.getItemCount());
+        //TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(listSpinner.getSelectedItemPosition());
+        //TaskAdapter taskAdapter = ((TaskAdapter)((RecyclerView)taskFragment.getView().findViewById(R.id.task_list_view)).getAdapter());
+        TaskAdapter taskAdapter = ((TaskDialogFragment)dialog).getTaskAdapter();
+        // Add the task
+        if (id == 0)
+            taskAdapter.add(task, taskAdapter.getItemCount());
+        // Update the task
+        else
+            taskAdapter.update(task, args.getInt("position"));
     }
+
+    @Override
+    public void onNewTaskDialogNeutralClick(DialogFragment dialog) {
+        // TODO: add confirm dialog
+        TaskDialogFragment taskDialogFragment = (TaskDialogFragment) dialog;
+        Bundle args = dialog.getArguments();
+        final long id = args.getLong("id");
+
+        // Delete task from Adapter
+        final int position = args.getInt("position");
+        final TaskAdapter taskAdapter = taskDialogFragment.getTaskAdapter();
+        final Task task = taskAdapter.getItem(position);
+        taskAdapter.remove(position);
+
+        // Setup the snack bar
+        final View view = taskDialogFragment.getRecyclerView();
+        Snackbar.make(view, "Task deleted", Snackbar.LENGTH_LONG)
+                .setAction("Undo", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Undo adapter changes
+                        taskAdapter.add(task, position);
+                        ((RecyclerView)view).scrollToPosition(position);
+                    }
+                }).setCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int event) {
+                        super.onDismissed(snackbar, event);
+
+                        // When clicked on undo, do not write to DB
+                        if (event == DISMISS_EVENT_ACTION) return;
+
+                        // Commit the changes to DB
+                        taskDataAccess.open();
+                        taskDataAccess.deleteTask(id);
+                        taskDataAccess.close();
+                    }
+        }).show();
+    }
+
     /** Called when user clicks on the New Task floating button */
     public void onNewTaskClick(View view) {
         OpenNewTaskDialog();
@@ -180,17 +226,6 @@ public class MainActivity extends AppCompatActivity implements
     public void openTaskLists(MenuItem menuItem) {
         Intent intent = new Intent(this, TaskListActivity.class);
         startActivity(intent);
-    }
-
-    /** Called when the user clicks the New Task button  */
-    public void openNewTaskDialog(MenuItem menuItem) {
-        OpenNewTaskDialog();
-    }
-
-    /** Will be called when the delete Task button is clicked */
-    public void onDeleteTask(View view) {
-        RecyclerView recyclerView = (RecyclerView) view;
-
     }
 
     @Override
@@ -209,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onConfirmDialogNeutralClick(android.support.v4.app.DialogFragment dialog) {
+    public void onConfirmDialogNeutralClick(DialogFragment dialog) {
         Bundle args = dialog.getArguments();
         int itemPosition = args.getInt("ItemPosition");
         int direction = args.getInt("Direction");
@@ -234,31 +269,16 @@ public class MainActivity extends AppCompatActivity implements
         PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, direction, ((ConfirmDialogFragment) dialog).getRecyclerView());
     }
 
-    @Override
-    public void onConfirmDialogNegativeClick(android.support.v4.app.DialogFragment dialog) {
-        Bundle args = dialog.getArguments();
-        int itemPosition = args.getInt("ItemPosition");
-
-        TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
-        taskAdapter.notifyItemChanged(itemPosition);
-    }
-
-    @Override
-    public boolean onConfirmDialogKeyListener(android.support.v4.app.DialogFragment dialog, int keyCode, KeyEvent event) {
-        onConfirmDialogNegativeClick(dialog);
-        return keyCode != KeyEvent.KEYCODE_BACK;
-    }
-
     private void OpenNewTaskDialog() {
         FragmentManager manager = getSupportFragmentManager();
-        NewTaskFragment newTaskFragment = new NewTaskFragment();
+        TaskDialogFragment taskDialogFragment = new TaskDialogFragment();
 
         // Set current tab value to new task dialog
         Bundle args = new Bundle();
         args.putInt("list", mViewPager.getCurrentItem());
-        newTaskFragment.setArguments(args);
+        taskDialogFragment.setArguments(args);
 
-        newTaskFragment.show(manager, "Create new task");
+        taskDialogFragment.show(manager, "Create new task");
     }
 
     public static void PerformSwipeAction(final TaskDataAccess taskDataAccess,
