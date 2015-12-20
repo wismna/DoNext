@@ -77,11 +77,11 @@ public class TasksFragment extends Fragment {
 
         // Set total cycles
         TextView totalCyclesView = (TextView) view.findViewById(R.id.total_task_cycles);
-        totalCyclesView.setText(String.valueOf(taskDataAccess.getTotalCycles(taskListId)));
+        totalCyclesView.setText(String.valueOf(taskDataAccess.getTotalCycles(taskListId) + " cycles"));
 
         // Set total count
         TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
-        totalTasksView.setText(String.valueOf(taskDataAccess.getTaskCount(taskListId)));
+        totalTasksView.setText(String.valueOf(taskDataAccess.getTaskCount(taskListId) + " tasks"));
 
         // Set RecyclerView Adapter
         final TaskAdapter taskAdapter = new TaskAdapter(taskDataAccess.getAllTasks(taskListId), mListener);

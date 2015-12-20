@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements
                             break;
                     }
                     // Reset the first item
-                    taskAdapter.add(task, 0);
+                    taskAdapter.add(task, itemPosition);
                     ((RecyclerView)view).scrollToPosition(0);
                 }
             }).setCallback(new Snackbar.Callback() {

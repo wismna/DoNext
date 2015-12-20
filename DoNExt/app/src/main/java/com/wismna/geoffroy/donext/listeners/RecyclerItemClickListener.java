@@ -37,8 +37,11 @@ public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListen
         if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
             mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
         }
-        // Allows swipe moves only on first element of the list
-        return childId != 0;
+
+        // Allows right swipe moves only on first element of the list, left everywhere
+        return e.getAction() != MotionEvent.ACTION_MOVE ||
+                ((e.getY() - e.getHistoricalY(0) > 0 || (e.getY() - e.getHistoricalY(0)) < 0) ||
+                        childId != 0 && e.getX() - e.getHistoricalX(0) > 0);
     }
 
     @Override

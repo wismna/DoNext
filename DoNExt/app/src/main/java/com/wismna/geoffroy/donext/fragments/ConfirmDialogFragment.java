@@ -37,15 +37,6 @@ public class ConfirmDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    /** Allows refreshing the first item of the adapter */
-    private void RefreshAdapter()
-    {
-        Bundle args = getArguments();
-        int itemPosition = args.getInt("ItemPosition");
-
-        getTaskAdapter().notifyItemChanged(itemPosition);
-    }
-
     public TaskAdapter getTaskAdapter() {
         return taskAdapter;
     }
@@ -57,7 +48,12 @@ public class ConfirmDialogFragment extends DialogFragment {
     @Override
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
-        RefreshAdapter();
+
+        // Allows refreshing the first item of the adapter
+        Bundle args = getArguments();
+        int itemPosition = args.getInt("ItemPosition");
+
+        getTaskAdapter().notifyItemChanged(itemPosition);
     }
 
     @Override
@@ -87,7 +83,7 @@ public class ConfirmDialogFragment extends DialogFragment {
             .setNegativeButton(R.string.task_swipe_confirmation_no, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // User cancelled the dialog
-                    RefreshAdapter();
+                    ConfirmDialogFragment.this.getDialog().cancel();
                 }
             }).setNeutralButton(R.string.task_swipe_confirmation_never, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
