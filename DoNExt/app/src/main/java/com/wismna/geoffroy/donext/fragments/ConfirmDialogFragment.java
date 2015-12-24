@@ -74,18 +74,18 @@ public class ConfirmDialogFragment extends DialogFragment {
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(getResources().getString(R.string.settings_confirm_message) + " " + message + "?")
-            .setPositiveButton(R.string.task_swipe_confirmation_yes, new DialogInterface.OnClickListener() {
+        builder.setMessage(message)
+            .setPositiveButton(R.string.task_confirmation_yes_button, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     confirmDialogListener.onConfirmDialogPositiveClick(ConfirmDialogFragment.this);
                 }
             })
-            .setNegativeButton(R.string.task_swipe_confirmation_no, new DialogInterface.OnClickListener() {
+            .setNegativeButton(R.string.task_confirmation_no_button, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // User cancelled the dialog
                     ConfirmDialogFragment.this.getDialog().cancel();
                 }
-            }).setNeutralButton(R.string.task_swipe_confirmation_never, new DialogInterface.OnClickListener() {
+            }).setNeutralButton(R.string.task_confirmation_never_button, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     confirmDialogListener.onConfirmDialogNeutralClick(ConfirmDialogFragment.this);
                 }

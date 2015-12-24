@@ -48,6 +48,7 @@ public class TaskDataAccess {
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
         values.put(DatabaseHelper.TASKS_COLUMN_DESC, description);
         values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priorities.indexOf(priority));
+        //values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priority);
         values.put(DatabaseHelper.TASKS_COLUMN_LIST, taskList);
         long insertId;
         if (id == 0)

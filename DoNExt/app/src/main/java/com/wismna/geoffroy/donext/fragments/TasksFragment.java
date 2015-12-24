@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
@@ -20,6 +19,7 @@ import com.wismna.geoffroy.donext.adapters.TaskAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
+import com.wismna.geoffroy.donext.widgets.NoScrollingLayoutManager;
 
 /**
  * A fragment representing a list of Items.
@@ -70,7 +70,8 @@ public class TasksFragment extends Fragment {
 
         // Set the Recycler view
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        //recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(new NoScrollingLayoutManager(context));
 
         TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext());
         taskDataAccess.open();
@@ -90,14 +91,12 @@ public class TasksFragment extends Fragment {
         taskDataAccess.close();
 
         // Set ItemTouch helper in RecyclerView to handle swipe move on elements
-        // TODO: conflicts with ItemTouchListener, see why
         ItemTouchHelper.Callback callback = new TaskTouchHelper(
                 taskAdapter, taskDataAccess, getFragmentManager(), recyclerView);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(recyclerView);
 
         // Implements touch listener to add click detection
-        // TODO: conflicts with ItemTouchHelper (maybe add swipe detection there with onFling?)
         //final Toast mToast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         recyclerView.addOnItemTouchListener(
             new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
@@ -106,8 +105,8 @@ public class TasksFragment extends Fragment {
                     //tasksFragmentListener.onItemClick(view, position);
 
                     TextView idTextView = (TextView) view.findViewById(R.id.task_id);
-                    /*mToast.setText("Item " + idTextView.getText() + " clicked!");
-                    mToast.show();*/
+                    //mToast.setText("Item " + idTextView.getText() + " clicked!");
+                    //mToast.show();
 
                     FragmentManager manager = getFragmentManager();
                     TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(taskAdapter, recyclerView);

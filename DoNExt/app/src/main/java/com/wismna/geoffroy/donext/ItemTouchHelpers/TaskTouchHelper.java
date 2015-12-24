@@ -27,8 +27,8 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
 
     public TaskTouchHelper(TaskAdapter taskAdapter, TaskDataAccess taskDataAccess,
                            FragmentManager fragmentManager, RecyclerView recyclerView){
-        // No drag moves, only swipes
-        super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        // No drag moves, only left swipes (except for 1st element, see getSwipeDirs method)
+        super(0, ItemTouchHelper.LEFT);
         this.taskAdapter = taskAdapter;
         this.taskDataAccess = taskDataAccess;
         this.fragmentManager = fragmentManager;
@@ -36,8 +36,15 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     @Override
+    public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        // Allow both directions swiping on first item, only left on the others
+        if (viewHolder.getAdapterPosition() == 0)
+            return ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+        else return super.getSwipeDirs(recyclerView, viewHolder);
+    }
+
+    @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        //TODO: Not implemented here
         return false;
     }
 
@@ -45,19 +52,19 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(viewHolder.itemView.getContext());
         int itemPosition = viewHolder.getAdapterPosition();
-        String title = "Confirm";
+        String title = "";
         boolean showDialog = false;
 
         switch (direction)
         {
             // Mark item as Done
             case ItemTouchHelper.LEFT:
-                title = "Done";
+                title = "Mark task as done?";
                 showDialog = sharedPref.getBoolean("pref_conf_done", true);
                 break;
             // Increase task cycle count
             case ItemTouchHelper.RIGHT:
-                title = "Next";
+                title = "Go to next task?";
                 showDialog = sharedPref.getBoolean("pref_conf_next", true);
                 break;
         }

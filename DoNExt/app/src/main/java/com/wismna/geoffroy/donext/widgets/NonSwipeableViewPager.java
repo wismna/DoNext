@@ -7,6 +7,7 @@ import android.view.MotionEvent;
 
 /**
  * Created by geoffroy on 15-12-04.
+ * Custom ViewPager to forbid vertical swiping between tabs
  */
 public class NonSwipeableViewPager extends ViewPager {
 

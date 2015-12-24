@@ -27,16 +27,20 @@
     <string name="new_task_cancel">Cancel</string>
     <string name="new_task_delete">Delete</string>
 
-    <!-- String related to task details activity -->
+    <!-- Strings related to task details activity -->
     <string name="task_details_activity_title">Details</string>
 
-    <!-- String related to task list Recycler View -->
-    <string name="task_swipe_confirmation_title">Confirm</string>
-    <string name="task_swipe_confirmation_done">Mark task as Done?</string>
-    <string name="task_swipe_confirmation_next">Mark task as Nexted?</string>
-    <string name="task_swipe_confirmation_yes">Yes</string>
-    <string name="task_swipe_confirmation_no">No</string>
-    <string name="task_swipe_confirmation_never">Never ask again</string>
+
+    <!-- Strings related to the confirmation dialog -->
+    <string name="task_confirmation_done_text">Mark task as Done?</string>
+    <string name="task_confirmation_next_text">Go to next task?</string>
+    <string name="task_confirmation_delete_text">Delete this task?</string>
+    <string name="task_confirmation_done_button">Done</string>
+    <string name="task_confirmation_next_button">Next</string>
+    <string name="task_confirmation_delete_button">Delete</string>
+    <string name="task_confirmation_yes_button">Yes</string>
+    <string name="task_confirmation_no_button">No</string>
+    <string name="task_confirmation_never_button">Never ask again</string>
 
     <!-- Strings related to Settings -->
     <string name="settings_confirm_message">Mark task as</string>

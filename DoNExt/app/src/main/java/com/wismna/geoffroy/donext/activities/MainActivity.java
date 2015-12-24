@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
         taskDataAccess.close();
     }
-    // TODO: change add methods to add or update
+
     @Override
     public void onNewTaskDialogPositiveClick(DialogFragment dialog) {
         // Get the dialog fragment
@@ -163,8 +163,6 @@ public class MainActivity extends AppCompatActivity implements
                 taskList.getId());
         taskDataAccess.close();
         // Update the corresponding tab adapter
-        //TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(listSpinner.getSelectedItemPosition());
-        //TaskAdapter taskAdapter = ((TaskAdapter)((RecyclerView)taskFragment.getView().findViewById(R.id.task_list_view)).getAdapter());
         TaskAdapter taskAdapter = ((TaskDialogFragment)dialog).getTaskAdapter();
         // Add the task
         if (id == 0)
@@ -177,40 +175,27 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onNewTaskDialogNeutralClick(DialogFragment dialog) {
         // TODO: add confirm dialog
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String title = getResources().getString(R.string.task_confirmation_delete_text);
+        boolean showDialog = sharedPref.getBoolean("pref_conf_del", true);
         TaskDialogFragment taskDialogFragment = (TaskDialogFragment) dialog;
         Bundle args = dialog.getArguments();
-        final long id = args.getLong("id");
 
         // Delete task from Adapter
-        final int position = args.getInt("position");
+        final int itemPosition = args.getInt("position");
         final TaskAdapter taskAdapter = taskDialogFragment.getTaskAdapter();
-        final Task task = taskAdapter.getItem(position);
-        taskAdapter.remove(position);
+        final RecyclerView view = taskDialogFragment.getRecyclerView();
 
-        // Setup the snack bar
-        final View view = taskDialogFragment.getRecyclerView();
-        Snackbar.make(view, "Task deleted", Snackbar.LENGTH_LONG)
-                .setAction("Undo", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Undo adapter changes
-                        taskAdapter.add(task, position);
-                        ((RecyclerView)view).scrollToPosition(position);
-                    }
-                }).setCallback(new Snackbar.Callback() {
-                    @Override
-                    public void onDismissed(Snackbar snackbar, int event) {
-                        super.onDismissed(snackbar, event);
-
-                        // When clicked on undo, do not write to DB
-                        if (event == DISMISS_EVENT_ACTION) return;
-
-                        // Commit the changes to DB
-                        taskDataAccess.open();
-                        taskDataAccess.deleteTask(id);
-                        taskDataAccess.close();
-                    }
-        }).show();
+        if (showDialog) {
+            ConfirmDialogFragment confirmDialogFragment =
+                    ConfirmDialogFragment.newInstance(taskAdapter, title, view);
+            Bundle confirmArgs = new Bundle();
+            confirmArgs.putInt("ItemPosition", itemPosition);
+            confirmArgs.putInt("Direction", -1);
+            confirmDialogFragment.setArguments(confirmArgs);
+            confirmDialogFragment.show(getSupportFragmentManager(), title);
+        }
+        else PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, -1, view);
     }
 
     /** Called when user clicks on the New Task floating button */
@@ -251,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean("pref_conf_next", false);
+        //editor.putBoolean("pref_conf_next", false);
 
         switch (direction)
         {
@@ -262,6 +247,10 @@ public class MainActivity extends AppCompatActivity implements
             // Increase task cycle count
             case ItemTouchHelper.RIGHT:
                 editor.putBoolean("pref_conf_next", false);
+                break;
+            // TODO: add delete action
+            case -1:
+                editor.putBoolean("pref_conf_del", false);
                 break;
         }
         editor.apply();
@@ -288,38 +277,47 @@ public class MainActivity extends AppCompatActivity implements
                                           final View view) {
         final long itemId = taskAdapter.getItemId(itemPosition);
         final Task task = taskAdapter.getItem(itemPosition);
-        String title = "";
+        String action = "";
         taskAdapter.remove(itemPosition);
 
         switch (direction)
         {
             // Mark item as Done
             case ItemTouchHelper.LEFT:
-                title = "Done";
+                action = "done";
                 break;
             // Increase task cycle count
             case ItemTouchHelper.RIGHT:
-                title = "Nexted";
+                action = "nexted";
                 task.setCycle(task.getCycle() + 1);
                 taskAdapter.add(task, taskAdapter.getItemCount());
+                break;
+            // TODO: add delete action
+            case -1:
+                action = "deleted";
+                taskAdapter.remove(itemPosition);
                 break;
         }
 
         // Setup the snack bar
-        Snackbar.make(view, "Task marked as " + title, Snackbar.LENGTH_LONG)
+        Snackbar.make(view, "Task " + action, Snackbar.LENGTH_LONG)
             .setAction("Undo", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // Undo adapter changes
                     switch (direction)
                     {
-                        // Nothing special to do yet
+                        // Nothing special to do for done
                         case ItemTouchHelper.LEFT:
                             break;
                         // Remove the last item
                         case ItemTouchHelper.RIGHT:
                             taskAdapter.remove(taskAdapter.getItemCount() - 1);
                             task.setCycle(task.getCycle() - 1);
+                            break;
+                        // TODO: add delete action
+                        // Nothing special to do for delete
+                        case -1:
                             break;
                     }
                     // Reset the first item
@@ -346,6 +344,10 @@ public class MainActivity extends AppCompatActivity implements
                         case ItemTouchHelper.RIGHT:
                             taskDataAccess.increaseCycle(task.getCycle(), itemId);
                             break;
+                        // TODO: add delete action
+                        case -1:
+                            // Commit the changes to DB
+                            taskDataAccess.deleteTask(itemId);
                     }
                     taskDataAccess.close();
                 }

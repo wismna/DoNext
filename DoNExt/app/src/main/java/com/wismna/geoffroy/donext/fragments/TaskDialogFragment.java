@@ -159,7 +159,7 @@ public class TaskDialogFragment extends DialogFragment {
                     mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
                 }
             });
-
+        setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_Holo_Light);
         return builder.create();
     }
 }
