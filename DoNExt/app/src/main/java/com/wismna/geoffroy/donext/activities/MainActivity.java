@@ -174,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onNewTaskDialogNeutralClick(DialogFragment dialog) {
-        // TODO: add confirm dialog
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String title = getResources().getString(R.string.task_confirmation_delete_text);
         boolean showDialog = sharedPref.getBoolean("pref_conf_del", true);
@@ -248,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements
             case ItemTouchHelper.RIGHT:
                 editor.putBoolean("pref_conf_next", false);
                 break;
-            // TODO: add delete action
             case -1:
                 editor.putBoolean("pref_conf_del", false);
                 break;
@@ -292,7 +290,6 @@ public class MainActivity extends AppCompatActivity implements
                 task.setCycle(task.getCycle() + 1);
                 taskAdapter.add(task, taskAdapter.getItemCount());
                 break;
-            // TODO: add delete action
             case -1:
                 action = "deleted";
                 taskAdapter.remove(itemPosition);
@@ -315,7 +312,6 @@ public class MainActivity extends AppCompatActivity implements
                             taskAdapter.remove(taskAdapter.getItemCount() - 1);
                             task.setCycle(task.getCycle() - 1);
                             break;
-                        // TODO: add delete action
                         // Nothing special to do for delete
                         case -1:
                             break;
@@ -344,7 +340,6 @@ public class MainActivity extends AppCompatActivity implements
                         case ItemTouchHelper.RIGHT:
                             taskDataAccess.increaseCycle(task.getCycle(), itemId);
                             break;
-                        // TODO: add delete action
                         case -1:
                             // Commit the changes to DB
                             taskDataAccess.deleteTask(itemId);

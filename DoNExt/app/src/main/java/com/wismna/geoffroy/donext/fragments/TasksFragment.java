@@ -128,7 +128,7 @@ public class TasksFragment extends Fragment {
                     // Set priority
                     int priority = 1;
                     if (titleTextView.getCurrentTextColor() == Color.LTGRAY) priority = 0;
-                    if (titleTextView.getTypeface().isBold()) priority = 2;
+                    else if (titleTextView.getTypeface().isBold()) priority = 2;
                     args.putInt("priority", priority);
 
                     taskDialogFragment.setArguments(args);

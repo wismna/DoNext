@@ -45,6 +45,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         holder.mDescriptionView.setText(holder.mItem.getDescription());
         int priority = holder.mItem.getPriority();
 
+        // Reset task rendering
+        holder.mTitleView.setTypeface(Typeface.DEFAULT);
+        holder.mTitleView.setTextColor(Color.BLACK);
+
         switch (priority)
         {
             case 0:
