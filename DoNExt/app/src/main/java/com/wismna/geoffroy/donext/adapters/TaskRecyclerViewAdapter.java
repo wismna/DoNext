@@ -10,22 +10,22 @@ import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.Task;
-import com.wismna.geoffroy.donext.fragments.TasksFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
+//import com.wismna.geoffroy.donext.fragments.TasksFragment.OnListFragmentInteractionListener;
+
 /**
- * {@link RecyclerView.Adapter} that can display a {@link Task} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
+ * {@link RecyclerView.Adapter} that can display a {@link Task}.
  */
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
+public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.ViewHolder> {
 
     private final List<Task> mValues;
-    private final OnListFragmentInteractionListener mListener;
+    //private final OnListFragmentInteractionListener mListener;
 
-    public TaskAdapter(List<Task> items, OnListFragmentInteractionListener listener) {
+    public TaskRecyclerViewAdapter(List<Task> items/*, OnListFragmentInteractionListener listener*/) {
         mValues = items;
-        mListener = listener;
+        //mListener = listener;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                 break;
         }
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+        /*holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
             if (null != mListener) {
@@ -68,7 +68,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                 mListener.onListFragmentInteraction(holder.mItem);
             }
             }
-        });
+        });*/
     }
 
     @Override

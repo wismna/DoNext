@@ -11,7 +11,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
 import com.wismna.geoffroy.donext.activities.MainActivity;
-import com.wismna.geoffroy.donext.adapters.TaskAdapter;
+import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.fragments.ConfirmDialogFragment;
 
@@ -20,16 +20,16 @@ import com.wismna.geoffroy.donext.fragments.ConfirmDialogFragment;
  * Helper class that handles all swipe events on a Task
  */
 public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
-    private TaskAdapter taskAdapter;
+    private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
     private TaskDataAccess taskDataAccess;
     private FragmentManager fragmentManager;
     private RecyclerView recyclerView;
 
-    public TaskTouchHelper(TaskAdapter taskAdapter, TaskDataAccess taskDataAccess,
+    public TaskTouchHelper(TaskRecyclerViewAdapter taskRecyclerViewAdapter, TaskDataAccess taskDataAccess,
                            FragmentManager fragmentManager, RecyclerView recyclerView){
         // No drag moves, only left swipes (except for 1st element, see getSwipeDirs method)
         super(0, ItemTouchHelper.LEFT);
-        this.taskAdapter = taskAdapter;
+        this.taskRecyclerViewAdapter = taskRecyclerViewAdapter;
         this.taskDataAccess = taskDataAccess;
         this.fragmentManager = fragmentManager;
         this.recyclerView = recyclerView;
@@ -70,14 +70,14 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
         }
         if (showDialog) {
             ConfirmDialogFragment confirmDialogFragment =
-                    ConfirmDialogFragment.newInstance(taskAdapter, title, recyclerView);
+                    ConfirmDialogFragment.newInstance(/*taskRecyclerViewAdapter, */title, recyclerView);
             Bundle args = new Bundle();
             args.putInt("ItemPosition", itemPosition);
             args.putInt("Direction", direction);
             confirmDialogFragment.setArguments(args);
             confirmDialogFragment.show(fragmentManager, title);
         }
-        else MainActivity.PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, direction, recyclerView);
+        else MainActivity.PerformSwipeAction(taskDataAccess, taskRecyclerViewAdapter, itemPosition, direction, recyclerView);
     }
 
     @Override

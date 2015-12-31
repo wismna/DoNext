@@ -9,9 +9,10 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Database helper class that contains table and column names as well as handles database creation
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "donext.db";
     public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_ORDER = "displayorder";
 
     public static final String TASKLIST_TABLE_NAME = "tasklist";
     public static final String TASKLIST_COLUMN_NAME = "name";
@@ -19,7 +20,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TASKLIST_TABLE_CREATE =
             "CREATE TABLE " + TASKLIST_TABLE_NAME + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    TASKLIST_COLUMN_NAME + " TEXT NOT NULL);";
+                    TASKLIST_COLUMN_NAME + " TEXT NOT NULL, " +
+                    COLUMN_ORDER + " INTEGER);";
 
     public static final String TASKS_TABLE_NAME = "tasks";
     public static final String TASKS_COLUMN_NAME = "name";
@@ -38,6 +40,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     TASKS_COLUMN_CYCLE + " INTEGER DEFAULT 0, " +
                     TASKS_COLUMN_DONE + " INTEGER DEFAULT 0, " +
                     TASKS_COLUMN_DELETED + " INTEGER DEFAULT 0, " +
+                    COLUMN_ORDER + " INTEGER, " +
                     TASKS_COLUMN_LIST + " INTEGER NOT NULL, " +
                     "FOREIGN KEY(" + TASKS_COLUMN_LIST + ") REFERENCES " +
                     TASKLIST_TABLE_NAME + "(" + COLUMN_ID + ")" +
@@ -55,6 +58,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        if (oldVersion == 1)
+        {
+            // Add new Order column
+            db.execSQL("ALTER TABLE " + TASKLIST_TABLE_NAME + " ADD COLUMN " + COLUMN_ORDER + " INTEGER");
+        }
     }
 }

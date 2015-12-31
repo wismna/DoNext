@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
@@ -26,7 +27,7 @@ import android.widget.Spinner;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.SmartFragmentStatePagerAdapter;
-import com.wismna.geoffroy.donext.adapters.TaskAdapter;
+import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
@@ -39,7 +40,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         TaskDialogFragment.NewTaskListener,
-        TasksFragment.OnListFragmentInteractionListener,
         ConfirmDialogFragment.ConfirmDialogListener
 {
 
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-
+    private SectionsPagerAdapter mSectionsPagerAdapter;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Access database to retrieve tasks
         taskDataAccess = new TaskDataAccess(this);
@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements
 
         taskLists = taskListDataAccess.getAllTaskLists();
         mSectionsPagerAdapter.notifyDataSetChanged();
+        taskListDataAccess.close();
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -89,16 +90,10 @@ public class MainActivity extends AppCompatActivity implements
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        // Add Task floating button
-        // TODO: disable or hide button when no lists exist
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
+        // Hide or show new task floating button
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        if (taskLists.size() == 0) fab.hide();
+        else fab.show();
 
     }
     @Override
@@ -115,12 +110,8 @@ public class MainActivity extends AppCompatActivity implements
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
 
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -145,8 +136,10 @@ public class MainActivity extends AppCompatActivity implements
     public void onNewTaskDialogPositiveClick(DialogFragment dialog) {
         // Get the dialog fragment
         Dialog dialogView = dialog.getDialog();
-        Bundle args = dialog.getArguments();
-        long id = args.getLong("id");
+        long id = 0;
+        Task task = ((TaskDialogFragment)dialog).getTask();
+        if (task != null) id = task.getId();
+
         // Get the controls
         Spinner listSpinner = (Spinner) dialogView.findViewById(R.id.new_task_list);
         EditText nameText = (EditText) dialogView.findViewById(R.id.new_task_name);
@@ -154,22 +147,40 @@ public class MainActivity extends AppCompatActivity implements
         RadioGroup priorityGroup = (RadioGroup) dialogView.findViewById(R.id.new_task_priority);
         RadioButton priorityRadio = (RadioButton) dialogView.findViewById(priorityGroup.getCheckedRadioButtonId());
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
+
         // Add the task to the database
         taskDataAccess.open();
-        Task task = taskDataAccess.createOrUpdateTask(id,
+        Task newTask = taskDataAccess.createOrUpdateTask(id,
                 nameText.getText().toString(),
                 descText.getText().toString(),
                 priorityRadio.getText().toString(),
                 taskList.getId());
         taskDataAccess.close();
         // Update the corresponding tab adapter
-        TaskAdapter taskAdapter = ((TaskDialogFragment)dialog).getTaskAdapter();
+
+        Bundle args = dialog.getArguments();
+        TaskRecyclerViewAdapter taskRecyclerViewAdapter = getSpecificTabAdapter(args.getInt("list"));
+        // Should never happen because we will have to be on this tab to open the dialog
+        if (taskRecyclerViewAdapter == null) return;
+
         // Add the task
-        if (id == 0)
-            taskAdapter.add(task, taskAdapter.getItemCount());
+        if (task == null)
+            taskRecyclerViewAdapter.add(newTask, taskRecyclerViewAdapter.getItemCount());
         // Update the task
-        else
-            taskAdapter.update(task, args.getInt("position"));
+        else {
+            int position = args.getInt("position");
+            // Check if task list was changed
+            if (task.getTaskListId() != taskList.getId())
+            {
+                // Remove item from current tab
+                taskRecyclerViewAdapter.remove(position);
+
+                // Add it to the corresponding tab provided it is already instanciated
+                TaskRecyclerViewAdapter destinationTaskAdapter = getSpecificTabAdapter(listSpinner.getSelectedItemPosition());
+                if (destinationTaskAdapter != null) destinationTaskAdapter.add(newTask, destinationTaskAdapter.getItemCount());
+            }
+            else taskRecyclerViewAdapter.update(newTask, position);
+        }
     }
 
     @Override
@@ -177,30 +188,39 @@ public class MainActivity extends AppCompatActivity implements
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String title = getResources().getString(R.string.task_confirmation_delete_text);
         boolean showDialog = sharedPref.getBoolean("pref_conf_del", true);
-        TaskDialogFragment taskDialogFragment = (TaskDialogFragment) dialog;
         Bundle args = dialog.getArguments();
 
         // Delete task from Adapter
         final int itemPosition = args.getInt("position");
-        final TaskAdapter taskAdapter = taskDialogFragment.getTaskAdapter();
-        final RecyclerView view = taskDialogFragment.getRecyclerView();
+        final RecyclerView view = getSpecificTabRecyclerView(args.getInt("list"));
+        final TaskRecyclerViewAdapter taskRecyclerViewAdapter = (TaskRecyclerViewAdapter) view.getAdapter();
 
         if (showDialog) {
             ConfirmDialogFragment confirmDialogFragment =
-                    ConfirmDialogFragment.newInstance(taskAdapter, title, view);
+                    ConfirmDialogFragment.newInstance(title, view);
             Bundle confirmArgs = new Bundle();
             confirmArgs.putInt("ItemPosition", itemPosition);
             confirmArgs.putInt("Direction", -1);
             confirmDialogFragment.setArguments(confirmArgs);
             confirmDialogFragment.show(getSupportFragmentManager(), title);
         }
-        else PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, -1, view);
+        else PerformSwipeAction(taskDataAccess, taskRecyclerViewAdapter, itemPosition, -1, view);
     }
 
     /** Called when user clicks on the New Task floating button */
     public void onNewTaskClick(View view) {
-        OpenNewTaskDialog();
+        FragmentManager manager = getSupportFragmentManager();
+        TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(null,
+                mSectionsPagerAdapter.getAllItems());
+
+        // Set current tab value to new task dialog
+        Bundle args = new Bundle();
+        args.putInt("list", mViewPager.getCurrentItem());
+        taskDialogFragment.setArguments(args);
+
+        taskDialogFragment.show(manager, "Create new task");
     }
+
     /** Called when the user clicks the Settings button  */
     public void openSettings(MenuItem menuItem) {
         Intent intent = new Intent(this, SettingsActivity.class);
@@ -213,18 +233,13 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onListFragmentInteraction(Task item) {
-
-    }
-
-    @Override
     public void onConfirmDialogPositiveClick(DialogFragment dialog) {
         Bundle args = dialog.getArguments();
         int itemPosition = args.getInt("ItemPosition");
         int direction = args.getInt("Direction");
 
-        TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
-        PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, direction, ((ConfirmDialogFragment) dialog).getRecyclerView());
+        TaskRecyclerViewAdapter taskRecyclerViewAdapter = ((ConfirmDialogFragment)dialog).getTaskRecyclerViewAdapter();
+        PerformSwipeAction(taskDataAccess, taskRecyclerViewAdapter, itemPosition, direction, ((ConfirmDialogFragment) dialog).getRecyclerView());
     }
 
     @Override
@@ -235,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPref.edit();
-        //editor.putBoolean("pref_conf_next", false);
 
         switch (direction)
         {
@@ -252,31 +266,19 @@ public class MainActivity extends AppCompatActivity implements
                 break;
         }
         editor.apply();
-        TaskAdapter taskAdapter = ((ConfirmDialogFragment)dialog).getTaskAdapter();
-        PerformSwipeAction(taskDataAccess, taskAdapter, itemPosition, direction, ((ConfirmDialogFragment) dialog).getRecyclerView());
-    }
-
-    private void OpenNewTaskDialog() {
-        FragmentManager manager = getSupportFragmentManager();
-        TaskDialogFragment taskDialogFragment = new TaskDialogFragment();
-
-        // Set current tab value to new task dialog
-        Bundle args = new Bundle();
-        args.putInt("list", mViewPager.getCurrentItem());
-        taskDialogFragment.setArguments(args);
-
-        taskDialogFragment.show(manager, "Create new task");
+        TaskRecyclerViewAdapter taskRecyclerViewAdapter = ((ConfirmDialogFragment)dialog).getTaskRecyclerViewAdapter();
+        PerformSwipeAction(taskDataAccess, taskRecyclerViewAdapter, itemPosition, direction, ((ConfirmDialogFragment) dialog).getRecyclerView());
     }
 
     public static void PerformSwipeAction(final TaskDataAccess taskDataAccess,
-                                          final TaskAdapter taskAdapter,
+                                          final TaskRecyclerViewAdapter taskRecyclerViewAdapter,
                                           final int itemPosition,
                                           final int direction,
                                           final View view) {
-        final long itemId = taskAdapter.getItemId(itemPosition);
-        final Task task = taskAdapter.getItem(itemPosition);
+        final long itemId = taskRecyclerViewAdapter.getItemId(itemPosition);
+        final Task task = taskRecyclerViewAdapter.getItem(itemPosition);
         String action = "";
-        taskAdapter.remove(itemPosition);
+        taskRecyclerViewAdapter.remove(itemPosition);
 
         switch (direction)
         {
@@ -288,11 +290,10 @@ public class MainActivity extends AppCompatActivity implements
             case ItemTouchHelper.RIGHT:
                 action = "nexted";
                 task.setCycle(task.getCycle() + 1);
-                taskAdapter.add(task, taskAdapter.getItemCount());
+                taskRecyclerViewAdapter.add(task, taskRecyclerViewAdapter.getItemCount());
                 break;
             case -1:
                 action = "deleted";
-                taskAdapter.remove(itemPosition);
                 break;
         }
 
@@ -309,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements
                             break;
                         // Remove the last item
                         case ItemTouchHelper.RIGHT:
-                            taskAdapter.remove(taskAdapter.getItemCount() - 1);
+                            taskRecyclerViewAdapter.remove(taskRecyclerViewAdapter.getItemCount() - 1);
                             task.setCycle(task.getCycle() - 1);
                             break;
                         // Nothing special to do for delete
@@ -317,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements
                             break;
                     }
                     // Reset the first item
-                    taskAdapter.add(task, itemPosition);
+                    taskRecyclerViewAdapter.add(task, itemPosition);
                     ((RecyclerView)view).scrollToPosition(0);
                 }
             }).setCallback(new Snackbar.Callback() {
@@ -348,6 +349,21 @@ public class MainActivity extends AppCompatActivity implements
                 }
         }).show();
     }
+
+    private RecyclerView getSpecificTabRecyclerView(int position) {
+        TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(position);
+        if (taskFragment == null) return null;
+        View view = taskFragment.getView();
+        if (view == null) return null;
+        return ((RecyclerView) view.findViewById(R.id.task_list_view));
+    }
+
+    private TaskRecyclerViewAdapter getSpecificTabAdapter(int position) {
+        RecyclerView view = getSpecificTabRecyclerView(position);
+        if (view == null) return null;
+        return (TaskRecyclerViewAdapter) view.getAdapter();
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -378,6 +394,10 @@ public class MainActivity extends AppCompatActivity implements
         public CharSequence getPageTitle(int position) {
             if (taskLists == null) return "N/A";
             return taskLists.get(position).getName();
+        }
+
+        public List<TaskList> getAllItems(){
+            return taskLists;
         }
     }
 }

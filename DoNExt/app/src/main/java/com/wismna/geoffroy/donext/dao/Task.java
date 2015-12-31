@@ -71,7 +71,7 @@ public class Task {
         this.deleted = deleted;
     }
 
-    public long getTaskList() {
+    public long getTaskListId() {
         return taskList;
     }
 

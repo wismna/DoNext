@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -16,9 +15,8 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.adapters.TaskAdapter;
+import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
-import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 
 import java.util.List;
 
@@ -28,20 +26,8 @@ import java.util.List;
  */
 public class TaskDialogFragment extends DialogFragment {
 
-    public TaskAdapter getTaskAdapter() {
-        return taskAdapter;
-    }
-
-    public void setTaskAdapter(TaskAdapter taskAdapter) {
-        this.taskAdapter = taskAdapter;
-    }
-
-    public RecyclerView getRecyclerView() {
-        return recyclerView;
-    }
-
-    public void setRecyclerView(RecyclerView recyclerView) {
-        this.recyclerView = recyclerView;
+    public Task getTask() {
+        return task;
     }
 
     /** The activity that creates an instance of this dialog fragment must
@@ -50,22 +36,20 @@ public class TaskDialogFragment extends DialogFragment {
     public interface NewTaskListener {
         void onNewTaskDialogPositiveClick(DialogFragment dialog);
         void onNewTaskDialogNeutralClick(DialogFragment dialog);
-        //void onDialogNegativeClick(DialogFragment dialog);
     }
 
-    private TaskAdapter taskAdapter;
-    private RecyclerView recyclerView;
     // Use this instance of the interface to deliver action events
     private NewTaskListener mListener;
+    private Task task;
+    private List<TaskList> taskLists;
 
-    public static TaskDialogFragment newInstance(TaskAdapter taskAdapter, RecyclerView recyclerView) {
+    public static TaskDialogFragment newInstance(Task task, List<TaskList> taskLists) {
 
         Bundle args = new Bundle();
-
         TaskDialogFragment fragment = new TaskDialogFragment();
-        fragment.setTaskAdapter(taskAdapter);
-        fragment.setRecyclerView(recyclerView);
         fragment.setArguments(args);
+        fragment.task = task;
+        fragment.taskLists = taskLists;
         return fragment;
     }
 
@@ -90,7 +74,7 @@ public class TaskDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.new_task, null);
+        View view = inflater.inflate(R.layout.fragment_task_details, null);
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
@@ -106,26 +90,19 @@ public class TaskDialogFragment extends DialogFragment {
             .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // Send the negative button event back to the host activity
-                    //mListener.onDialogNegativeClick(NoticeDialogFragment.this);
                     // Canceled creation, nothing to do
                     TaskDialogFragment.this.getDialog().cancel();
                 }
             });
 
-        // Access database to retrieve task lists
-        TaskListDataAccess dataAccess = new TaskListDataAccess(getActivity());
-        dataAccess.open();
-
         // Populate spinner with task lists
         Spinner spinner = (Spinner) view.findViewById(R.id.new_task_list);
         // Create an ArrayAdapter using the string array and a default spinner layout
-        List<TaskList> taskLists = dataAccess.getAllTaskLists();
         ArrayAdapter<TaskList> adapter = new ArrayAdapter<>(
                 getActivity(), android.R.layout.simple_spinner_item, taskLists);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        dataAccess.close();
 
         // Auto set list value to current tab
         Bundle args = getArguments();
@@ -133,33 +110,32 @@ public class TaskDialogFragment extends DialogFragment {
         spinner.setSelection(id);
 
         // Set other properties if they exist
-        EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
-        titleText.setText(args.getString("title"));
-        EditText descText = (EditText) view.findViewById(R.id.new_task_description);
-        descText.setText(args.getString("description"));
-        RadioGroup priorityGroup = (RadioGroup) view.findViewById(R.id.new_task_priority);
-        int priority = args.getInt("priority");
-        switch (priority)
-        {
-            case 0:
-                priorityGroup.check(R.id.new_task_priority_low);
-                break;
-            case 1:
-                priorityGroup.check(R.id.new_task_priority_normal);
-                break;
-            case 2:
-                priorityGroup.check(R.id.new_task_priority_high);
-                break;
-        }
-        // Add a Delete button in Edit mode
-        if (args.getLong("id") != 0)
+        if (task != null) {
+            EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
+            titleText.setText(task.getName());
+            EditText descText = (EditText) view.findViewById(R.id.new_task_description);
+            descText.setText(task.getDescription());
+            RadioGroup priorityGroup = (RadioGroup) view.findViewById(R.id.new_task_priority);
+            switch (task.getPriority()) {
+                case 0:
+                    priorityGroup.check(R.id.new_task_priority_low);
+                    break;
+                case 1:
+                    priorityGroup.check(R.id.new_task_priority_normal);
+                    break;
+                case 2:
+                    priorityGroup.check(R.id.new_task_priority_high);
+                    break;
+            }
+
             builder.setNeutralButton(R.string.new_task_delete, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
                 }
             });
-        setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_Holo_Light);
+            setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_Holo_Light);
+        }
         return builder.create();
     }
 }

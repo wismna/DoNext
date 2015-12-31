@@ -8,6 +8,7 @@ public class TaskList {
     private long id;
     private String name;
     private long taskCount;
+    private int order;
 
     public long getId() {
         return id;
@@ -25,10 +26,24 @@ public class TaskList {
         this.name = comment;
     }
 
-    // Will be used by the ArrayAdapter in the ListView
+    public long getTaskCount() {
+        return taskCount;
+    }
+
+    public void setTaskCount(long taskCount) {
+        this.taskCount = taskCount;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
     @Override
     public String toString() {
         return name;
     }
-
 }

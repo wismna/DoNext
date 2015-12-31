@@ -1,7 +1,6 @@
 package com.wismna.geoffroy.donext.fragments;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,28 +14,18 @@ import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.ItemTouchHelpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.adapters.TaskAdapter;
-import com.wismna.geoffroy.donext.dao.Task;
+import com.wismna.geoffroy.donext.activities.MainActivity;
+import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
 import com.wismna.geoffroy.donext.widgets.NoScrollingLayoutManager;
 
 /**
  * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
  */
 public class TasksFragment extends Fragment {
-
-    /*public interface TasksFragmentListener {
-        void onItemClick(View view, int position);
-    }*/
-
     private static final String TASK_LIST_ID = "task_list_id";
     private long taskListId = -1;
-    //private TasksFragmentListener tasksFragmentListener;
-    private OnListFragmentInteractionListener mListener;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -65,12 +54,11 @@ public class TasksFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_task_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_tasks, container, false);
         final Context context = view.getContext();
 
         // Set the Recycler view
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
-        //recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setLayoutManager(new NoScrollingLayoutManager(context));
 
         TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext());
@@ -85,89 +73,39 @@ public class TasksFragment extends Fragment {
         totalTasksView.setText(String.valueOf(taskDataAccess.getTaskCount(taskListId) + " tasks"));
 
         // Set RecyclerView Adapter
-        final TaskAdapter taskAdapter = new TaskAdapter(taskDataAccess.getAllTasks(taskListId), mListener);
-        recyclerView.setAdapter(taskAdapter);
+        final TaskRecyclerViewAdapter taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(taskDataAccess.getAllTasks(taskListId));
+        recyclerView.setAdapter(taskRecyclerViewAdapter);
 
         taskDataAccess.close();
 
         // Set ItemTouch helper in RecyclerView to handle swipe move on elements
         ItemTouchHelper.Callback callback = new TaskTouchHelper(
-                taskAdapter, taskDataAccess, getFragmentManager(), recyclerView);
+                taskRecyclerViewAdapter, taskDataAccess, getFragmentManager(), recyclerView);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(recyclerView);
 
         // Implements touch listener to add click detection
-        //final Toast mToast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         recyclerView.addOnItemTouchListener(
-            new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, int position) {
-                    //tasksFragmentListener.onItemClick(view, position);
+                new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Bundle args = new Bundle();
+                        args.putInt("position", position);
 
-                    TextView idTextView = (TextView) view.findViewById(R.id.task_id);
-                    //mToast.setText("Item " + idTextView.getText() + " clicked!");
-                    //mToast.show();
+                        // Set current tab value to new task dialog
+                        ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.container);
+                        args.putInt("list", viewPager.getCurrentItem());
 
-                    FragmentManager manager = getFragmentManager();
-                    TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(taskAdapter, recyclerView);
+                        FragmentManager manager = getFragmentManager();
+                        TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(/*taskRecyclerViewAdapter, recyclerView,*/
+                                taskRecyclerViewAdapter.getItem(position),
+                                ((MainActivity.SectionsPagerAdapter)viewPager.getAdapter()).getAllItems());
 
-                    Bundle args = new Bundle();
-                    args.putLong("id", Long.valueOf(idTextView.getText().toString()));
-                    args.putInt("position", position);
-
-                    // Set current tab value to new task dialog
-                    ViewPager viewPager =(ViewPager) getActivity().findViewById(R.id.container);
-                    args.putInt("list", viewPager.getCurrentItem());
-
-                    // Set title
-                    TextView titleTextView = (TextView) view.findViewById(R.id.task_name);
-                    args.putString("title", titleTextView.getText().toString());
-                    // Set description
-                    TextView descTextView = (TextView) view.findViewById(R.id.task_description);
-                    args.putString("description", descTextView.getText().toString());
-                    // Set priority
-                    int priority = 1;
-                    if (titleTextView.getCurrentTextColor() == Color.LTGRAY) priority = 0;
-                    else if (titleTextView.getTypeface().isBold()) priority = 2;
-                    args.putInt("priority", priority);
-
-                    taskDialogFragment.setArguments(args);
-                    taskDialogFragment.show(manager, "Edit task");
-                }
-            })
+                        taskDialogFragment.setArguments(args);
+                        taskDialogFragment.show(manager, "Edit task");
+                    }
+                })
         );
         return view;
-    }
-
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(Task item);
     }
 }

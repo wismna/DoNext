@@ -11,7 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 
 import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.adapters.TaskAdapter;
+import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 
 public class ConfirmDialogFragment extends DialogFragment {
     public interface ConfirmDialogListener {
@@ -20,25 +20,26 @@ public class ConfirmDialogFragment extends DialogFragment {
     }
 
     private ConfirmDialogListener confirmDialogListener;
-    private TaskAdapter taskAdapter;
+    //private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
     private RecyclerView recyclerView;
     private String message;
 
     public static ConfirmDialogFragment newInstance(
-            TaskAdapter taskAdapter, String message, RecyclerView recyclerView) {
+            /*TaskRecyclerViewAdapter taskRecyclerViewAdapter, */String message, RecyclerView recyclerView) {
 
-        Bundle args = new Bundle();
+        //Bundle args = new Bundle();
 
         ConfirmDialogFragment fragment = new ConfirmDialogFragment();
-        fragment.taskAdapter = taskAdapter;
+        //fragment.taskRecyclerViewAdapter = taskRecyclerViewAdapter;
         fragment.message = message;
         fragment.recyclerView = recyclerView;
-        fragment.setArguments(args);
+        //fragment.setArguments(args);
         return fragment;
     }
 
-    public TaskAdapter getTaskAdapter() {
-        return taskAdapter;
+    public TaskRecyclerViewAdapter getTaskRecyclerViewAdapter() {
+        //return taskRecyclerViewAdapter;
+        return (TaskRecyclerViewAdapter) recyclerView.getAdapter();
     }
 
     public RecyclerView getRecyclerView() {
@@ -53,7 +54,7 @@ public class ConfirmDialogFragment extends DialogFragment {
         Bundle args = getArguments();
         int itemPosition = args.getInt("ItemPosition");
 
-        getTaskAdapter().notifyItemChanged(itemPosition);
+        getTaskRecyclerViewAdapter().notifyItemChanged(itemPosition);
     }
 
     @Override
@@ -93,7 +94,6 @@ public class ConfirmDialogFragment extends DialogFragment {
             .setOnKeyListener(new DialogInterface.OnKeyListener() {
                 @Override
                 public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                    //return false;
                     return keyCode != KeyEvent.KEYCODE_BACK;
                 }
             });

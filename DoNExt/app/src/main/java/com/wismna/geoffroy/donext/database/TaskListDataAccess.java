@@ -19,7 +19,8 @@ public class TaskListDataAccess {
     // Database fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    //private String[] taskListColumns = {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME};
+    private String[] taskListColumns =
+            {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME, DatabaseHelper.COLUMN_ORDER};
 
     public TaskListDataAccess(Context context) {
         dbHelper = new DatabaseHelper(context);
@@ -33,9 +34,10 @@ public class TaskListDataAccess {
         dbHelper.close();
     }
 
-    /*public TaskList createTaskList(String name) {
+    public TaskList createTaskList(String name, int order) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
+        values.put(DatabaseHelper.COLUMN_ORDER, order);
         long insertId = database.insert(DatabaseHelper.TASKLIST_TABLE_NAME, null,
                 values);
         Cursor cursor = database.query(DatabaseHelper.TASKLIST_TABLE_NAME,
@@ -45,31 +47,27 @@ public class TaskListDataAccess {
         TaskList newTaskList = cursorToTaskList(cursor);
         cursor.close();
         return newTaskList;
-    }*/
-
-    public Cursor createTaskList(String name) {
-        ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
-        database.insert(DatabaseHelper.TASKLIST_TABLE_NAME, null, values);
-        return getAllTaskListsCursor();
     }
 
-    /*public void deleteTaskList(TaskList comment) {
-        long id = comment.getId();
-        System.out.println("Comment deleted with id: " + id);
-        database.delete(DatabaseHelper.TASKLIST_TABLE_NAME, DatabaseHelper.COLUMN_ID
-                + " = " + id, null);
-    }*/
-
-    public Cursor deleteTaskList(Cursor taskListCursor) {
-        TaskList taskList = cursorToTaskList(taskListCursor);
-        long id = taskList.getId();
-        System.out.println("Task list deleted with id: " + id);
+    public void deleteTaskList(long id) {
+        // Delete all related tasks
         database.delete(DatabaseHelper.TASKS_TABLE_NAME, DatabaseHelper.TASKS_COLUMN_LIST
                 + " = " + id, null);
+        // Delete list
         database.delete(DatabaseHelper.TASKLIST_TABLE_NAME, DatabaseHelper.COLUMN_ID
                 + " = " + id, null);
-        return getAllTaskListsCursor();
+    }
+
+    public void updateOrder(long id, int order) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseHelper.COLUMN_ORDER, order);
+        database.update(DatabaseHelper.TASKLIST_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+    }
+
+    public void updateName(long id, String name) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
+        database.update(DatabaseHelper.TASKLIST_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
     }
 
     public List<TaskList> getAllTaskLists() {
@@ -96,7 +94,8 @@ public class TaskListDataAccess {
                     " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
                     " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
                       DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID + ") AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
-                " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME,
+                " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME +
+                " ORDER BY " + DatabaseHelper.COLUMN_ORDER + " ASC ",
                 null);
     }
 
@@ -104,6 +103,9 @@ public class TaskListDataAccess {
         TaskList taskList = new TaskList();
         taskList.setId(cursor.getLong(0));
         taskList.setName(cursor.getString(1));
+        taskList.setOrder(cursor.getInt(2));
+        if (cursor.getColumnCount() == 4)
+            taskList.setTaskCount(cursor.getLong(3));
         return taskList;
     }
 }

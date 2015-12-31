@@ -71,15 +71,6 @@ public class TaskDataAccess {
                 DatabaseHelper.COLUMN_ID + " = " + taskId, null);
     }
 
-    /*public Cursor deleteTask(Cursor taskCursor) {
-        Task task = cursorToTask(taskCursor);
-        long id = task.getId();
-        //System.out.println("Task deleted with id: " + id);
-        database.delete(DatabaseHelper.TASKS_TABLE_NAME, DatabaseHelper.COLUMN_ID
-                + " = " + id, null);
-        return getAllTasksCursor();
-    }*/
-
     public Task getTask(long id)
     {
         Cursor cursor = getTaskCursor(id);
