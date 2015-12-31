@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -43,29 +42,15 @@ public class TaskDialogFragment extends DialogFragment {
     private Task task;
     private List<TaskList> taskLists;
 
-    public static TaskDialogFragment newInstance(Task task, List<TaskList> taskLists) {
+    public static TaskDialogFragment newInstance(Task task, List<TaskList> taskLists, NewTaskListener newTaskListener) {
 
         Bundle args = new Bundle();
         TaskDialogFragment fragment = new TaskDialogFragment();
         fragment.setArguments(args);
         fragment.task = task;
         fragment.taskLists = taskLists;
+        fragment.mListener = newTaskListener;
         return fragment;
-    }
-
-    /** Override the Fragment.onAttach() method to instantiate the NoticeDialogListener */
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        // Verify that the host activity implements the callback interface
-        try {
-            // Instantiate the NoticeDialogListener so we can send events to the host
-            mListener = (NewTaskListener) activity;
-        } catch (ClassCastException e) {
-            // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(activity.toString()
-                    + " must implement NewTaskListener");
-        }
     }
 
     @Override

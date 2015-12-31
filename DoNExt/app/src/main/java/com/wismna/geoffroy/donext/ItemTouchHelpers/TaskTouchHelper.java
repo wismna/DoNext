@@ -1,38 +1,27 @@
 package com.wismna.geoffroy.donext.ItemTouchHelpers;
 
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
-
-import com.wismna.geoffroy.donext.activities.MainActivity;
-import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
-import com.wismna.geoffroy.donext.database.TaskDataAccess;
-import com.wismna.geoffroy.donext.fragments.ConfirmDialogFragment;
 
 /**
  * Created by geoffroy on 15-12-04.
  * Helper class that handles all swipe events on a Task
  */
 public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
-    private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
-    private TaskDataAccess taskDataAccess;
-    private FragmentManager fragmentManager;
-    private RecyclerView recyclerView;
+    public interface TaskTouchHelperAdapter {
+        void onItemSwiped(int position, int direction);
+    }
 
-    public TaskTouchHelper(TaskRecyclerViewAdapter taskRecyclerViewAdapter, TaskDataAccess taskDataAccess,
-                           FragmentManager fragmentManager, RecyclerView recyclerView){
+    private TaskTouchHelperAdapter mAdapter;
+
+    public TaskTouchHelper(TaskTouchHelperAdapter adapter){
         // No drag moves, only left swipes (except for 1st element, see getSwipeDirs method)
         super(0, ItemTouchHelper.LEFT);
-        this.taskRecyclerViewAdapter = taskRecyclerViewAdapter;
-        this.taskDataAccess = taskDataAccess;
-        this.fragmentManager = fragmentManager;
-        this.recyclerView = recyclerView;
+        this.mAdapter = adapter;
     }
 
     @Override
@@ -50,34 +39,7 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(viewHolder.itemView.getContext());
-        int itemPosition = viewHolder.getAdapterPosition();
-        String title = "";
-        boolean showDialog = false;
-
-        switch (direction)
-        {
-            // Mark item as Done
-            case ItemTouchHelper.LEFT:
-                title = "Mark task as done?";
-                showDialog = sharedPref.getBoolean("pref_conf_done", true);
-                break;
-            // Increase task cycle count
-            case ItemTouchHelper.RIGHT:
-                title = "Go to next task?";
-                showDialog = sharedPref.getBoolean("pref_conf_next", true);
-                break;
-        }
-        if (showDialog) {
-            ConfirmDialogFragment confirmDialogFragment =
-                    ConfirmDialogFragment.newInstance(/*taskRecyclerViewAdapter, */title, recyclerView);
-            Bundle args = new Bundle();
-            args.putInt("ItemPosition", itemPosition);
-            args.putInt("Direction", direction);
-            confirmDialogFragment.setArguments(args);
-            confirmDialogFragment.show(fragmentManager, title);
-        }
-        else MainActivity.PerformSwipeAction(taskDataAccess, taskRecyclerViewAdapter, itemPosition, direction, recyclerView);
+        mAdapter.onItemSwiped(viewHolder.getAdapterPosition(), direction);
     }
 
     @Override
@@ -106,5 +68,23 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
 
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         }
+    }
+
+    @Override
+    public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+        if (actionState != ItemTouchHelper.ACTION_STATE_IDLE)
+        {
+            viewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+        }
+
+        super.onSelectedChanged(viewHolder, actionState);
+    }
+
+    @Override
+    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
+
+        viewHolder.itemView.setAlpha(1.0f);
+        viewHolder.itemView.setBackgroundColor(0);
     }
 }

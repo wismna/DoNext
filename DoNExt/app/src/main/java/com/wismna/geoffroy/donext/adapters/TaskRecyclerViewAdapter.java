@@ -13,7 +13,6 @@ import com.wismna.geoffroy.donext.dao.Task;
 
 import java.util.List;
 
-//import com.wismna.geoffroy.donext.fragments.TasksFragment.OnListFragmentInteractionListener;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Task}.
@@ -21,11 +20,9 @@ import java.util.List;
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.ViewHolder> {
 
     private final List<Task> mValues;
-    //private final OnListFragmentInteractionListener mListener;
 
-    public TaskRecyclerViewAdapter(List<Task> items/*, OnListFragmentInteractionListener listener*/) {
+    public TaskRecyclerViewAdapter(List<Task> items) {
         mValues = items;
-        //mListener = listener;
     }
 
     @Override
@@ -58,17 +55,6 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
                 holder.mTitleView.setTypeface(holder.mTitleView.getTypeface(), Typeface.BOLD);
                 break;
         }
-
-        /*holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            if (null != mListener) {
-                // Notify the active callbacks interface (the activity, if the
-                // fragment is attached to one) that an item has been selected.
-                mListener.onListFragmentInteraction(holder.mItem);
-            }
-            }
-        });*/
     }
 
     @Override

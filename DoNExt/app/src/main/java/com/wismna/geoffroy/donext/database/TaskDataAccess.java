@@ -71,16 +71,6 @@ public class TaskDataAccess {
                 DatabaseHelper.COLUMN_ID + " = " + taskId, null);
     }
 
-    public Task getTask(long id)
-    {
-        Cursor cursor = getTaskCursor(id);
-
-        cursor.moveToFirst();
-        Task task = cursorToTask(cursor);
-        cursor.close();
-        return task;
-    }
-
     public List<Task> getAllTasks(long id) {
         List<Task> tasks = new ArrayList<>();
 
@@ -98,7 +88,7 @@ public class TaskDataAccess {
     }
 
     public int getTaskCount(long id) {
-        int taskCount = 0;
+        int taskCount;
         Cursor cursor = database.rawQuery(
                 "SELECT COUNT(*) " +
                         " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
@@ -111,7 +101,7 @@ public class TaskDataAccess {
         return taskCount;
     }
     public int getTotalCycles(long id) {
-        int totalCycles = 0;
+        int totalCycles;
         Cursor cursor = database.rawQuery(
                 "SELECT SUM(" + DatabaseHelper.TASKS_COLUMN_CYCLE + ") " +
                     " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
@@ -124,10 +114,6 @@ public class TaskDataAccess {
         return totalCycles;
     }
 
-    public Cursor getTaskCursor(long id) {
-        return database.query(DatabaseHelper.TASKS_TABLE_NAME,
-                taskColumns, DatabaseHelper.COLUMN_ID + " = " + id, null, null, null, null);
-    }
     public Cursor getAllTasksCursor(long id) {
         return database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
                 DatabaseHelper.TASKS_COLUMN_LIST + " = " + id +
@@ -143,9 +129,9 @@ public class TaskDataAccess {
         return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
     }
 
-    public int increaseCycle(int currentCycle, long id) {
+    public int increaseCycle(int newCycle, long id) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.TASKS_COLUMN_CYCLE, currentCycle + 1);
+        contentValues.put(DatabaseHelper.TASKS_COLUMN_CYCLE, newCycle);
         return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
     }
 

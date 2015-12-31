@@ -1,49 +1,30 @@
 package com.wismna.geoffroy.donext.fragments;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 
 import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 
 public class ConfirmDialogFragment extends DialogFragment {
     public interface ConfirmDialogListener {
         void onConfirmDialogPositiveClick(DialogFragment dialog);
         void onConfirmDialogNeutralClick(DialogFragment dialog);
+        void onConfirmDialogCancel(int position);
     }
 
     private ConfirmDialogListener confirmDialogListener;
-    //private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
-    private RecyclerView recyclerView;
     private String message;
 
-    public static ConfirmDialogFragment newInstance(
-            /*TaskRecyclerViewAdapter taskRecyclerViewAdapter, */String message, RecyclerView recyclerView) {
-
-        //Bundle args = new Bundle();
-
+    public static ConfirmDialogFragment newInstance(String message, ConfirmDialogListener confirmDialogListener) {
         ConfirmDialogFragment fragment = new ConfirmDialogFragment();
-        //fragment.taskRecyclerViewAdapter = taskRecyclerViewAdapter;
         fragment.message = message;
-        fragment.recyclerView = recyclerView;
-        //fragment.setArguments(args);
+        fragment.confirmDialogListener = confirmDialogListener;
         return fragment;
-    }
-
-    public TaskRecyclerViewAdapter getTaskRecyclerViewAdapter() {
-        //return taskRecyclerViewAdapter;
-        return (TaskRecyclerViewAdapter) recyclerView.getAdapter();
-    }
-
-    public RecyclerView getRecyclerView() {
-        return recyclerView;
     }
 
     @Override
@@ -52,23 +33,7 @@ public class ConfirmDialogFragment extends DialogFragment {
 
         // Allows refreshing the first item of the adapter
         Bundle args = getArguments();
-        int itemPosition = args.getInt("ItemPosition");
-
-        getTaskRecyclerViewAdapter().notifyItemChanged(itemPosition);
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        // Verify that the host activity implements the callback interface
-        try {
-            // Instantiate the NoticeDialogListener so we can send events to the host
-            confirmDialogListener = (ConfirmDialogListener) activity;
-        } catch (ClassCastException e) {
-            // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(activity.toString()
-                    + " must implement NewTaskListener");
-        }
+        confirmDialogListener.onConfirmDialogCancel(args.getInt("ItemPosition"));
     }
 
     @Override

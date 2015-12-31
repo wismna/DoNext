@@ -21,16 +21,21 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link TaskList}.
  */
 
-// TODO: implement inline edit
 public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRecyclerViewAdapter.ViewHolder>
     implements TaskListTouchHelper.TaskListTouchHelperAdapter {
 
+    public interface TaskListRecyclerViewAdapterListener {
+        void notifyOnDeleteButtonClicked();
+    }
+
     private final List<TaskList> mValues;
     private Context mContext;
+    private TaskListRecyclerViewAdapterListener mListener;
 
-    public TaskListRecyclerViewAdapter(List<TaskList> items, Context context) {
+    public TaskListRecyclerViewAdapter(List<TaskList> items, Context context, TaskListRecyclerViewAdapterListener listener) {
         mValues = items;
         mContext = context;
+        mListener = listener;
     }
 
     @Override
@@ -48,12 +53,15 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
 
         // Handle inline name change
         holder.mTaskNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            // TODO: handle exception when onFocus is lost after click on Delete
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus)
-                {
-                    EditText editText = (EditText) v;
-                    holder.mItem.setName(editText.getText().toString());
+
+                EditText editText = (EditText) v;
+                String name = editText.getText().toString();
+
+                if (!hasFocus && !holder.mItem.getName().matches(name)) {
+                    holder.mItem.setName(name);
 
                     TaskListDataAccess taskListDataAccess = new TaskListDataAccess(mContext);
                     taskListDataAccess.open();
@@ -67,7 +75,6 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         });
 
         // Handle click on delete button
-        // TODO: find a way to call TaskListsFragment.toggleVisibleCreateNewTaskListLayout
         holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,6 +85,9 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
                 remove(position);
 
                 taskListDataAccess.close();
+
+                // Notify parent fragment that a task list was deleted
+                mListener.notifyOnDeleteButtonClicked();
             }
         });
     }

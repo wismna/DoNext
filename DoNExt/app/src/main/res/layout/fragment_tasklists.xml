@@ -9,23 +9,23 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     tools:context=".activities.TaskListActivity">
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/new_task_list_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginStart="50dp">
         <EditText
             android:id="@+id/new_task_list_name"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:hint="@string/task_list_new_list_hint"/>
         <Button
             android:id="@+id/new_task_list_button"
-            android:layout_width="wrap_content"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
             android:text="@string/task_list_new_list_create"/>
-    </RelativeLayout>
+    </LinearLayout>
     <android.support.v7.widget.RecyclerView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -34,8 +34,6 @@
         android:name="com.wismna.geoffroy.donext.fragments.TaskListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".fragments.TaskListsFragment"
         tools:listitem="@layout/fragment_tasklist" />
