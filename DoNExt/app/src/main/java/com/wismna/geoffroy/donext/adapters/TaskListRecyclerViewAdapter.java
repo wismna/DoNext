@@ -78,6 +78,9 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Disable the OnFocusChanged listener as it is pointless now
+                holder.mTaskNameView.setOnFocusChangeListener(null);
+
                 TaskListDataAccess taskListDataAccess = new TaskListDataAccess(mContext);
                 taskListDataAccess.open();
 

@@ -295,7 +295,7 @@ public class TasksFragment extends Fragment implements
 
         // Add the task
         if (task == null)
-            taskRecyclerViewAdapter.add(newTask, taskRecyclerViewAdapter.getItemCount());
+            taskRecyclerViewAdapter.add(newTask, 0);
             // Update the task
         else {
             int position = args.getInt("position");

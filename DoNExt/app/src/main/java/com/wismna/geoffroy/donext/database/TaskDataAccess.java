@@ -120,7 +120,7 @@ public class TaskDataAccess {
                     " AND " + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
                     " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0,
                 null, null, null,
-                DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " ASC");
+                DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " DESC");
     }
 
     public int setDone(long id) {

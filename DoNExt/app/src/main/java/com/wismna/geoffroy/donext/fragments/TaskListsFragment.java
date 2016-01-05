@@ -90,13 +90,6 @@ public class TaskListsFragment extends Fragment implements TaskListRecyclerViewA
         toggleVisibleCreateNewTaskListLayout(mView);
     }
 
-    @Override
-    public void onPause() {
-        // TODO: persist changes in DB here
-
-        super.onPause();
-    }
-
     public class GetTaskListsTask extends AsyncTask<TaskListDataAccess, Void, List<TaskList>> {
         @Override
         protected List<TaskList> doInBackground(TaskListDataAccess... params) {
