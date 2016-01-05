@@ -53,10 +53,8 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
 
         // Handle inline name change
         holder.mTaskNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            // TODO: handle exception when onFocus is lost after click on Delete
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-
                 EditText editText = (EditText) v;
                 String name = editText.getText().toString();
 

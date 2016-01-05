@@ -15,6 +15,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -88,15 +89,12 @@ public class TasksFragment extends Fragment implements
         taskDataAccess = new TaskDataAccess(view.getContext());
         taskDataAccess.open();
 
-        // Set total cycles
-        UpdateCycleCount();
-
-        // Set total count
-        UpdateTaskCount();
-
         // Set RecyclerView Adapter
         taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(taskDataAccess.getAllTasks(taskListId));
         recyclerView.setAdapter(taskRecyclerViewAdapter);
+
+        // Set total cycles
+        UpdateCycleCount();
 
         taskDataAccess.close();
 
@@ -120,13 +118,26 @@ public class TasksFragment extends Fragment implements
                         FragmentManager manager = getFragmentManager();
                         TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(
                                 taskRecyclerViewAdapter.getItem(position),
-                                ((MainActivity.SectionsPagerAdapter)viewPager.getAdapter()).getAllItems(), TasksFragment.this);
+                                ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems(), TasksFragment.this);
 
                         taskDialogFragment.setArguments(args);
                         taskDialogFragment.show(manager, "Edit task");
                     }
                 })
         );
+
+        // Set total count
+        UpdateTaskCount();
+
+        // Handle updating remaining task count in a listener to be sure that the layout is available
+        recyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                UpdateRemainingTaskCount();
+                recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                return true;
+            }
+        });
         return view;
     }
 
@@ -136,8 +147,20 @@ public class TasksFragment extends Fragment implements
     }
 
     private void UpdateTaskCount() {
+        int totalTasks = taskRecyclerViewAdapter.getItemCount();
         TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
-        totalTasksView.setText(String.valueOf(taskDataAccess.getTaskCount(taskListId) + " tasks"));
+        totalTasksView.setText(String.valueOf(totalTasks + " tasks"));
+    }
+
+    private void UpdateRemainingTaskCount() {
+        TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
+        NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
+        int remainingTaskCount = taskRecyclerViewAdapter.getItemCount() - layoutManager.getChildCount();
+        if (remainingTaskCount == 0)
+            remainingTasksView.setText("");
+        else
+            remainingTasksView.setText(String.valueOf(
+                    remainingTaskCount + " task" + (remainingTaskCount > 1 ? "s" : "") +" remaining"));
     }
 
     /** Performs an action on a task: done, next or delete */
@@ -214,9 +237,10 @@ public class TasksFragment extends Fragment implements
                 }
 
                 UpdateCycleCount();
-                UpdateTaskCount();
-
                 taskDataAccess.close();
+
+                UpdateTaskCount();
+                UpdateRemainingTaskCount();
             }
         }).show();
     }
@@ -285,18 +309,22 @@ public class TasksFragment extends Fragment implements
                 priorityRadio.getText().toString(),
                 taskList.getId());
 
-        UpdateTaskCount();
         taskDataAccess.close();
-        // Update the corresponding tab adapter
+
 
         Bundle args = dialog.getArguments();
         // Should never happen because we will have to be on this tab to open the dialog
         if (taskRecyclerViewAdapter == null) return;
 
         // Add the task
-        if (task == null)
+        if (task == null) {
             taskRecyclerViewAdapter.add(newTask, 0);
-            // Update the task
+            recyclerView.scrollToPosition(0);
+
+            // Update the task count
+            UpdateTaskCount();
+        }
+        // Update the task
         else {
             int position = args.getInt("position");
             // Check if task list was changed
@@ -307,9 +335,10 @@ public class TasksFragment extends Fragment implements
 
                 // Add it to the corresponding tab provided it is already instanciated
                 mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
-            }
-            else taskRecyclerViewAdapter.update(newTask, position);
+            } else taskRecyclerViewAdapter.update(newTask, position);
         }
+
+        UpdateRemainingTaskCount();
     }
 
     @Override
