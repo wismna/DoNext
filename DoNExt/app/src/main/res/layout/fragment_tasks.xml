@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -20,11 +20,12 @@
         android:id="@+id/task_list_view"
         android:name="com.wismna.geoffroy.donext.activities.TaskFragment"
         android:layout_width="match_parent"
-        android:layout_height="410dp"
+        android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_below="@id/total_task_cycles"
         app:layoutManager="LinearLayoutManager"
+        app:layout_heightPercent="90%"
         tools:context=".fragments.TasksFragment"
         tools:listitem="@layout/fragment_task" />
     <TextView
@@ -33,4 +34,4 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/task_list_view" />
-</RelativeLayout>
+</android.support.percent.PercentRelativeLayout>

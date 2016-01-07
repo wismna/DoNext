@@ -9,10 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.wismna.geoffroy.donext.ItemTouchHelpers.TaskListTouchHelper;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
+import com.wismna.geoffroy.donext.helpers.TaskListTouchHelper;
 
 import java.util.Collections;
 import java.util.List;

@@ -22,13 +22,13 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.wismna.geoffroy.donext.ItemTouchHelpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.activities.MainActivity;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
+import com.wismna.geoffroy.donext.helpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
 import com.wismna.geoffroy.donext.widgets.NoScrollingLayoutManager;
 
@@ -155,12 +155,12 @@ public class TasksFragment extends Fragment implements
     private void UpdateRemainingTaskCount() {
         TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
         NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
-        int remainingTaskCount = taskRecyclerViewAdapter.getItemCount() - layoutManager.getChildCount();
+        int remainingTaskCount = taskRecyclerViewAdapter.getItemCount() - layoutManager.findLastCompletelyVisibleItemPosition() - 1;
         if (remainingTaskCount == 0)
             remainingTasksView.setText("");
         else
             remainingTasksView.setText(String.valueOf(
-                    remainingTaskCount + " task" + (remainingTaskCount > 1 ? "s" : "") +" remaining"));
+                    remainingTaskCount + " more task" + (remainingTaskCount > 1 ? "s" : "")));
     }
 
     /** Performs an action on a task: done, next or delete */

@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext.ItemTouchHelpers;
+package com.wismna.geoffroy.donext.helpers;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
