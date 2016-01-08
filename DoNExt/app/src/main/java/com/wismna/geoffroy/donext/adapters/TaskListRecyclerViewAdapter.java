@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.adapters;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.TaskList;
-import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.helpers.TaskListTouchHelper;
 
 import java.util.Collections;
@@ -25,16 +23,16 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
     implements TaskListTouchHelper.TaskListTouchHelperAdapter {
 
     public interface TaskListRecyclerViewAdapterListener {
-        void notifyOnDeleteButtonClicked();
+        void onNameChangeFocus(TaskList taskList);
+        void onClickDeleteButton(int position, long id);
+        void onItemMove(long fromTaskId, long toTaskId, int fromPosition, int toPosition);
     }
 
     private final List<TaskList> mValues;
-    private Context mContext;
     private TaskListRecyclerViewAdapterListener mListener;
 
-    public TaskListRecyclerViewAdapter(List<TaskList> items, Context context, TaskListRecyclerViewAdapterListener listener) {
+    public TaskListRecyclerViewAdapter(List<TaskList> items, TaskListRecyclerViewAdapterListener listener) {
         mValues = items;
-        mContext = context;
         mListener = listener;
     }
 
@@ -61,17 +59,13 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
                 if (!hasFocus && !holder.mItem.getName().matches(name)) {
                     holder.mItem.setName(name);
 
-                    TaskListDataAccess taskListDataAccess = new TaskListDataAccess(mContext);
-                    taskListDataAccess.open();
-
                     update(holder.mItem, position);
-                    taskListDataAccess.updateName(holder.mItem.getId(), holder.mItem.getName());
-
-                    taskListDataAccess.close();
+                    mListener.onNameChangeFocus(holder.mItem);
                 }
             }
         });
 
+        // TODO: add confirmation dialog
         // Handle click on delete button
         holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,16 +73,8 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
                 // Disable the OnFocusChanged listener as it is pointless now
                 holder.mTaskNameView.setOnFocusChangeListener(null);
 
-                TaskListDataAccess taskListDataAccess = new TaskListDataAccess(mContext);
-                taskListDataAccess.open();
-
-                taskListDataAccess.deleteTaskList(holder.mItem.getId());
-                remove(position);
-
-                taskListDataAccess.close();
-
-                // Notify parent fragment that a task list was deleted
-                mListener.notifyOnDeleteButtonClicked();
+                //remove(position);
+                mListener.onClickDeleteButton(position, holder.mItem.getId());
             }
         });
     }
@@ -104,8 +90,8 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
     }
 
     public void remove(int position) {
-        mValues.remove(position);
         notifyItemRemoved(position);
+        mValues.remove(position);
     }
 
     public void update(TaskList item, int position) {
@@ -115,8 +101,6 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        TaskListDataAccess taskListDataAccess = new TaskListDataAccess(mContext);
-        taskListDataAccess.open();
         long fromTaskId = mValues.get(fromPosition).getId();
         long toTaskId = mValues.get(toPosition).getId();
 
@@ -131,13 +115,8 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
                 Collections.swap(mValues, i, i - 1);
             }
         }
-
-        taskListDataAccess.updateOrder(fromTaskId, toPosition);
-        taskListDataAccess.updateOrder(toTaskId, fromPosition);
-        // Update the adapter on the fly
+        mListener.onItemMove(fromTaskId, toTaskId, fromPosition, toPosition);
         notifyItemMoved(fromPosition, toPosition);
-
-        taskListDataAccess.close();
         return true;
     }
 

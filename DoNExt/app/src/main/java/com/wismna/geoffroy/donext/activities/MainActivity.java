@@ -63,17 +63,23 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         mSectionsPagerAdapter.notifyDataSetChanged();
         taskListDataAccess.close();
 
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        if (taskLists.size() == 0) {
+            Intent intent = new Intent(this, TaskListActivity.class);
+            startActivity(intent);
+        }
+        else {
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+            // Set up the ViewPager with the sections adapter.
+            mViewPager = (ViewPager) findViewById(R.id.container);
+            mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        // Hide or show new task floating button
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        if (taskLists.size() == 0) fab.hide();
-        else fab.show();
+            TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+            tabLayout.setupWithViewPager(mViewPager);
+
+            // Hide or show new task floating button
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.show();
+        }
 
     }
     @Override

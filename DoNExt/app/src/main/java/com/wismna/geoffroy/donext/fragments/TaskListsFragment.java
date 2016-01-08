@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -27,7 +28,9 @@ import java.util.List;
 /**
  * A fragment representing a list of Items.
  */
-public class TaskListsFragment extends Fragment implements TaskListRecyclerViewAdapter.TaskListRecyclerViewAdapterListener {
+public class TaskListsFragment extends Fragment implements
+        TaskListRecyclerViewAdapter.TaskListRecyclerViewAdapterListener,
+        ConfirmDialogFragment.ConfirmDialogListener {
     private TaskListRecyclerViewAdapter taskListRecyclerViewAdapter;
     private TaskListDataAccess taskListDataAccess;
     private View mView;
@@ -64,7 +67,6 @@ public class TaskListsFragment extends Fragment implements TaskListRecyclerViewA
 
                 taskListDataAccess.open();
                 TaskList taskList = taskListDataAccess.createTaskList(text, position);
-                taskListDataAccess.close();
                 taskListRecyclerViewAdapter.add(taskList, position);
 
                 editText.setText("");
@@ -73,6 +75,18 @@ public class TaskListsFragment extends Fragment implements TaskListRecyclerViewA
         });
 
         return mView;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        taskListDataAccess.close();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        taskListDataAccess.open();
     }
 
     private void toggleVisibleCreateNewTaskListLayout(View view) {
@@ -86,7 +100,37 @@ public class TaskListsFragment extends Fragment implements TaskListRecyclerViewA
     }
 
     @Override
-    public void notifyOnDeleteButtonClicked() {
+    public void onNameChangeFocus(TaskList taskList) {
+        taskListDataAccess.updateName(taskList.getId(), taskList.getName());
+    }
+
+    @Override
+    public void onClickDeleteButton(int position, long id) {
+        String title = getResources().getString(R.string.task_list_confirmation_delete);
+        ConfirmDialogFragment confirmDialogFragment =
+                ConfirmDialogFragment.newInstance(title, this);
+        Bundle args = new Bundle();
+        args.putInt("ItemPosition", position);
+        args.putLong("ItemId", id);
+        confirmDialogFragment.setArguments(args);
+        confirmDialogFragment.show(getFragmentManager(), title);
+    }
+
+    @Override
+    public void onItemMove(long fromTaskId, long toTaskId, int fromPosition, int toPosition) {
+        taskListDataAccess.updateOrder(fromTaskId, toPosition);
+        taskListDataAccess.updateOrder(toTaskId, fromPosition);
+    }
+
+    @Override
+    public void onConfirmDialogClick(DialogFragment dialog, ConfirmDialogFragment.ButtonEvent event) {
+        if (event == ConfirmDialogFragment.ButtonEvent.NO) return;
+
+        Bundle args = dialog.getArguments();
+        int position = args.getInt("ItemPosition");
+        long id = args.getLong("ItemId");
+        taskListRecyclerViewAdapter.remove(position);
+        taskListDataAccess.deleteTaskList(id);
         toggleVisibleCreateNewTaskListLayout(mView);
     }
 
@@ -104,7 +148,7 @@ public class TaskListsFragment extends Fragment implements TaskListRecyclerViewA
         protected void onPostExecute(List<TaskList> taskLists) {
             super.onPostExecute(taskLists);
             taskListRecyclerViewAdapter =
-                    new TaskListRecyclerViewAdapter(taskLists, getContext(), TaskListsFragment.this);
+                    new TaskListRecyclerViewAdapter(taskLists, TaskListsFragment.this);
 
             // Set the adapter
             Context context = mView.getContext();

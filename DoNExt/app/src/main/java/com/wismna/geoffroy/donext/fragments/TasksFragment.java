@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -96,8 +97,6 @@ public class TasksFragment extends Fragment implements
         // Set total cycles
         UpdateCycleCount();
 
-        taskDataAccess.close();
-
         // Set ItemTouch helper in RecyclerView to handle swipe move on elements
         ItemTouchHelper.Callback callback = new TaskTouchHelper(this);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
@@ -141,21 +140,36 @@ public class TasksFragment extends Fragment implements
         return view;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        taskDataAccess.close();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        taskDataAccess.open();
+    }
+
     private void UpdateCycleCount() {
+        int totalCycles = taskDataAccess.getTotalCycles(taskListId);
+        if (totalCycles == 0) return;
         TextView totalCyclesView = (TextView) view.findViewById(R.id.total_task_cycles);
-        totalCyclesView.setText(String.valueOf(taskDataAccess.getTotalCycles(taskListId) + " cycles"));
+        totalCyclesView.setText(String.valueOf(totalCycles + " cycles"));
     }
 
     private void UpdateTaskCount() {
         int totalTasks = taskRecyclerViewAdapter.getItemCount();
         TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
-        totalTasksView.setText(String.valueOf(totalTasks + " tasks"));
+        if (totalTasks == 0)  totalTasksView.setText(getResources().getText(R.string.task_no_tasks));
+        else totalTasksView.setText(String.valueOf(totalTasks + " tasks"));
     }
 
     private void UpdateRemainingTaskCount() {
         TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
         NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
-        int remainingTaskCount = taskRecyclerViewAdapter.getItemCount() - layoutManager.findLastCompletelyVisibleItemPosition() - 1;
+        int remainingTaskCount = taskRecyclerViewAdapter.getItemCount() - layoutManager.findLastVisibleItemPosition() - 1;
         if (remainingTaskCount == 0)
             remainingTasksView.setText("");
         else
@@ -219,7 +233,6 @@ public class TasksFragment extends Fragment implements
                 // When clicked on undo, do not write to DB
                 if (event == DISMISS_EVENT_ACTION) return;
 
-                taskDataAccess.open();
                 // Commit the changes to DB
                 switch (direction)
                 {
@@ -237,7 +250,6 @@ public class TasksFragment extends Fragment implements
                 }
 
                 UpdateCycleCount();
-                taskDataAccess.close();
 
                 UpdateTaskCount();
                 UpdateRemainingTaskCount();
@@ -246,43 +258,38 @@ public class TasksFragment extends Fragment implements
     }
 
     @Override
-    public void onConfirmDialogPositiveClick(DialogFragment dialog) {
+    public void onConfirmDialogClick(DialogFragment dialog, ConfirmDialogFragment.ButtonEvent event) {
         Bundle args = dialog.getArguments();
         int itemPosition = args.getInt("ItemPosition");
         int direction = args.getInt("Direction");
 
-        PerformTaskAction(itemPosition, direction);
-    }
+        // Handle never ask again checkbox
+        CheckBox neverAskAgainCheckBox = (CheckBox) dialog.getDialog().findViewById(R.id.task_confirmation_never);
+        if (neverAskAgainCheckBox.isChecked()) {
 
-    @Override
-    public void onConfirmDialogNeutralClick(DialogFragment dialog) {
-        Bundle args = dialog.getArguments();
-        int itemPosition = args.getInt("ItemPosition");
-        int direction = args.getInt("Direction");
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+            SharedPreferences.Editor editor = sharedPref.edit();
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = sharedPref.edit();
-
-        // Set system settings
-        switch (direction)
-        {
-            case ItemTouchHelper.LEFT:
-                editor.putBoolean("pref_conf_done", false);
-                break;
-            case ItemTouchHelper.RIGHT:
-                editor.putBoolean("pref_conf_next", false);
-                break;
-            case -1:
-                editor.putBoolean("pref_conf_del", false);
-                break;
+            // Set system settings
+            switch (direction) {
+                case ItemTouchHelper.LEFT:
+                    editor.putBoolean("pref_conf_done", false);
+                    break;
+                case ItemTouchHelper.RIGHT:
+                    editor.putBoolean("pref_conf_next", false);
+                    break;
+                case -1:
+                    editor.putBoolean("pref_conf_del", false);
+                    break;
+            }
+            editor.apply();
         }
-        editor.apply();
-        PerformTaskAction(itemPosition, direction);
-    }
-
-    @Override
-    public void onConfirmDialogCancel(int position) {
-        taskRecyclerViewAdapter.notifyItemChanged(position);
+        if (event == ConfirmDialogFragment.ButtonEvent.YES) {
+            PerformTaskAction(itemPosition, direction);
+        }
+        else if(event == ConfirmDialogFragment.ButtonEvent.NO) {
+            taskRecyclerViewAdapter.notifyItemChanged(itemPosition);
+        }
     }
 
     @Override
@@ -302,14 +309,11 @@ public class TasksFragment extends Fragment implements
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
 
         // Add the task to the database
-        taskDataAccess.open();
         Task newTask = taskDataAccess.createOrUpdateTask(id,
                 nameText.getText().toString(),
                 descText.getText().toString(),
                 priorityRadio.getText().toString(),
                 taskList.getId());
-
-        taskDataAccess.close();
 
 
         Bundle args = dialog.getArguments();
@@ -373,12 +377,12 @@ public class TasksFragment extends Fragment implements
         {
             // Mark item as Done
             case ItemTouchHelper.LEFT:
-                title = "Mark task as done?";
+                title = getResources().getString(R.string.task_confirmation_done_text);
                 showDialog = sharedPref.getBoolean("pref_conf_done", true);
                 break;
             // Increase task cycle count
             case ItemTouchHelper.RIGHT:
-                title = "Go to next task?";
+                title = getResources().getString(R.string.task_confirmation_next_text);
                 showDialog = sharedPref.getBoolean("pref_conf_next", true);
                 break;
         }

@@ -12,6 +12,8 @@
     <string name="task_list_new_list_hint">New list name</string>
     <string name="task_list_new_list_create">Create</string>
     <string name="task_list_delete">Delete</string>
+    <string name="task_list_confirmation_delete">Delete task list?</string>
+
 
     <!-- Strings related to new task dialog -->
     <string name="new_task_list">List</string>
@@ -27,11 +29,11 @@
 
     <!-- Strings related to task details activity -->
     <string name="task_details_activity_title">Details</string>
-
+    <string name="task_no_tasks">Yeah! No more tasks!</string>
 
     <!-- Strings related to the confirmation dialog -->
     <string name="task_confirmation_done_text">Mark task as Done?</string>
-    <string name="task_confirmation_next_text">Go to next task?</string>
+    <string name="task_confirmation_next_text">NEXT, do this one later?</string>
     <string name="task_confirmation_delete_text">Delete this task?</string>
     <string name="task_confirmation_done_button">Done</string>
     <string name="task_confirmation_next_button">Next</string>
