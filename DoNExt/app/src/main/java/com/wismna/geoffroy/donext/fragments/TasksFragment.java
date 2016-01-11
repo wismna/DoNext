@@ -31,6 +31,7 @@ import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.helpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
+import com.wismna.geoffroy.donext.widgets.DividerItemDecoration;
 import com.wismna.geoffroy.donext.widgets.NoScrollingLayoutManager;
 
 /**
@@ -83,19 +84,19 @@ public class TasksFragment extends Fragment implements
         view = inflater.inflate(R.layout.fragment_tasks, container, false);
         final Context context = view.getContext();
 
+        taskDataAccess = new TaskDataAccess(view.getContext());
+        taskDataAccess.open();
+
         // Set the Recycler view
         recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
         recyclerView.setLayoutManager(new NoScrollingLayoutManager(context));
 
-        taskDataAccess = new TaskDataAccess(view.getContext());
-        taskDataAccess.open();
-
         // Set RecyclerView Adapter
-        taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(taskDataAccess.getAllTasks(taskListId));
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
+                taskDataAccess.getAllTasks(taskListId),
+                Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")));
         recyclerView.setAdapter(taskRecyclerViewAdapter);
-
-        // Set total cycles
-        UpdateCycleCount();
 
         // Set ItemTouch helper in RecyclerView to handle swipe move on elements
         ItemTouchHelper.Callback callback = new TaskTouchHelper(this);
@@ -125,18 +126,37 @@ public class TasksFragment extends Fragment implements
                 })
         );
 
-        // Set total count
-        UpdateTaskCount();
-
-        // Handle updating remaining task count in a listener to be sure that the layout is available
+        // Handle updating total counts in a listener to be sure that the layout is available
         recyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                UpdateRemainingTaskCount();
-                recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                // Update total cycle count
+                int totalCycles = taskRecyclerViewAdapter.getCycleCount();
+                if (totalCycles != 0) {
+                    TextView totalCyclesView = (TextView) view.findViewById(R.id.total_task_cycles);
+                    totalCyclesView.setText(String.valueOf(totalCycles + " cycles"));
+                }
+
+                // Update total tasks
+                int totalTasks = taskRecyclerViewAdapter.getItemCount();
+                TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
+                if (totalTasks == 0) totalTasksView.setText(getResources().getText(R.string.task_no_tasks));
+                else totalTasksView.setText(String.valueOf(totalTasks + " task" + (totalTasks > 1 ? "s" : "")));
+
+                // Update remaining tasks
+                TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
+                NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
+                int remainingTaskCount = totalTasks - layoutManager.findLastVisibleItemPosition() - 1;
+                if (remainingTaskCount == 0) remainingTasksView.setText("");
+                else remainingTasksView.setText(String.valueOf(
+                        remainingTaskCount + " more task" + (remainingTaskCount > 1 ? "s" : "")));
+
+                //recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 return true;
             }
         });
+
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity()));
         return view;
     }
 
@@ -150,31 +170,6 @@ public class TasksFragment extends Fragment implements
     public void onResume() {
         super.onResume();
         taskDataAccess.open();
-    }
-
-    private void UpdateCycleCount() {
-        int totalCycles = taskDataAccess.getTotalCycles(taskListId);
-        if (totalCycles == 0) return;
-        TextView totalCyclesView = (TextView) view.findViewById(R.id.total_task_cycles);
-        totalCyclesView.setText(String.valueOf(totalCycles + " cycles"));
-    }
-
-    private void UpdateTaskCount() {
-        int totalTasks = taskRecyclerViewAdapter.getItemCount();
-        TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
-        if (totalTasks == 0)  totalTasksView.setText(getResources().getText(R.string.task_no_tasks));
-        else totalTasksView.setText(String.valueOf(totalTasks + " tasks"));
-    }
-
-    private void UpdateRemainingTaskCount() {
-        TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
-        NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
-        int remainingTaskCount = taskRecyclerViewAdapter.getItemCount() - layoutManager.findLastVisibleItemPosition() - 1;
-        if (remainingTaskCount == 0)
-            remainingTasksView.setText("");
-        else
-            remainingTasksView.setText(String.valueOf(
-                    remainingTaskCount + " more task" + (remainingTaskCount > 1 ? "s" : "")));
     }
 
     /** Performs an action on a task: done, next or delete */
@@ -203,58 +198,54 @@ public class TasksFragment extends Fragment implements
 
         // Setup the snack bar
         Snackbar.make(view, "Task " + action, Snackbar.LENGTH_LONG)
-                .setAction("Undo", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Undo adapter changes
-                        switch (direction)
-                        {
-                            // Nothing special to do for done
-                            case ItemTouchHelper.LEFT:
-                                break;
-                            // Remove the last item
-                            case ItemTouchHelper.RIGHT:
-                                taskRecyclerViewAdapter.remove(taskRecyclerViewAdapter.getItemCount() - 1);
-                                task.setCycle(task.getCycle() - 1);
-                                break;
-                            // Nothing special to do for delete
-                            case -1:
-                                break;
-                        }
-                        // Reset the first item
-                        taskRecyclerViewAdapter.add(task, itemPosition);
-                        recyclerView.scrollToPosition(0);
+            .setAction("Undo", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Undo adapter changes
+                    switch (direction) {
+                        // Nothing special to do for done
+                        case ItemTouchHelper.LEFT:
+                            break;
+                        // Remove the last item
+                        case ItemTouchHelper.RIGHT:
+                            taskRecyclerViewAdapter.remove(taskRecyclerViewAdapter.getItemCount() - 1);
+                            task.setCycle(task.getCycle() - 1);
+                            break;
+                        // Nothing special to do for delete
+                        case -1:
+                            break;
                     }
-                }).setCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar snackbar, int event) {
-                super.onDismissed(snackbar, event);
-
-                // When clicked on undo, do not write to DB
-                if (event == DISMISS_EVENT_ACTION) return;
-
-                // Commit the changes to DB
-                switch (direction)
-                {
-                    // Mark item as Done
-                    case ItemTouchHelper.LEFT:
-                        taskDataAccess.setDone(itemId);
-                        break;
-                    // Increase task cycle count
-                    case ItemTouchHelper.RIGHT:
-                        taskDataAccess.increaseCycle(task.getCycle(), itemId);
-                        break;
-                    case -1:
-                        // Commit the changes to DB
-                        taskDataAccess.deleteTask(itemId);
+                    // Reset the first item
+                    taskRecyclerViewAdapter.add(task, itemPosition);
+                    recyclerView.scrollToPosition(0);
                 }
+            }).setCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+                    super.onDismissed(snackbar, event);
 
-                UpdateCycleCount();
+                    // When clicked on undo, do not write to DB
+                    if (event == DISMISS_EVENT_ACTION) return;
 
-                UpdateTaskCount();
-                UpdateRemainingTaskCount();
-            }
-        }).show();
+                    // Commit the changes to DB
+                    switch (direction)
+                    {
+                        // Mark item as Done
+                        case ItemTouchHelper.LEFT:
+                            taskDataAccess.setDone(itemId);
+                            break;
+                        // Increase task cycle count
+                        case ItemTouchHelper.RIGHT:
+                            taskDataAccess.increaseCycle(task.getCycle(), itemId);
+                            break;
+                        case -1:
+                            // Commit the changes to DB
+                            taskDataAccess.deleteTask(itemId);
+                    }
+
+                    //UpdateCycleCount();
+                }
+            }).show();
     }
 
     @Override
@@ -315,7 +306,6 @@ public class TasksFragment extends Fragment implements
                 priorityRadio.getText().toString(),
                 taskList.getId());
 
-
         Bundle args = dialog.getArguments();
         // Should never happen because we will have to be on this tab to open the dialog
         if (taskRecyclerViewAdapter == null) return;
@@ -324,9 +314,6 @@ public class TasksFragment extends Fragment implements
         if (task == null) {
             taskRecyclerViewAdapter.add(newTask, 0);
             recyclerView.scrollToPosition(0);
-
-            // Update the task count
-            UpdateTaskCount();
         }
         // Update the task
         else {
@@ -336,13 +323,12 @@ public class TasksFragment extends Fragment implements
             {
                 // Remove item from current tab
                 taskRecyclerViewAdapter.remove(position);
+                //UpdateCycleCount();
 
                 // Add it to the corresponding tab provided it is already instanciated
                 mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
             } else taskRecyclerViewAdapter.update(newTask, position);
         }
-
-        UpdateRemainingTaskCount();
     }
 
     @Override

@@ -2,7 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:orientation="horizontal" >
+    android:paddingTop="5dp"
+    android:orientation="horizontal"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground" >
     <TextView
         android:id="@+id/task_cycle"
         android:layout_width="56dp"

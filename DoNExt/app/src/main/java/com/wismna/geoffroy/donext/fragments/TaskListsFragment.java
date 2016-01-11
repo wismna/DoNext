@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -47,6 +48,7 @@ public class TaskListsFragment extends Fragment implements
         super.onCreate(savedInstanceState);
 
         taskListDataAccess = new TaskListDataAccess(getContext());
+        taskListDataAccess.open();
         new GetTaskListsTask().execute(taskListDataAccess);
     }
 
@@ -62,10 +64,12 @@ public class TaskListsFragment extends Fragment implements
             public void onClick(View v) {
                 EditText editText = (EditText) mView.findViewById(R.id.new_task_list_name);
                 String text = editText.getText().toString();
-                if (text.matches("")) return;
+                if (text.matches("")) {
+                    editText.setError(getResources().getString(R.string.task_list_new_list_error));
+                    return;
+                }
                 int position = taskListRecyclerViewAdapter.getItemCount();
 
-                taskListDataAccess.open();
                 TaskList taskList = taskListDataAccess.createTaskList(text, position);
                 taskListRecyclerViewAdapter.add(taskList, position);
 
@@ -106,14 +110,38 @@ public class TaskListsFragment extends Fragment implements
 
     @Override
     public void onClickDeleteButton(int position, long id) {
-        String title = getResources().getString(R.string.task_list_confirmation_delete);
-        ConfirmDialogFragment confirmDialogFragment =
-                ConfirmDialogFragment.newInstance(title, this);
-        Bundle args = new Bundle();
-        args.putInt("ItemPosition", position);
-        args.putLong("ItemId", id);
-        confirmDialogFragment.setArguments(args);
-        confirmDialogFragment.show(getFragmentManager(), title);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        if(sharedPref.getBoolean("pref_conf_tasklist_del", true)) {
+            String title = getResources().getString(R.string.task_list_confirmation_delete);
+            ConfirmDialogFragment confirmDialogFragment =
+                    ConfirmDialogFragment.newInstance(title, this);
+            Bundle args = new Bundle();
+            args.putInt("ItemPosition", position);
+            args.putLong("ItemId", id);
+            confirmDialogFragment.setArguments(args);
+            confirmDialogFragment.show(getFragmentManager(), title);
+        }
+        else deleteTaskList(position, id);
+    }
+
+    @Override
+    public void onConfirmDialogClick(DialogFragment dialog, ConfirmDialogFragment.ButtonEvent event) {
+        // Handle never ask again checkbox
+        CheckBox neverAskAgainCheckBox = (CheckBox) dialog.getDialog().findViewById(R.id.task_confirmation_never);
+        if (neverAskAgainCheckBox.isChecked()) {
+
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+            SharedPreferences.Editor editor = sharedPref.edit();
+
+            editor.putBoolean("pref_conf_tasklist_del", false);
+            editor.apply();
+        }
+
+        if (event == ConfirmDialogFragment.ButtonEvent.NO) return;
+
+        Bundle args = dialog.getArguments();
+        deleteTaskList(args.getInt("ItemPosition"), args.getLong("ItemId"));
     }
 
     @Override
@@ -122,13 +150,8 @@ public class TaskListsFragment extends Fragment implements
         taskListDataAccess.updateOrder(toTaskId, fromPosition);
     }
 
-    @Override
-    public void onConfirmDialogClick(DialogFragment dialog, ConfirmDialogFragment.ButtonEvent event) {
-        if (event == ConfirmDialogFragment.ButtonEvent.NO) return;
-
-        Bundle args = dialog.getArguments();
-        int position = args.getInt("ItemPosition");
-        long id = args.getLong("ItemId");
+    private void deleteTaskList(int position, long id)
+    {
         taskListRecyclerViewAdapter.remove(position);
         taskListDataAccess.deleteTaskList(id);
         toggleVisibleCreateNewTaskListLayout(mView);
@@ -138,10 +161,7 @@ public class TaskListsFragment extends Fragment implements
         @Override
         protected List<TaskList> doInBackground(TaskListDataAccess... params) {
             TaskListDataAccess taskListDataAccess = params[0];
-            taskListDataAccess.open();
-            List<TaskList> taskLists = taskListDataAccess.getAllTaskLists();
-            taskListDataAccess.close();
-            return taskLists;
+            return taskListDataAccess.getAllTaskLists();
         }
 
         @Override

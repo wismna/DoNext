@@ -21,13 +21,13 @@
         android:name="com.wismna.geoffroy.donext.activities.TaskFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="@dimen/text_margin"
+        android:layout_marginRight="@dimen/text_margin"
         android:layout_below="@id/total_task_cycles"
         app:layoutManager="LinearLayoutManager"
         app:layout_heightPercent="90%"
         tools:context=".fragments.TasksFragment"
-        tools:listitem="@layout/fragment_task" />
+        tools:listitem="@layout/fragment_task_detailed" />
     <TextView
         android:id="@+id/remaining_task_count"
         android:layout_width="150dp"

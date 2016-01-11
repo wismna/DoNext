@@ -11,14 +11,17 @@
     <!-- Strings related to Task List edition -->
     <string name="task_list_new_list_hint">New list name</string>
     <string name="task_list_new_list_create">Create</string>
+    <string name="task_list_new_list_error">List name cannot be blank</string>
     <string name="task_list_delete">Delete</string>
     <string name="task_list_confirmation_delete">Delete task list?</string>
-
 
     <!-- Strings related to new task dialog -->
     <string name="new_task_list">List</string>
     <string name="new_task_name">Name</string>
+    <string name="new_task_name_hint">New task name</string>
+    <string name="new_task_name_error">Task name cannot be blank</string>
     <string name="new_task_description">Description</string>
+    <string name="new_task_description_hint">Optional task description</string>
     <string name="new_task_priority">Priority</string>
     <string name="new_task_priority_low">Low</string>
     <string name="new_task_priority_normal">Normal</string>
@@ -43,10 +46,21 @@
     <string name="task_confirmation_never_button">Never ask again</string>
 
     <!-- Strings related to Settings -->
+    <string name="settings_category_tasks">Tasks</string>
+    <string name="settings_category_tasklists">Task lists</string>
     <string name="settings_confirm_message">Mark task as</string>
     <string name="settings_confirm_donext">Confirm on next?</string>
     <string name="settings_confirm_markdone">Confirm on done?</string>
     <string name="settings_confirm_delete">Confirm on delete?</string>
+    <string name="settings_task_layout">Task layout:</string>
+    <string-array name="settings_task_layouts">
+        <item>Simple</item>
+        <item>Detailed</item>
+    </string-array>
+    <string-array name="settings_task_layout_values">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
     <string name="settings_max_lists_label">Maximum number of lists:</string>
     <string-array name="settings_max_lists_number">
         <item>1</item>

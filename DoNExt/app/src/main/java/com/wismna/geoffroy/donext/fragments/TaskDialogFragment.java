@@ -9,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -59,19 +60,13 @@ public class TaskDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_task_details, null);
+        View view = inflater.inflate(R.layout.fragment_task_form, null);
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(view)
             // Add action buttons
-            .setPositiveButton(R.string.new_task_save, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int id) {
-                    // Send the positive button event back to the host activity
-                    mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this);
-                }
-            })
+            .setPositiveButton(R.string.new_task_save, null)
             .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // Send the negative button event back to the host activity
@@ -122,5 +117,32 @@ public class TaskDialogFragment extends DialogFragment {
             setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_Holo_Light);
         }
         return builder.create();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        final AlertDialog d = (AlertDialog) getDialog();
+        if(d != null)
+        {
+            Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+            positiveButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    EditText titleText = (EditText) d.findViewById(R.id.new_task_name);
+                    if (titleText.getText().toString().matches(""))
+                        titleText.setError(getResources().getString(R.string.new_task_name_error));
+                    else
+                    {
+                        // Send the positive button event back to the host activity
+                        mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this);
+                        dismiss();
+                    }
+                }
+            });
+        }
     }
 }

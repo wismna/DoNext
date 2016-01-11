@@ -87,8 +87,6 @@ public class TaskListDataAccess {
     }
 
     public Cursor getAllTaskListsCursor() {
-        //return database.query(DatabaseHelper.TASKLIST_TABLE_NAME,
-        //        taskListColumns, null, null, null, null, null);
         return database.rawQuery("SELECT *," +
                 " (SELECT COUNT(*) " +
                     " FROM " + DatabaseHelper.TASKS_TABLE_NAME +

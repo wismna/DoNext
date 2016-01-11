@@ -1,7 +1,6 @@
 package com.wismna.geoffroy.donext.helpers;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -50,27 +49,27 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
             View itemView = viewHolder.itemView;
 
             Paint p = new Paint();
+            p.setARGB(255, 222, 222, 222);
             if (dX > 0) {
-            /* Set your color for positive displacement */
-                p.setARGB(255, 204, 229, 255);
+            // Set your color for positive displacement
+                //p.setARGB(255, 204, 229, 255);
 
                 // Draw Rect with varying right side, equal to displacement dX
                 c.drawRect((float) itemView.getLeft(), (float) itemView.getTop(), dX,
                         (float) itemView.getBottom(), p);
             } else {
-            /* Set your color for negative displacement */
-                p.setARGB(255, 204, 255, 229);
+            // Set your color for negative displacement
+                //p.setARGB(255, 204, 255, 229);
 
                 // Draw Rect with varying left side, equal to the item's right side plus negative displacement dX
                 c.drawRect((float) itemView.getRight() + dX, (float) itemView.getTop(),
                         (float) itemView.getRight(), (float) itemView.getBottom(), p);
             }
-
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         }
     }
 
-    @Override
+    /*@Override
     public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
         if (actionState != ItemTouchHelper.ACTION_STATE_IDLE)
         {
@@ -86,5 +85,5 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
 
         viewHolder.itemView.setAlpha(1.0f);
         viewHolder.itemView.setBackgroundColor(0);
-    }
+    }*/
 }
