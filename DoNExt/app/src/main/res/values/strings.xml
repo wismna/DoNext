@@ -14,6 +14,7 @@
     <string name="task_list_new_list_error">List name cannot be blank</string>
     <string name="task_list_delete">Delete</string>
     <string name="task_list_confirmation_delete">Delete task list?</string>
+    <string name="task_list_drag_handle">Drag handle</string>
 
     <!-- Strings related to new task dialog -->
     <string name="new_task_list">List</string>

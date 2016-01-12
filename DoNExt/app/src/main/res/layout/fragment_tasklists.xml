@@ -13,11 +13,11 @@
         android:id="@+id/new_task_list_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="50dp"
-        android:layout_marginStart="50dp">
+        android:layout_marginLeft="75dp"
+        android:layout_marginStart="75dp">
         <EditText
             android:id="@+id/new_task_list_name"
-            android:layout_width="200dp"
+            android:layout_width="175dp"
             android:layout_height="wrap_content"
             android:hint="@string/task_list_new_list_hint"/>
         <Button
