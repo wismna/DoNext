@@ -1,11 +1,14 @@
 package com.wismna.geoffroy.donext.adapters;
 
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
@@ -26,6 +29,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         void onNameChangeFocus(TaskList taskList);
         void onClickDeleteButton(int position, long id);
         void onItemMove(long fromTaskId, long toTaskId, int fromPosition, int toPosition);
+        void onStartDrag(RecyclerView.ViewHolder viewHolder);
     }
 
     private final List<TaskList> mValues;
@@ -49,6 +53,17 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         holder.mTaskCountView.setText(String.valueOf(mValues.get(position).getTaskCount()));
         holder.mTaskNameView.setText(mValues.get(position).getName());
 
+        holder.handleView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (MotionEventCompat.getActionMasked(event) ==
+                        MotionEvent.ACTION_DOWN) {
+                    mListener.onStartDrag(holder);
+                }
+                return false;
+            }
+        });
+
         // Handle inline name change
         holder.mTaskNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -65,7 +80,6 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
             }
         });
 
-        // TODO: add confirmation dialog
         // Handle click on delete button
         holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,6 +136,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
+        public final ImageView handleView;
         public final TextView mTaskCountView;
         public final TextView mTaskNameView;
         public final Button mTaskDeleteButton;
@@ -130,6 +145,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         public ViewHolder(View view) {
             super(view);
             mView = view;
+            handleView = (ImageView) itemView.findViewById(R.id.handle);
             mTaskCountView = (TextView) view.findViewById(R.id.task_list_count);
             mTaskNameView = (TextView) view.findViewById(R.id.task_list_name);
             mTaskDeleteButton = (Button) view.findViewById(R.id.task_list_delete);

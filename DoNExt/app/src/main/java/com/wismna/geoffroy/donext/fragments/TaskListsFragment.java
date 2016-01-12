@@ -35,6 +35,7 @@ public class TaskListsFragment extends Fragment implements
     private TaskListRecyclerViewAdapter taskListRecyclerViewAdapter;
     private TaskListDataAccess taskListDataAccess;
     private View mView;
+    private ItemTouchHelper mItemTouchHelper;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -150,6 +151,11 @@ public class TaskListsFragment extends Fragment implements
         taskListDataAccess.updateOrder(toTaskId, fromPosition);
     }
 
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
+    }
+
     private void deleteTaskList(int position, long id)
     {
         taskListRecyclerViewAdapter.remove(position);
@@ -178,8 +184,8 @@ public class TaskListsFragment extends Fragment implements
 
             // Set the Touch Helper
             ItemTouchHelper.Callback callback = new TaskListTouchHelper(taskListRecyclerViewAdapter);
-            ItemTouchHelper helper = new ItemTouchHelper(callback);
-            helper.attachToRecyclerView(recyclerView);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(recyclerView);
 
             toggleVisibleCreateNewTaskListLayout(mView);
         }
