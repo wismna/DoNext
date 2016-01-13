@@ -26,7 +26,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
     implements TaskListTouchHelper.TaskListTouchHelperAdapter {
 
     public interface TaskListRecyclerViewAdapterListener {
-        void onNameChangeFocus(TaskList taskList);
+        void onEditTextLoseFocus(TaskList taskList);
         void onClickDeleteButton(int position, long id);
         void onItemMove(long fromTaskId, long toTaskId, int fromPosition, int toPosition);
         void onStartDrag(RecyclerView.ViewHolder viewHolder);
@@ -75,7 +75,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
                     holder.mItem.setName(name);
 
                     update(holder.mItem, position);
-                    mListener.onNameChangeFocus(holder.mItem);
+                    mListener.onEditTextLoseFocus(holder.mItem);
                 }
             }
         });

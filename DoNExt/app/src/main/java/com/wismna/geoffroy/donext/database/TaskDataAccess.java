@@ -65,11 +65,6 @@ public class TaskDataAccess {
         return newTask;
     }
 
-    public void deleteTask(long taskId) {
-        database.delete(DatabaseHelper.TASKS_TABLE_NAME,
-                DatabaseHelper.COLUMN_ID + " = " + taskId, null);
-    }
-
     public List<Task> getAllTasks(long id) {
         List<Task> tasks = new ArrayList<>();
 
@@ -104,6 +99,14 @@ public class TaskDataAccess {
     public int increaseCycle(int newCycle, long id) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper.TASKS_COLUMN_CYCLE, newCycle);
+        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+    }
+
+    public int deleteTask(long id) {
+        /*database.delete(DatabaseHelper.TASKS_TABLE_NAME,
+                DatabaseHelper.COLUMN_ID + " = " + taskId, null);*/
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseHelper.TASKS_COLUMN_DELETED, 1);
         return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
     }
 

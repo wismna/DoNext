@@ -13,6 +13,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -84,6 +85,7 @@ public class TaskListsFragment extends Fragment implements
 
     @Override
     public void onPause() {
+        clearFocus();
         super.onPause();
         taskListDataAccess.close();
     }
@@ -91,6 +93,7 @@ public class TaskListsFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
+        clearFocus();
         taskListDataAccess.open();
     }
 
@@ -102,10 +105,11 @@ public class TaskListsFragment extends Fragment implements
         int maxTaskLists = Integer.valueOf(maxTaskListsString);
         if (taskListCount >= maxTaskLists) layout.setVisibility(View.GONE);
         else layout.setVisibility(View.VISIBLE);
+        clearFocus();
     }
 
     @Override
-    public void onNameChangeFocus(TaskList taskList) {
+    public void onEditTextLoseFocus(TaskList taskList) {
         taskListDataAccess.updateName(taskList.getId(), taskList.getName());
     }
 
@@ -161,6 +165,18 @@ public class TaskListsFragment extends Fragment implements
         taskListRecyclerViewAdapter.remove(position);
         taskListDataAccess.deleteTaskList(id);
         toggleVisibleCreateNewTaskListLayout(mView);
+    }
+
+    /** Helper method to clear focus by giving it to the parent layout */
+    private void clearFocus() {
+        View view = getView();
+        if (view != null) {
+            view.requestFocus();
+
+            // Hide keyboard
+            InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     public class GetTaskListsTask extends AsyncTask<TaskListDataAccess, Void, List<TaskList>> {

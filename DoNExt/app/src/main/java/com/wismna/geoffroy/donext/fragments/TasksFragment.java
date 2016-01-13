@@ -140,7 +140,8 @@ public class TasksFragment extends Fragment implements
                 // Update total tasks
                 int totalTasks = taskRecyclerViewAdapter.getItemCount();
                 TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
-                if (totalTasks == 0) totalTasksView.setText(getResources().getText(R.string.task_no_tasks));
+                // isAdded is to prevent an IllegalStateException when fast switching between tabs
+                if (totalTasks == 0 && isAdded()) totalTasksView.setText(getResources().getText(R.string.task_no_tasks));
                 else totalTasksView.setText(String.valueOf(totalTasks + " task" + (totalTasks > 1 ? "s" : "")));
 
                 // Update remaining tasks
@@ -161,8 +162,8 @@ public class TasksFragment extends Fragment implements
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
         taskDataAccess.close();
     }
 
