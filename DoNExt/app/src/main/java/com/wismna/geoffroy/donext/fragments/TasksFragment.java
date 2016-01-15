@@ -52,6 +52,7 @@ public class TasksFragment extends Fragment implements
     private View view;
     private RecyclerView recyclerView;
     private TaskChangedAdapter mAdapter;
+    private Snackbar snackbar;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -164,6 +165,7 @@ public class TasksFragment extends Fragment implements
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (snackbar != null) snackbar.dismiss();
         taskDataAccess.close();
     }
 
@@ -198,7 +200,7 @@ public class TasksFragment extends Fragment implements
         }
 
         // Setup the snack bar
-        Snackbar.make(view, "Task " + action, Snackbar.LENGTH_LONG)
+        snackbar = Snackbar.make(view, "Task " + action, Snackbar.LENGTH_LONG)
             .setAction("Undo", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -220,33 +222,32 @@ public class TasksFragment extends Fragment implements
                     taskRecyclerViewAdapter.add(task, itemPosition);
                     recyclerView.scrollToPosition(0);
                 }
-            }).setCallback(new Snackbar.Callback() {
-                @Override
-                public void onDismissed(Snackbar snackbar, int event) {
-                    super.onDismissed(snackbar, event);
+            });
+        snackbar.setCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
 
-                    // When clicked on undo, do not write to DB
-                    if (event == DISMISS_EVENT_ACTION) return;
+                // When clicked on undo, do not write to DB
+                if (event == DISMISS_EVENT_ACTION) return;
 
-                    // Commit the changes to DB
-                    switch (direction)
-                    {
-                        // Mark item as Done
-                        case ItemTouchHelper.LEFT:
-                            taskDataAccess.setDone(itemId);
-                            break;
-                        // Increase task cycle count
-                        case ItemTouchHelper.RIGHT:
-                            taskDataAccess.increaseCycle(task.getCycle(), itemId);
-                            break;
-                        case -1:
-                            // Commit the changes to DB
-                            taskDataAccess.deleteTask(itemId);
-                    }
-
-                    //UpdateCycleCount();
+                // Commit the changes to DB
+                switch (direction)
+                {
+                    // Mark item as Done
+                    case ItemTouchHelper.LEFT:
+                        taskDataAccess.setDone(itemId);
+                        break;
+                    // Increase task cycle count
+                    case ItemTouchHelper.RIGHT:
+                        taskDataAccess.increaseCycle(task.getCycle(), itemId);
+                        break;
+                    case -1:
+                        // Commit the changes to DB
+                        taskDataAccess.deleteTask(itemId);
                 }
-            }).show();
+            }
+        }).show();
     }
 
     @Override

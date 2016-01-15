@@ -6,6 +6,7 @@
     <string name="action_editTabs">Edit lists</string>
     <string name="action_about">About</string>
     <string name="action_new_task">New task</string>
+    <string name="action_changeLayout">Change layout</string>
     <string name="settings_activity_title">Settings</string>
 
     <!-- Strings related to Task List edition -->

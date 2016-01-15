@@ -1,7 +1,9 @@
 package com.wismna.geoffroy.donext.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -72,6 +74,10 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             // Set up the ViewPager with the sections adapter.
             mViewPager = (ViewPager) findViewById(R.id.container);
             mViewPager.setAdapter(mSectionsPagerAdapter);
+            // Open last opened tab
+            SharedPreferences sharedPref =
+                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+            mViewPager.setCurrentItem(sharedPref.getInt("last_opened_tab", 0));
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
@@ -80,8 +86,36 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.show();
         }
-
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Save currently opened tab
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("last_opened_tab", mViewPager.getCurrentItem());
+        editor.apply();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_changeLayout);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String layoutType = sharedPref.getString("pref_conf_task_layout", "1");
+        switch (layoutType) {
+            case "1" :
+                item.setIcon(R.drawable.ic_list_white_24dp);
+                break;
+            case "2" :
+                item.setIcon(R.drawable.ic_view_list_white_24dp);
+                break;
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -122,14 +156,30 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         taskDialogFragment.show(manager, "Create new task");
     }
 
-    /** Called when the user clicks the Settings button  */
-    public void openSettings(MenuItem menuItem) {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
+    /** Called when the user clicks on the Change Layout button */
+    public void changeLayout(MenuItem item) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        String layoutTypeString = sharedPref.getString("pref_conf_task_layout", "1");
+        int layoutType = Integer.valueOf(layoutTypeString);
+        editor.putString("pref_conf_task_layout", String.valueOf(layoutType % 2 + 1));
+        editor.apply();
+
+        // Update the ViewPagerAdapter to refresh all tabs
+        mSectionsPagerAdapter.notifyDataSetChanged();
+        // Invalidate the menu to redraw the icon
+        invalidateOptionsMenu();
     }
+
     /** Called when the user clicks the Edit Lists button  */
     public void openTaskLists(MenuItem menuItem) {
         Intent intent = new Intent(this, TaskListActivity.class);
+        startActivity(intent);
+    }
+
+    /** Called when the user clicks the Settings button  */
+    public void openSettings(MenuItem menuItem) {
+        Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
