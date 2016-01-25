@@ -6,8 +6,12 @@
     <string name="action_editTabs">Edit lists</string>
     <string name="action_about">About</string>
     <string name="action_new_task">New task</string>
+    <string name="action_edit_task">Edit task</string>
     <string name="action_changeLayout">Change layout</string>
-    <string name="settings_activity_title">Settings</string>
+
+    <!-- Strings related to tabs -->
+    <string name="tab_left_arrow">Left scroll arrow</string>
+    <string name="tab_right_arrow">Right scroll arrow</string>
 
     <!-- Strings related to Task List edition -->
     <string name="task_list_new_list_hint">New list name</string>
@@ -35,6 +39,16 @@
     <!-- Strings related to task details activity -->
     <string name="task_details_activity_title">Details</string>
     <string name="task_no_tasks">Yeah! No more tasks!</string>
+    <string name="task_total_cycles">%1$d cycle%2$s</string>
+    <string name="task_total">%1$d task%2$s</string>
+    <string name="task_remaining">%1$d more task%2$s</string>
+
+    <!-- String related to the SnackBar -->
+    <string name="snackabar_label">Task %s</string>
+    <string name="snackabar_action_done">done</string>
+    <string name="snackabar_action_next">nexted</string>
+    <string name="snackabar_action_deleted">deleted</string>
+    <string name="snackabar_button">Undo</string>
 
     <!-- Strings related to the confirmation dialog -->
     <string name="task_confirmation_done_text">Mark task as Done?</string>
@@ -74,4 +88,7 @@
         <item>7</item>
     </string-array>
     <string name="title_activity_task_list">TaskListActivity</string>
+
+    <!-- Strings related to About -->
+    <string name="about_version">Version %s</string>
 </resources>

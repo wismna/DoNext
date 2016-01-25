@@ -33,7 +33,7 @@ public class TaskListTouchHelper extends ItemTouchHelper.SimpleCallback  {
 
     @Override
     public boolean isLongPressDragEnabled() {
-        return true;
+        return false;
     }
 
     @Override

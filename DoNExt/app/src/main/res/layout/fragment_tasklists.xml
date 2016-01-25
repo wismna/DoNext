@@ -27,6 +27,7 @@
             android:id="@+id/new_task_list_button"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:text="@string/task_list_new_list_create"/>
     </LinearLayout>
     <android.support.v7.widget.RecyclerView

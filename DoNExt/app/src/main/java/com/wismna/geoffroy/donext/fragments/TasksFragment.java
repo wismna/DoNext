@@ -3,6 +3,7 @@ package com.wismna.geoffroy.donext.fragments;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
@@ -122,7 +123,7 @@ public class TasksFragment extends Fragment implements
                                 ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems(), TasksFragment.this);
 
                         taskDialogFragment.setArguments(args);
-                        taskDialogFragment.show(manager, "Edit task");
+                        taskDialogFragment.show(manager, getResources().getString(R.string.action_edit_task));
                     }
                 })
         );
@@ -131,27 +132,29 @@ public class TasksFragment extends Fragment implements
         recyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
+                // isAdded is tested to prevent an IllegalStateException when fast switching between tabs
+                if (!isAdded()) return true;
+                Resources resources = getResources();
+
                 // Update total cycle count
                 int totalCycles = taskRecyclerViewAdapter.getCycleCount();
-                if (totalCycles != 0) {
-                    TextView totalCyclesView = (TextView) view.findViewById(R.id.total_task_cycles);
-                    totalCyclesView.setText(String.valueOf(totalCycles + " cycles"));
-                }
+                TextView totalCyclesView = (TextView) view.findViewById(R.id.total_task_cycles);
+                if (totalCycles != 0)
+                    totalCyclesView.setText(resources.getString(R.string.task_total_cycles, totalCycles, (totalCycles > 1 ? "s" : "")));
+                else totalCyclesView.setText("");
 
                 // Update total tasks
                 int totalTasks = taskRecyclerViewAdapter.getItemCount();
                 TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
-                // isAdded is to prevent an IllegalStateException when fast switching between tabs
-                if (totalTasks == 0 && isAdded()) totalTasksView.setText(getResources().getText(R.string.task_no_tasks));
-                else totalTasksView.setText(String.valueOf(totalTasks + " task" + (totalTasks > 1 ? "s" : "")));
+                if (totalTasks == 0) totalTasksView.setText(resources.getText(R.string.task_no_tasks));
+                else totalTasksView.setText(resources.getString(R.string.task_total, totalTasks, (totalTasks > 1 ? "s" : "")));
 
                 // Update remaining tasks
                 TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
                 NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
                 int remainingTaskCount = totalTasks - layoutManager.findLastVisibleItemPosition() - 1;
                 if (remainingTaskCount == 0) remainingTasksView.setText("");
-                else remainingTasksView.setText(String.valueOf(
-                        remainingTaskCount + " more task" + (remainingTaskCount > 1 ? "s" : "")));
+                else remainingTasksView.setText(resources.getString(R.string.task_remaining, remainingTaskCount, (remainingTaskCount > 1 ? "s" : "")));
 
                 //recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 return true;
@@ -180,28 +183,30 @@ public class TasksFragment extends Fragment implements
         final long itemId = taskRecyclerViewAdapter.getItemId(itemPosition);
         final Task task = taskRecyclerViewAdapter.getItem(itemPosition);
         String action = "";
+        Resources resources = getResources();
+
         taskRecyclerViewAdapter.remove(itemPosition);
 
         switch (direction)
         {
             // Mark item as Done
             case ItemTouchHelper.LEFT:
-                action = "done";
+                action = resources.getString(R.string.snackabar_action_done);
                 break;
             // Increase task cycle count
             case ItemTouchHelper.RIGHT:
-                action = "nexted";
+                action = resources.getString(R.string.snackabar_action_next);
                 task.setCycle(task.getCycle() + 1);
                 taskRecyclerViewAdapter.add(task, taskRecyclerViewAdapter.getItemCount());
                 break;
             case -1:
-                action = "deleted";
+                action = resources.getString(R.string.snackabar_action_deleted);
                 break;
         }
 
         // Setup the snack bar
-        snackbar = Snackbar.make(view, "Task " + action, Snackbar.LENGTH_LONG)
-            .setAction("Undo", new View.OnClickListener() {
+        snackbar = Snackbar.make(view, resources.getString(R.string.snackabar_label, action), Snackbar.LENGTH_LONG)
+            .setAction(resources.getString(R.string.snackabar_button), new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // Undo adapter changes
@@ -231,6 +236,7 @@ public class TasksFragment extends Fragment implements
                 // When clicked on undo, do not write to DB
                 if (event == DISMISS_EVENT_ACTION) return;
 
+                // TODO: correct bug when fast switching between tabs
                 // Commit the changes to DB
                 switch (direction)
                 {

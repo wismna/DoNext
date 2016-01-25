@@ -2,6 +2,7 @@ package com.wismna.geoffroy.donext.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -79,8 +80,26 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             mViewPager.setCurrentItem(sharedPref.getInt("last_opened_tab", 0));
 
-            TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+            // TODO: hide arrows on start when not needed
+            final TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
+            tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    // Hide left arrow when scrolled to the left
+                    View leftArrow = findViewById(R.id.left_arrow);
+                    if (scrollX <= 1) leftArrow.setVisibility(View.GONE);
+                    else leftArrow.setVisibility(View.VISIBLE);
+
+                    // Hide right arrow when scrolled to the right
+                    View rightArrow = findViewById(R.id.right_arrow);
+                    Point size = new Point();
+                    getWindowManager().getDefaultDisplay().getSize(size);
+                    if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - size.x)
+                        rightArrow.setVisibility(View.GONE);
+                    else rightArrow.setVisibility(View.VISIBLE);
+                }
+            });
 
             // Hide or show new task floating button
             FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -180,6 +199,12 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
     /** Called when the user clicks the Settings button  */
     public void openSettings(MenuItem menuItem) {
         Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    /** Called when the user clicks the About button  */
+    public void openAbout(MenuItem menuItem) {
+        Intent intent = new Intent(this, AboutActivity.class);
         startActivity(intent);
     }
 
