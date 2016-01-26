@@ -3,6 +3,7 @@ package com.wismna.geoffroy.donext.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private  TabLayout tabLayout;
     private List<TaskList> taskLists;
 
     @Override
@@ -80,26 +82,20 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             mViewPager.setCurrentItem(sharedPref.getInt("last_opened_tab", 0));
 
-            // TODO: hide arrows on start when not needed
-            final TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+            tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
-            tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                @Override
-                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                    // Hide left arrow when scrolled to the left
-                    View leftArrow = findViewById(R.id.left_arrow);
-                    if (scrollX <= 1) leftArrow.setVisibility(View.GONE);
-                    else leftArrow.setVisibility(View.VISIBLE);
 
-                    // Hide right arrow when scrolled to the right
-                    View rightArrow = findViewById(R.id.right_arrow);
-                    Point size = new Point();
-                    getWindowManager().getDefaultDisplay().getSize(size);
-                    if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - size.x)
-                        rightArrow.setVisibility(View.GONE);
-                    else rightArrow.setVisibility(View.VISIBLE);
-                }
-            });
+            toggleTabLayoutArrows(tabLayout.getScrollX());
+            // Handles scroll detection (only available for SDK version >=23)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
+                tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                    @Override
+                    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                        toggleTabLayoutArrows(scrollX);
+                    }
+                });
+            }
 
             // Hide or show new task floating button
             FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -216,6 +212,23 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         RecyclerView recyclerView = ((RecyclerView) view.findViewById(R.id.task_list_view));
         if (recyclerView == null) return null;
         return (TaskRecyclerViewAdapter) recyclerView.getAdapter();
+    }
+
+    /** Toggles scrolling arrows visibility */
+    private void toggleTabLayoutArrows(int scrollX){
+        // Hide left arrow when scrolled to the left
+        View leftArrow = findViewById(R.id.left_arrow);
+        if (scrollX <= 1) leftArrow.setVisibility(View.GONE);
+        else leftArrow.setVisibility(View.VISIBLE);
+
+        // TODO: hide right arrow when no need to scroll
+        // Hide right arrow when scrolled to the right
+        View rightArrow = findViewById(R.id.right_arrow);
+        Point size = new Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - size.x)
+            rightArrow.setVisibility(View.GONE);
+        else rightArrow.setVisibility(View.VISIBLE);
     }
 
     /**

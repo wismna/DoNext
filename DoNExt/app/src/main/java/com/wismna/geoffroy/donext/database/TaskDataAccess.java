@@ -16,7 +16,12 @@ import java.util.List;
  * Created by geoffroy on 15-11-27.
  * Data access class that handles Tasks
  */
-public class TaskDataAccess {
+public class TaskDataAccess implements AutoCloseable {
+    public enum MODE {
+        READ,
+        WRITE
+    }
+
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
     private String[] taskColumns = {
@@ -27,15 +32,21 @@ public class TaskDataAccess {
     private List<String> priorities = new ArrayList<>();
 
     public TaskDataAccess(Context context) {
+        this(context, MODE.READ);
+    }
+    public TaskDataAccess(Context context, MODE writeMode) {
         dbHelper = new DatabaseHelper(context);
 
         priorities.add(context.getString(R.string.new_task_priority_low));
         priorities.add(context.getString(R.string.new_task_priority_normal));
         priorities.add(context.getString(R.string.new_task_priority_high));
+
+        open(writeMode);
     }
 
-    public void open() throws SQLException {
-        database = dbHelper.getWritableDatabase();
+    public void open(MODE writeMode) throws SQLException {
+        if (writeMode == MODE.WRITE) database = dbHelper.getWritableDatabase();
+        else database = dbHelper.getReadableDatabase();
     }
 
     public void close() {

@@ -90,5 +90,6 @@
     <string name="title_activity_task_list">TaskListActivity</string>
 
     <!-- Strings related to About -->
-    <string name="about_version">Version %s</string>
+    <string name="about_version_donext">DoNext version %s</string>
+    <string name="about_version_android">Android version %s</string>
 </resources>

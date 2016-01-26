@@ -48,7 +48,7 @@ public class TasksFragment extends Fragment implements
 
     private static final String TASK_LIST_ID = "task_list_id";
     private long taskListId = -1;
-    private TaskDataAccess taskDataAccess;
+    //private TaskDataAccess taskDataAccess;
     private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
     private View view;
     private RecyclerView recyclerView;
@@ -86,8 +86,6 @@ public class TasksFragment extends Fragment implements
         view = inflater.inflate(R.layout.fragment_tasks, container, false);
         final Context context = view.getContext();
 
-        taskDataAccess = new TaskDataAccess(view.getContext());
-        taskDataAccess.open();
 
         // Set the Recycler view
         recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
@@ -95,9 +93,11 @@ public class TasksFragment extends Fragment implements
 
         // Set RecyclerView Adapter
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
-                taskDataAccess.getAllTasks(taskListId),
-                Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")));
+        try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext())) {
+            taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
+                    taskDataAccess.getAllTasks(taskListId),
+                    Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")));
+        }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
 
         // Set ItemTouch helper in RecyclerView to handle swipe move on elements
@@ -166,16 +166,9 @@ public class TasksFragment extends Fragment implements
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onPause();
         if (snackbar != null) snackbar.dismiss();
-        taskDataAccess.close();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        taskDataAccess.open();
     }
 
     /** Performs an action on a task: done, next or delete */
@@ -236,21 +229,21 @@ public class TasksFragment extends Fragment implements
                 // When clicked on undo, do not write to DB
                 if (event == DISMISS_EVENT_ACTION) return;
 
-                // TODO: correct bug when fast switching between tabs
                 // Commit the changes to DB
-                switch (direction)
-                {
-                    // Mark item as Done
-                    case ItemTouchHelper.LEFT:
-                        taskDataAccess.setDone(itemId);
-                        break;
-                    // Increase task cycle count
-                    case ItemTouchHelper.RIGHT:
-                        taskDataAccess.increaseCycle(task.getCycle(), itemId);
-                        break;
-                    case -1:
-                        // Commit the changes to DB
-                        taskDataAccess.deleteTask(itemId);
+                try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
+                    switch (direction) {
+                        // Mark item as Done
+                        case ItemTouchHelper.LEFT:
+                            taskDataAccess.setDone(itemId);
+                            break;
+                        // Increase task cycle count
+                        case ItemTouchHelper.RIGHT:
+                            taskDataAccess.increaseCycle(task.getCycle(), itemId);
+                            break;
+                        case -1:
+                            // Commit the changes to DB
+                            taskDataAccess.deleteTask(itemId);
+                    }
                 }
             }
         }).show();
@@ -308,34 +301,36 @@ public class TasksFragment extends Fragment implements
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
 
         // Add the task to the database
-        Task newTask = taskDataAccess.createOrUpdateTask(id,
-                nameText.getText().toString(),
-                descText.getText().toString(),
-                priorityRadio.getText().toString(),
-                taskList.getId());
+        try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
+            Task newTask = taskDataAccess.createOrUpdateTask(id,
+                    nameText.getText().toString(),
+                    descText.getText().toString(),
+                    priorityRadio.getText().toString(),
+                    taskList.getId());
 
-        Bundle args = dialog.getArguments();
-        // Should never happen because we will have to be on this tab to open the dialog
-        if (taskRecyclerViewAdapter == null) return;
+            Bundle args = dialog.getArguments();
+            // Should never happen because we will have to be on this tab to open the dialog
+            if (taskRecyclerViewAdapter == null) return;
 
-        // Add the task
-        if (task == null) {
-            taskRecyclerViewAdapter.add(newTask, 0);
-            recyclerView.scrollToPosition(0);
-        }
-        // Update the task
-        else {
-            int position = args.getInt("position");
-            // Check if task list was changed
-            if (task.getTaskListId() != taskList.getId())
-            {
-                // Remove item from current tab
-                taskRecyclerViewAdapter.remove(position);
-                //UpdateCycleCount();
+            // Add the task
+            if (task == null) {
+                taskRecyclerViewAdapter.add(newTask, 0);
+                recyclerView.scrollToPosition(0);
+            }
+            // Update the task
+            else {
+                int position = args.getInt("position");
+                // Check if task list was changed
+                if (task.getTaskListId() != taskList.getId())
+                {
+                    // Remove item from current tab
+                    taskRecyclerViewAdapter.remove(position);
+                    //UpdateCycleCount();
 
-                // Add it to the corresponding tab provided it is already instanciated
-                mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
-            } else taskRecyclerViewAdapter.update(newTask, position);
+                    // Add it to the corresponding tab provided it is already instantiated
+                    mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
+                } else taskRecyclerViewAdapter.update(newTask, position);
+            }
         }
     }
 
