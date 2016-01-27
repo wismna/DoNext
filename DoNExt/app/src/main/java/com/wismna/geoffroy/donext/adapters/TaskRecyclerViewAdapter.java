@@ -94,8 +94,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         notifyItemRemoved(position);
     }
 
-    public void update(Task item, int position)
-    {
+    public void update(Task item, int position) {
         mValues.set(position, item);
         notifyItemChanged(position);
     }

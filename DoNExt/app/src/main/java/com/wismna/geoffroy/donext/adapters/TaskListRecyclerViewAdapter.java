@@ -48,7 +48,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mTaskCountView.setText(String.valueOf(mValues.get(position).getTaskCount()));
         holder.mTaskNameView.setText(mValues.get(position).getName());
@@ -74,7 +74,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
                 if (!hasFocus && !holder.mItem.getName().matches(name)) {
                     holder.mItem.setName(name);
 
-                    update(holder.mItem, position);
+                    update(holder.mItem, holder.getAdapterPosition());
                     mListener.onEditTextLoseFocus(holder.mItem);
                 }
             }
@@ -84,11 +84,11 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Disable the OnFocusChanged listener as it is pointless now
+                // Disable the OnFocusChanged listener as it is now pointless and harmful
                 holder.mTaskNameView.setOnFocusChangeListener(null);
 
                 //remove(position);
-                mListener.onClickDeleteButton(position, holder.mItem.getId());
+                mListener.onClickDeleteButton(holder.getAdapterPosition(), holder.mItem.getId());
             }
         });
     }
@@ -104,8 +104,8 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
     }
 
     public void remove(int position) {
-        notifyItemRemoved(position);
         mValues.remove(position);
+        notifyItemRemoved(position);
     }
 
     public void update(TaskList item, int position) {
