@@ -22,11 +22,11 @@ public class ConfirmDialogFragment extends DialogFragment {
         NO
     }
     private ConfirmDialogListener confirmDialogListener;
-    private String message;
+    //private String message;
 
-    public static ConfirmDialogFragment newInstance(String message, ConfirmDialogListener confirmDialogListener) {
+    public static ConfirmDialogFragment newInstance(/*String message, */ConfirmDialogListener confirmDialogListener) {
         ConfirmDialogFragment fragment = new ConfirmDialogFragment();
-        fragment.message = message;
+        //fragment.message = message;
         fragment.confirmDialogListener = confirmDialogListener;
         return fragment;
     }
@@ -44,10 +44,11 @@ public class ConfirmDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
+        Bundle args = getArguments();
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.fragment_task_confirmation, null);
-        builder.setView(view).setMessage(message)
-            .setPositiveButton(R.string.task_confirmation_yes_button, new DialogInterface.OnClickListener() {
+        builder.setView(view).setMessage(args.getString("message"))
+            .setPositiveButton(args.getInt("button"), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     confirmDialogListener.onConfirmDialogClick(ConfirmDialogFragment.this, ButtonEvent.YES);
                 }

@@ -346,8 +346,10 @@ public class TasksFragment extends Fragment implements
 
         if (showDialog) {
             ConfirmDialogFragment confirmDialogFragment =
-                    ConfirmDialogFragment.newInstance(title, this);
+                    ConfirmDialogFragment.newInstance(this);
             Bundle confirmArgs = new Bundle();
+            confirmArgs.putString("message", title);
+            confirmArgs.putInt("button", R.string.task_confirmation_delete_button);
             confirmArgs.putInt("ItemPosition", itemPosition);
             confirmArgs.putInt("Direction", -1);
             confirmDialogFragment.setArguments(confirmArgs);
@@ -361,6 +363,7 @@ public class TasksFragment extends Fragment implements
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String title = "";
         boolean showDialog = false;
+        int buttonLabel = -1;
 
         switch (direction)
         {
@@ -368,17 +371,21 @@ public class TasksFragment extends Fragment implements
             case ItemTouchHelper.LEFT:
                 title = getResources().getString(R.string.task_confirmation_done_text);
                 showDialog = sharedPref.getBoolean("pref_conf_done", true);
+                buttonLabel = R.string.task_confirmation_done_button;
                 break;
             // Increase task cycle count
             case ItemTouchHelper.RIGHT:
                 title = getResources().getString(R.string.task_confirmation_next_text);
                 showDialog = sharedPref.getBoolean("pref_conf_next", true);
+                buttonLabel = R.string.task_confirmation_next_button;
                 break;
         }
         if (showDialog) {
             ConfirmDialogFragment confirmDialogFragment =
-                    ConfirmDialogFragment.newInstance(title, this);
+                    ConfirmDialogFragment.newInstance(this);
             Bundle args = new Bundle();
+            args.putString("message", title);
+            args.putInt("button", buttonLabel);
             args.putInt("ItemPosition", itemPosition);
             args.putInt("Direction", direction);
             confirmDialogFragment.setArguments(args);

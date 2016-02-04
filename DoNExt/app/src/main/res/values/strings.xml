@@ -58,7 +58,7 @@
     <string name="task_confirmation_next_button">Next</string>
     <string name="task_confirmation_delete_button">Delete</string>
     <string name="task_confirmation_yes_button">Yes</string>
-    <string name="task_confirmation_no_button">No</string>
+    <string name="task_confirmation_no_button">Cancel</string>
     <string name="task_confirmation_never_button">Never ask again</string>
 
     <!-- Strings related to Settings -->

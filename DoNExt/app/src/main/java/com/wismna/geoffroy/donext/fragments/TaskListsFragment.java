@@ -120,8 +120,10 @@ public class TaskListsFragment extends Fragment implements
         if(sharedPref.getBoolean("pref_conf_tasklist_del", true)) {
             String title = getResources().getString(R.string.task_list_confirmation_delete);
             ConfirmDialogFragment confirmDialogFragment =
-                    ConfirmDialogFragment.newInstance(title, this);
+                    ConfirmDialogFragment.newInstance(this);
             Bundle args = new Bundle();
+            args.putString("message", title);
+            args.putInt("button", R.string.task_confirmation_delete_button);
             args.putInt("ItemPosition", position);
             args.putLong("ItemId", id);
             confirmDialogFragment.setArguments(args);
