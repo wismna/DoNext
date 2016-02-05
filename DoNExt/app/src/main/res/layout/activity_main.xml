@@ -48,6 +48,10 @@
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/left_arrow"
+                android:layout_toEndOf="@+id/left_arrow"
+                android:layout_toLeftOf="@+id/right_arrow"
+                android:layout_toStartOf="@+id/right_arrow"
                 app:tabMode="scrollable" />
         </RelativeLayout>
     </android.support.design.widget.AppBarLayout>
@@ -65,5 +69,5 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         android:onClick="onNewTaskClick"
-        android:src="@android:drawable/ic_input_add" />
+        android:src="@drawable/ic_add_white_24dp" />
 </android.support.design.widget.CoordinatorLayout>

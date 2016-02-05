@@ -218,16 +218,15 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
     private void toggleTabLayoutArrows(int scrollX){
         // Hide left arrow when scrolled to the left
         View leftArrow = findViewById(R.id.left_arrow);
-        if (scrollX <= 1) leftArrow.setVisibility(View.GONE);
+        if (scrollX <= 1) leftArrow.setVisibility(View.INVISIBLE);
         else leftArrow.setVisibility(View.VISIBLE);
 
-        // TODO: hide right arrow when no need to scroll
         // Hide right arrow when scrolled to the right
         View rightArrow = findViewById(R.id.right_arrow);
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
-        if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - size.x)
-            rightArrow.setVisibility(View.GONE);
+        if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - tabLayout.getMeasuredWidth())
+            rightArrow.setVisibility(View.INVISIBLE);
         else rightArrow.setVisibility(View.VISIBLE);
     }
 
