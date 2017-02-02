@@ -85,9 +85,9 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
 
-            toggleTabLayoutArrows(tabLayout.getScrollX());
             // Handles scroll detection (only available for SDK version >=23)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                toggleTabLayoutArrows(tabLayout.getScrollX());
                 //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
                 tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
                     @Override
