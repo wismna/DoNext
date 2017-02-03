@@ -106,7 +106,10 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
     @Override
     protected void onPause() {
         super.onPause();
-        // Save currently opened tab
+
+        // No tabs exist yet, nothing to save
+        if (mViewPager == null) return;
+        // Otherwise, save currently opened tab
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         SharedPreferences.Editor editor = sharedPref.edit();
