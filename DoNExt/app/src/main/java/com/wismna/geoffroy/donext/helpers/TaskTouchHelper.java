@@ -44,6 +44,7 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
                             float dX, float dY, int actionState, boolean isCurrentlyActive) {
+        // TODO: add NEXT and DONE texts while swiping (eventually buttons?)
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             // Get RecyclerView item from the ViewHolder
             View itemView = viewHolder.itemView;
