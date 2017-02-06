@@ -18,8 +18,8 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     private TaskTouchHelperAdapter mAdapter;
 
     public TaskTouchHelper(TaskTouchHelperAdapter adapter){
-        // No drag moves, only left swipes (except for 1st element, see getSwipeDirs method)
-        super(0, ItemTouchHelper.LEFT);
+        // No drag moves, no swipes (except for 1st element, see getSwipeDirs method)
+        super(0, 0);
         this.mAdapter = adapter;
     }
 
