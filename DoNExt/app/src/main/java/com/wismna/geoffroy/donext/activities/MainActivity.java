@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
      */
     public class SectionsPagerAdapter extends SmartFragmentStatePagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

@@ -31,6 +31,10 @@
     <string name="settings_confirm_message">Changer l\'état de la tâche en</string>
     <string name="settings_max_lists_label">Nombre de listes maximum:</string>
     <string name="settings_task_layout">Apparence des tâches:</string>
+    <string-array name="settings_task_layouts">
+        <item>Simple</item>
+        <item>Détaillée</item>
+    </string-array>
     <string name="snackabar_action_deleted">supprimée</string>
     <string name="snackabar_action_done">terminée</string>
     <string name="snackabar_action_next">suivante</string>
@@ -56,7 +60,7 @@
     <string name="task_list_new_list_hint">Nom de la liste</string>
     <string name="task_no_tasks">Super! Aucune tâche en cours!</string>
     <string name="task_remaining">%1$d tâche%2$s restante%2$s</string>
-    <string name="task_total">%1$d tâch%2$s</string>
+    <string name="task_total">%1$d tâche%2$s</string>
     <string name="task_total_cycles">%1$d cycle%2$s</string>
     <string name="title_activity_task_list">TaskListActivity</string>
 </resources>

@@ -25,7 +25,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"/>
     <Button
         android:id="@+id/task_list_delete"
-        android:layout_width="80dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:text="@string/task_list_delete" />
