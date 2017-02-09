@@ -73,12 +73,12 @@
         <item>Simple</item>
         <item>Detailed</item>
     </string-array>
-    <string-array name="settings_task_layout_values">
+    <string-array name="settings_task_layout_values" translatable="false">
         <item>1</item>
         <item>2</item>
     </string-array>
     <string name="settings_max_lists_label">Maximum number of lists:</string>
-    <string-array name="settings_max_lists_number">
+    <string-array name="settings_max_lists_number" translatable="false">
         <item>1</item>
         <item>2</item>
         <item>3</item>
