@@ -92,4 +92,5 @@
     <!-- Strings related to About -->
     <string name="about_version_donext">DoNext version %s</string>
     <string name="about_version_android">Android version %s</string>
+    <string name="about_link" translatable="false">https://github.com/wismna</string>
 </resources>

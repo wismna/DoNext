@@ -78,7 +78,7 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
             textPaint.setTextSize(25 * itemView.getResources().getDisplayMetrics().density);
             textPaint.setColor(Color.WHITE);
 
-            int heightOffset = 55;
+            int heightOffset = itemView.getHeight() / 2 - (int)textPaint.getTextSize() / 2;
             int widthOffset = 30;
             // Set your color for positive displacement
             if (dX > 0) {
