@@ -51,6 +51,8 @@ public class TaskDialogFragment extends DialogFragment {
         fragment.task = task;
         fragment.taskLists = taskLists;
         fragment.mListener = newTaskListener;
+        // TODO: keep dialog open when rotating
+        fragment.setRetainInstance(true);
         return fragment;
     }
 
