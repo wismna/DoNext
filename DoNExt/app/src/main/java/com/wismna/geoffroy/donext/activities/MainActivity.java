@@ -18,6 +18,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.SmartFragmentStatePagerAdapter;
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-    private  TabLayout tabLayout;
+    private TabLayout tabLayout;
     private List<TaskList> taskLists;
 
     @Override
@@ -82,21 +86,34 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             mViewPager.setCurrentItem(sharedPref.getInt("last_opened_tab", 0));
 
-            tabLayout = (TabLayout) findViewById(R.id.tabs);
-            tabLayout.setupWithViewPager(mViewPager);
+            View tabs = findViewById(R.id.tabs);
+            if (tabs instanceof TabLayout) {
+                tabLayout = (TabLayout) tabs;
+                tabLayout.setupWithViewPager(mViewPager);
 
-            // Handles scroll detection (only available for SDK version >=23)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                toggleTabLayoutArrows(tabLayout.getScrollX());
-                //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
-                tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                // Handles scroll detection (only available for SDK version >=23)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    toggleTabLayoutArrows(tabLayout.getScrollX());
+                    //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
+                    tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                        @Override
+                        public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                            toggleTabLayoutArrows(scrollX);
+                        }
+                    });
+                }
+            }
+            else if (tabs instanceof ListView) {
+                ListView listView = (ListView) tabs;
+                listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                        toggleTabLayoutArrows(scrollX);
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        mViewPager.setCurrentItem(position);
+                        view.setSelected(true);
                     }
                 });
             }
-
             // Hide or show new task floating button
             FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.show();
@@ -221,16 +238,19 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
     private void toggleTabLayoutArrows(int scrollX){
         // Hide left arrow when scrolled to the left
         View leftArrow = findViewById(R.id.left_arrow);
-        if (scrollX <= 1) leftArrow.setVisibility(View.INVISIBLE);
-        else leftArrow.setVisibility(View.VISIBLE);
-
+        if (leftArrow != null) {
+            if (scrollX <= 1) leftArrow.setVisibility(View.INVISIBLE);
+            else leftArrow.setVisibility(View.VISIBLE);
+        }
         // Hide right arrow when scrolled to the right
         View rightArrow = findViewById(R.id.right_arrow);
-        Point size = new Point();
-        getWindowManager().getDefaultDisplay().getSize(size);
-        if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - tabLayout.getMeasuredWidth())
-            rightArrow.setVisibility(View.INVISIBLE);
-        else rightArrow.setVisibility(View.VISIBLE);
+        if (rightArrow != null) {
+            Point size = new Point();
+            getWindowManager().getDefaultDisplay().getSize(size);
+            if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - tabLayout.getMeasuredWidth())
+                rightArrow.setVisibility(View.INVISIBLE);
+            else rightArrow.setVisibility(View.VISIBLE);
+        }
     }
 
     /**

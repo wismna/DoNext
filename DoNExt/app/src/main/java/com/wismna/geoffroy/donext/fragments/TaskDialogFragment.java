@@ -51,7 +51,6 @@ public class TaskDialogFragment extends DialogFragment {
         fragment.task = task;
         fragment.taskLists = taskLists;
         fragment.mListener = newTaskListener;
-        // TODO: keep dialog open when rotating
         fragment.setRetainInstance(true);
         return fragment;
     }
@@ -146,5 +145,16 @@ public class TaskDialogFragment extends DialogFragment {
                 }
             });
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        Dialog dialog = getDialog();
+        // Stop the dialog from being dismissed on rotation, due to a bug with the compatibility library
+        // https://code.google.com/p/android/issues/detail?id=17423
+        if (dialog != null && getRetainInstance()) {
+            dialog.setDismissMessage(null);
+        }
+        super.onDestroyView();
     }
 }

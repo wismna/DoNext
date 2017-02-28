@@ -28,6 +28,7 @@ public class ConfirmDialogFragment extends DialogFragment {
         ConfirmDialogFragment fragment = new ConfirmDialogFragment();
         //fragment.message = message;
         fragment.confirmDialogListener = confirmDialogListener;
+        fragment.setRetainInstance(true);
         return fragment;
     }
 
@@ -69,5 +70,16 @@ public class ConfirmDialogFragment extends DialogFragment {
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);
         return dialog;
+    }
+
+    @Override
+    public void onDestroyView() {
+        Dialog dialog = getDialog();
+        // Stop the dialog from being dismissed on rotation, due to a bug with the compatibility library
+        // https://code.google.com/p/android/issues/detail?id=17423
+        if (dialog != null && getRetainInstance()) {
+            dialog.setDismissMessage(null);
+        }
+        super.onDestroyView();
     }
 }

@@ -20,8 +20,9 @@
         android:layout_marginStart="75dp">
         <EditText
             android:id="@+id/new_task_list_name"
-            android:layout_width="175dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="2"
             android:hint="@string/task_list_new_list_hint"/>
         <Button
             android:id="@+id/new_task_list_button"

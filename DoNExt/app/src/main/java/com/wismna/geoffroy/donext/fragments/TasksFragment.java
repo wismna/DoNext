@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -68,6 +69,7 @@ public class TasksFragment extends Fragment implements
         args.putLong(TASK_LIST_ID, taskListId);
         fragment.setArguments(args);
         fragment.mAdapter = taskChangedAdapter;
+        fragment.setRetainInstance(true);
         return fragment;
     }
 
@@ -80,6 +82,7 @@ public class TasksFragment extends Fragment implements
         }
     }
 
+    @SuppressLint("NewApi")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -221,7 +224,8 @@ public class TasksFragment extends Fragment implements
                     recyclerView.scrollToPosition(0);
                 }
             });
-        snackbar.setCallback(new Snackbar.Callback() {
+        snackbar.addCallback(new Snackbar.Callback() {
+            @SuppressLint("NewApi")
             @Override
             public void onDismissed(Snackbar snackbar, int event) {
                 super.onDismissed(snackbar, event);
@@ -284,6 +288,7 @@ public class TasksFragment extends Fragment implements
         }
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void onNewTaskDialogPositiveClick(DialogFragment dialog) {
         // Get the dialog fragment
