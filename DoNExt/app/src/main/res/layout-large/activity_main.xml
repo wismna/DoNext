@@ -41,7 +41,7 @@
             android:id="@+id/tabs"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.2"/>
+            android:layout_weight="0.2" />
         <com.wismna.geoffroy.donext.widgets.NonSwipeableViewPager
             android:id="@+id/container"
             android:layout_width="0dp"
