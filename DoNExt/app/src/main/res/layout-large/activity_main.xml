@@ -41,12 +41,15 @@
             android:id="@+id/tabs"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.2" />
+            android:layout_weight="0.2"
+            android:listSelector="@drawable/tasklist_select"/>
         <com.wismna.geoffroy.donext.widgets.NonSwipeableViewPager
             android:id="@+id/container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.8"
+            android:elevation="10dp"
+            android:background="@android:color/background_light"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

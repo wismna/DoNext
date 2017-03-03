@@ -104,12 +104,16 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             }
             else if (tabs instanceof ListView) {
                 ListView listView = (ListView) tabs;
+                //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
                 listView.setAdapter(new ArrayAdapter<>(this, R.layout.list_tasklist_item, taskLists));
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         mViewPager.setCurrentItem(position);
-                        //view.setSelected(true);
+                        view.setSelected(true);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            parent.setElevation(10);
+                        }
                     }
                 });
             }
