@@ -63,9 +63,15 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+
         // Access database to retrieve Tabs
         TaskListDataAccess taskListDataAccess = new TaskListDataAccess(this);
         taskListDataAccess.open();
+
+        // Handle Today list
+        handleTodayList(sharedPref, taskListDataAccess);
 
         taskLists = taskListDataAccess.getAllTaskLists();
         mSectionsPagerAdapter.notifyDataSetChanged();
@@ -81,8 +87,6 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             mViewPager = (ViewPager) findViewById(R.id.container);
             mViewPager.setAdapter(mSectionsPagerAdapter);
             // Open last opened tab
-            SharedPreferences sharedPref =
-                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             mViewPager.setCurrentItem(sharedPref.getInt("last_opened_tab", 0));
 
             View tabs = findViewById(R.id.tabs);
@@ -253,6 +257,25 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - tabLayout.getMeasuredWidth())
                 rightArrow.setVisibility(View.INVISIBLE);
             else rightArrow.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void handleTodayList(SharedPreferences sharedPref, TaskListDataAccess taskListDataAccess) {
+        String todayListName = getString(R.string.task_list_today);
+        TaskList todayList = taskListDataAccess.getTaskListByName(todayListName);
+        if (sharedPref.getBoolean("pref_conf_today_enable", false)) {
+            // Get or create the Today list
+            if (todayList == null) {
+                // TODO: set order correctly
+                todayList = taskListDataAccess.createTaskList(todayListName, 0);
+            }
+            if (!todayList.isVisible()) taskListDataAccess.updateVisibility(todayList.getId(), true);
+            // Mark all tasks with an earlier do date as done
+        }
+        else {
+            if (todayList != null){
+                taskListDataAccess.updateVisibility(todayList.getId(), false);
+            }
         }
     }
 

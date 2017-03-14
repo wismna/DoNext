@@ -9,6 +9,9 @@ import android.database.sqlite.SQLiteDatabase;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.Task;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,11 +58,17 @@ public class TaskDataAccess implements AutoCloseable {
 
     /** Adds or update a task in the database */
     public Task createOrUpdateTask(long id, String name, String description, String priority, long taskList) {
+        return createOrUpdateTask(id, name, description, priority, taskList, new Date());
+    }
+    public Task createOrUpdateTask(long id, String name, String description, String priority, long taskList, Date date) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
         values.put(DatabaseHelper.TASKS_COLUMN_DESC, description);
         values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priorities.indexOf(priority));
         values.put(DatabaseHelper.TASKS_COLUMN_LIST, taskList);
+        DateFormat sdf = SimpleDateFormat.getDateInstance();
+        String dateString = sdf.format(date);
+        values.put(DatabaseHelper.TASKS_COLUMN_DUEDATE, dateString);
         long insertId;
         if (id == 0)
             insertId = database.insert(DatabaseHelper.TASKS_TABLE_NAME, null, values);
@@ -92,7 +101,7 @@ public class TaskDataAccess implements AutoCloseable {
         return tasks;
     }
 
-    public Cursor getAllTasksCursor(long id) {
+    private Cursor getAllTasksCursor(long id) {
         return database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
                 DatabaseHelper.TASKS_COLUMN_LIST + " = " + id +
                     " AND " + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
@@ -102,22 +111,23 @@ public class TaskDataAccess implements AutoCloseable {
     }
 
     public int setDone(long id) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.TASKS_COLUMN_DONE, 1);
-        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+        return update(id, DatabaseHelper.TASKS_COLUMN_DONE, 1);
     }
 
     public int increaseCycle(int newCycle, long id) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.TASKS_COLUMN_CYCLE, newCycle);
-        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+        return update(id, DatabaseHelper.TASKS_COLUMN_CYCLE, newCycle);
     }
 
     public int deleteTask(long id) {
         /*database.delete(DatabaseHelper.TASKS_TABLE_NAME,
                 DatabaseHelper.COLUMN_ID + " = " + taskId, null);*/
+        return update(id, DatabaseHelper.TASKS_COLUMN_DELETED, 1);
+    }
+
+    private int update(long id, String column, Object value) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.TASKS_COLUMN_DELETED, 1);
+        if (value instanceof Integer)
+            contentValues.put(column, (int) value);
         return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
     }
 
@@ -131,6 +141,7 @@ public class TaskDataAccess implements AutoCloseable {
         task.setDone(cursor.getInt(5));
         task.setDeleted(cursor.getInt(6));
         task.setTaskList(cursor.getLong(7));
+        task.setDueDate(cursor.getString(8));
         return task;
     }
 }

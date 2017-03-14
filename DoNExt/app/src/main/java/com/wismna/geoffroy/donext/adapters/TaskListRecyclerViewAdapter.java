@@ -17,6 +17,7 @@ import com.wismna.geoffroy.donext.helpers.TaskListTouchHelper;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link TaskList}.
@@ -34,10 +35,14 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
 
     private final List<TaskList> mValues;
     private TaskListRecyclerViewAdapterListener mListener;
+    private String mReservedTaskListName;
 
-    public TaskListRecyclerViewAdapter(List<TaskList> items, TaskListRecyclerViewAdapterListener listener) {
+    public TaskListRecyclerViewAdapter(List<TaskList> items,
+                                       TaskListRecyclerViewAdapterListener listener,
+                                       String reservedTaskListName) {
         mValues = items;
         mListener = listener;
+        mReservedTaskListName = reservedTaskListName;
     }
 
     @Override
@@ -53,6 +58,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         holder.mTaskCountView.setText(String.valueOf(mValues.get(position).getTaskCount()));
         holder.mTaskNameView.setText(mValues.get(position).getName());
 
+
         holder.handleView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -64,8 +70,10 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
             }
         });
 
+        Boolean isReservedName = Objects.equals(holder.mItem.getName(), mReservedTaskListName);
+        holder.mTaskNameView.setEnabled(!isReservedName);
         // Handle inline name change
-        holder.mTaskNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        if (!isReservedName) holder.mTaskNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 EditText editText = (EditText) v;
@@ -80,8 +88,9 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
             }
         });
 
+        holder.mTaskDeleteButton.setEnabled(!isReservedName);
         // Handle click on delete button
-        holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
+        if (!isReservedName) holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Disable the OnFocusChanged listener as it is now pointless and harmful
@@ -134,15 +143,15 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         return true;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final ImageView handleView;
-        public final TextView mTaskCountView;
-        public final TextView mTaskNameView;
-        public final Button mTaskDeleteButton;
-        public TaskList mItem;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        final View mView;
+        final ImageView handleView;
+        final TextView mTaskCountView;
+        final TextView mTaskNameView;
+        final Button mTaskDeleteButton;
+        TaskList mItem;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
             handleView = (ImageView) itemView.findViewById(R.id.handle);

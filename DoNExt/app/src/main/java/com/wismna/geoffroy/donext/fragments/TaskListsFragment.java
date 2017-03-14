@@ -70,6 +70,10 @@ public class TaskListsFragment extends Fragment implements
                     editText.setError(getResources().getString(R.string.task_list_new_list_error));
                     return;
                 }
+                else if (text.matches(getString(R.string.task_list_today))) {
+                    editText.setError(getResources().getString(R.string.task_list_today_list_error));
+                    return;
+                }
                 int position = taskListRecyclerViewAdapter.getItemCount();
 
                 TaskList taskList = taskListDataAccess.createTaskList(text, position);
@@ -101,7 +105,7 @@ public class TaskListsFragment extends Fragment implements
         LinearLayout layout = (LinearLayout) view.findViewById(R.id.new_task_list_layout);
         int taskListCount = taskListRecyclerViewAdapter.getItemCount();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String maxTaskListsString = sharedPref.getString("pref_conf_max_lists", "3");
+        String maxTaskListsString = sharedPref.getString("pref_conf_max_lists", "5");
         int maxTaskLists = Integer.valueOf(maxTaskListsString);
         if (taskListCount >= maxTaskLists) layout.setVisibility(View.GONE);
         else layout.setVisibility(View.VISIBLE);
@@ -192,7 +196,7 @@ public class TaskListsFragment extends Fragment implements
         protected void onPostExecute(List<TaskList> taskLists) {
             super.onPostExecute(taskLists);
             taskListRecyclerViewAdapter =
-                    new TaskListRecyclerViewAdapter(taskLists, TaskListsFragment.this);
+                    new TaskListRecyclerViewAdapter(taskLists, TaskListsFragment.this, getString(R.string.task_list_today));
 
             // Set the adapter
             Context context = mView.getContext();

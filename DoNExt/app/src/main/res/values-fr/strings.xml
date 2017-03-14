@@ -63,4 +63,10 @@
     <string name="task_total">%1$d tâche%2$s</string>
     <string name="task_total_cycles">%1$d cycle%2$s</string>
     <string name="title_activity_task_list">TaskListActivity</string>
+    <string name="settings_today_title">Liste Aujourd\'hui</string>
+    <string name="settings_today_enable">Activer la liste Aujourd\'hui?</string>
+    <string name="settings_today_desc">La liste Aujourd\'hui est une liste spéciale, dans laquelle les tâches n\'existent que pour la journée en cours. Chaque jour, cette liste est réinitialisée.</string>
+    <string name="task_list_today">Aujourd\'hui</string>
+    <string name="task_list_today_list_error">Le nom \"Aujourd\'hui\" est réservé. Vous pouvez activer la liste Aujourd\'hui dans les paramètres.</string>
+    <string name="settings_today_action_title">Action à entreprendre à la fin de la journée:</string>
 </resources>

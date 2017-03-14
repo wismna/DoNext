@@ -8,43 +8,48 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by geoffroy on 15-11-25.
  * Database helper class that contains table and column names as well as handles database creation
  */
-public class DatabaseHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 2;
+class DatabaseHelper extends SQLiteOpenHelper {
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "donext.db";
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_ORDER = "displayorder";
+    static final String COLUMN_ID = "_id";
+    static final String COLUMN_ORDER = "displayorder";
 
-    public static final String TASKLIST_TABLE_NAME = "tasklist";
-    public static final String TASKLIST_COLUMN_NAME = "name";
-    public static final String TASKLIST_COLUMN_TASK_COUNT = "taskcount";
+    static final String TASKLIST_TABLE_NAME = "tasklist";
+    static final String TASKLIST_COLUMN_NAME = "name";
+    static final String TASKLIST_COLUMN_TASK_COUNT = "taskcount";
+    static final String TASKLIST_COLUMN_VISIBLE = "visible";
     private static final String TASKLIST_TABLE_CREATE =
-            "CREATE TABLE " + TASKLIST_TABLE_NAME + " (" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    TASKLIST_COLUMN_NAME + " TEXT NOT NULL, " +
-                    COLUMN_ORDER + " INTEGER);";
+        "CREATE TABLE " + TASKLIST_TABLE_NAME + " (" +
+            COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            TASKLIST_COLUMN_NAME + " TEXT NOT NULL, " +
+            COLUMN_ORDER + " INTEGER, " +
+            TASKLIST_COLUMN_VISIBLE + " INTEGER DEFAULT 1" +
+        ");";
 
-    public static final String TASKS_TABLE_NAME = "tasks";
-    public static final String TASKS_COLUMN_NAME = "name";
-    public static final String TASKS_COLUMN_DESC = "description";
-    public static final String TASKS_COLUMN_CYCLE = "cycle";
-    public static final String TASKS_COLUMN_PRIORITY = "priority";
-    public static final String TASKS_COLUMN_DONE = "done";
-    public static final String TASKS_COLUMN_DELETED= "deleted";
-    public static final String TASKS_COLUMN_LIST = "list";
+    static final String TASKS_TABLE_NAME = "tasks";
+    static final String TASKS_COLUMN_NAME = "name";
+    static final String TASKS_COLUMN_DESC = "description";
+    static final String TASKS_COLUMN_CYCLE = "cycle";
+    static final String TASKS_COLUMN_PRIORITY = "priority";
+    static final String TASKS_COLUMN_DONE = "done";
+    static final String TASKS_COLUMN_DELETED= "deleted";
+    static final String TASKS_COLUMN_LIST = "list";
+    static final String TASKS_COLUMN_DUEDATE = "duedate";
     private static final String TASKS_TABLE_CREATE =
-            "CREATE TABLE " + TASKS_TABLE_NAME + " (" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    TASKS_COLUMN_NAME + " TEXT NOT NULL, " +
-                    TASKS_COLUMN_DESC + " TEXT, " +
-                    TASKS_COLUMN_PRIORITY + " INTEGER, " +
-                    TASKS_COLUMN_CYCLE + " INTEGER DEFAULT 0, " +
-                    TASKS_COLUMN_DONE + " INTEGER DEFAULT 0, " +
-                    TASKS_COLUMN_DELETED + " INTEGER DEFAULT 0, " +
-                    COLUMN_ORDER + " INTEGER, " +
-                    TASKS_COLUMN_LIST + " INTEGER NOT NULL, " +
-                    "FOREIGN KEY(" + TASKS_COLUMN_LIST + ") REFERENCES " +
-                    TASKLIST_TABLE_NAME + "(" + COLUMN_ID + ")" +
-             ");";
+        "CREATE TABLE " + TASKS_TABLE_NAME + " (" +
+            COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            TASKS_COLUMN_NAME + " TEXT NOT NULL, " +
+            TASKS_COLUMN_DESC + " TEXT, " +
+            TASKS_COLUMN_PRIORITY + " INTEGER, " +
+            TASKS_COLUMN_CYCLE + " INTEGER DEFAULT 0, " +
+            TASKS_COLUMN_DONE + " INTEGER DEFAULT 0, " +
+            TASKS_COLUMN_DELETED + " INTEGER DEFAULT 0, " +
+            COLUMN_ORDER + " INTEGER, " +
+            TASKS_COLUMN_LIST + " INTEGER NOT NULL, " +
+                "FOREIGN KEY(" + TASKS_COLUMN_LIST + ") REFERENCES " +
+                TASKLIST_TABLE_NAME + "(" + COLUMN_ID + ")" +
+            TASKS_COLUMN_DUEDATE + " DATE, " +
+         ");";
 
     DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -62,6 +67,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         {
             // Add new Order column
             db.execSQL("ALTER TABLE " + TASKLIST_TABLE_NAME + " ADD COLUMN " + COLUMN_ORDER + " INTEGER");
+        }
+        if (oldVersion == 2)
+        {
+            // Add new Visible column
+            db.execSQL("ALTER TABLE " + TASKLIST_TABLE_NAME + " ADD COLUMN " + TASKLIST_COLUMN_VISIBLE + " INTEGER DEFAULT 1");
+            // Add new Due Date column
+            db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TASKS_COLUMN_DUEDATE + " DATE");
         }
     }
 }

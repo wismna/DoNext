@@ -1,5 +1,8 @@
 package com.wismna.geoffroy.donext.dao;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+
 /**
  * Created by geoffroy on 15-11-25.
  * Data access object class that represents a Task
@@ -14,6 +17,7 @@ public class Task {
     private int deleted;
     private long taskList;
     private String taskListName;
+    private Date dueDate;
 
     public long getId() {
         return id;
@@ -85,6 +89,14 @@ public class Task {
 
     public void setTaskListName(String taskListName) {
         this.taskListName = taskListName;
+    }
+
+    public void setDueDate(String dueDate) {
+        this.dueDate = Date.valueOf(dueDate);
+    }
+
+    public Date getDueDate() {
+        return dueDate;
     }
 
     // Will be used by the ArrayAdapter in the ListView

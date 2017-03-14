@@ -20,7 +20,8 @@ public class TaskListDataAccess {
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
     private String[] taskListColumns =
-            {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME, DatabaseHelper.COLUMN_ORDER};
+            {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME,
+            DatabaseHelper.COLUMN_ORDER, DatabaseHelper.TASKLIST_COLUMN_VISIBLE};
 
     public TaskListDataAccess(Context context) {
         dbHelper = new DatabaseHelper(context);
@@ -35,9 +36,14 @@ public class TaskListDataAccess {
     }
 
     public TaskList createTaskList(String name, int order) {
+        return createTaskList(name, order, true);
+    }
+
+    public TaskList createTaskList(String name, int order, Boolean visible) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
         values.put(DatabaseHelper.COLUMN_ORDER, order);
+        values.put(DatabaseHelper.TASKLIST_COLUMN_VISIBLE, visible ? 1 : 0);
         long insertId = database.insert(DatabaseHelper.TASKLIST_TABLE_NAME, null,
                 values);
         Cursor cursor = database.query(DatabaseHelper.TASKLIST_TABLE_NAME,
@@ -59,22 +65,32 @@ public class TaskListDataAccess {
     }
 
     public void updateOrder(long id, int order) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.COLUMN_ORDER, order);
-        database.update(DatabaseHelper.TASKLIST_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+        update(id, DatabaseHelper.COLUMN_ORDER, order);
     }
 
     public void updateName(long id, String name) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
-        database.update(DatabaseHelper.TASKLIST_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+        update(id, DatabaseHelper.TASKLIST_COLUMN_NAME, name);
+    }
+
+    public void updateVisibility(long id, boolean visible){
+        update(id, DatabaseHelper.TASKLIST_COLUMN_VISIBLE, visible ? 1 : 0);
+    }
+
+    public TaskList getTaskListByName(String name) {
+        Cursor cursor = getTaskListByNameCursor(name);
+        TaskList taskList = null;
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            taskList = cursorToTaskList(cursor);
+            cursor.close();
+        }
+        return taskList;
     }
 
     public List<TaskList> getAllTaskLists() {
         List<TaskList> taskLists = new ArrayList<>();
 
         Cursor cursor = getAllTaskListsCursor();
-
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             TaskList taskList = cursorToTaskList(cursor);
@@ -86,13 +102,28 @@ public class TaskListDataAccess {
         return taskLists;
     }
 
-    public Cursor getAllTaskListsCursor() {
+    private void update(long id, String column, Object value)
+    {
+        ContentValues contentValues = new ContentValues();
+        if (value instanceof String)
+            contentValues.put(column, (String) value);
+        if (value instanceof Integer)
+            contentValues.put(column, (int) value);
+        database.update(DatabaseHelper.TASKLIST_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+    }
+
+    private Cursor getTaskListByNameCursor(String name) {
+        return database.query(true, DatabaseHelper.TASKLIST_TABLE_NAME, taskListColumns,
+                DatabaseHelper.TASKLIST_COLUMN_NAME + " = '" + name + "'", null, null, null, null, null);
+    }
+    private Cursor getAllTaskListsCursor() {
         return database.rawQuery("SELECT *," +
                 " (SELECT COUNT(*) " +
                     " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
                     " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
                       DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID + ") AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
                 " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME +
+                " WHERE " + DatabaseHelper.TASKLIST_COLUMN_VISIBLE + " = " + 1 +
                 " ORDER BY " + DatabaseHelper.COLUMN_ORDER + " ASC ",
                 null);
     }
@@ -102,8 +133,11 @@ public class TaskListDataAccess {
         taskList.setId(cursor.getLong(0));
         taskList.setName(cursor.getString(1));
         taskList.setOrder(cursor.getInt(2));
-        if (cursor.getColumnCount() == 4)
-            taskList.setTaskCount(cursor.getLong(3));
+        taskList.setVisible(cursor.getInt(3));
+        // Get "false" count column if it exists
+        if (cursor.getColumnCount() == 5)
+            taskList.setTaskCount(cursor.getLong(4));
         return taskList;
     }
+
 }
