@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.fragments;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -19,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -35,6 +35,8 @@ import com.wismna.geoffroy.donext.helpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
 import com.wismna.geoffroy.donext.widgets.DividerItemDecoration;
 import com.wismna.geoffroy.donext.widgets.NoScrollingLayoutManager;
+
+import org.joda.time.LocalDate;
 
 /**
  * A fragment representing a list of Items.
@@ -82,7 +84,6 @@ public class TasksFragment extends Fragment implements
         }
     }
 
-    @SuppressLint("NewApi")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -225,7 +226,6 @@ public class TasksFragment extends Fragment implements
                 }
             });
         snackbar.addCallback(new Snackbar.Callback() {
-            @SuppressLint("NewApi")
             @Override
             public void onDismissed(Snackbar snackbar, int event) {
                 super.onDismissed(snackbar, event);
@@ -288,7 +288,6 @@ public class TasksFragment extends Fragment implements
         }
     }
 
-    @SuppressLint("NewApi")
     @Override
     public void onNewTaskDialogPositiveClick(DialogFragment dialog) {
         // Get the dialog fragment
@@ -303,6 +302,7 @@ public class TasksFragment extends Fragment implements
         EditText descText = (EditText) dialogView.findViewById(R.id.new_task_description);
         RadioGroup priorityGroup = (RadioGroup) dialogView.findViewById(R.id.new_task_priority);
         RadioButton priorityRadio = (RadioButton) dialogView.findViewById(priorityGroup.getCheckedRadioButtonId());
+        DatePicker dueDatePicker = (DatePicker) dialogView.findViewById(R.id.new_task_due_date);
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
 
         // Add the task to the database
@@ -311,7 +311,8 @@ public class TasksFragment extends Fragment implements
                     nameText.getText().toString(),
                     descText.getText().toString(),
                     priorityRadio.getText().toString(),
-                    taskList.getId());
+                    taskList.getId(),
+                    new LocalDate(dueDatePicker.getYear(), dueDatePicker.getMonth(), dueDatePicker.getDayOfMonth()));
 
             Bundle args = dialog.getArguments();
             // Should never happen because we will have to be on this tab to open the dialog

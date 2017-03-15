@@ -50,7 +50,7 @@
                 android:entries="@array/settings_today_actions"
                 android:entryValues="@array/settings_today_action_values"
                 android:summary="%s"
-                android:defaultValue="0" />
+                android:defaultValue="2" />
         </PreferenceScreen>
     </PreferenceCategory>
 </PreferenceScreen>

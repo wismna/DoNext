@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="settings_task_layouts">
+        <item>Simple</item>
+        <item>Détaillée</item>
+    </string-array>
     <string-array name="settings_today_actions">
-        <item>Terminé</item>
-        <item>Supprimé</item>
+        <item>Terminer</item>
+        <item>Supprimer</item>
     </string-array>
 </resources>

@@ -50,7 +50,7 @@ public class TaskListsFragment extends Fragment implements
         super.onCreate(savedInstanceState);
 
         taskListDataAccess = new TaskListDataAccess(getContext());
-        taskListDataAccess.open();
+        taskListDataAccess.open(TaskListDataAccess.MODE.WRITE);
         new GetTaskListsTask().execute(taskListDataAccess);
     }
 
@@ -98,7 +98,7 @@ public class TaskListsFragment extends Fragment implements
     public void onResume() {
         super.onResume();
         clearFocus();
-        taskListDataAccess.open();
+        taskListDataAccess.open(TaskListDataAccess.MODE.WRITE);
     }
 
     private void toggleVisibleCreateNewTaskListLayout(View view) {

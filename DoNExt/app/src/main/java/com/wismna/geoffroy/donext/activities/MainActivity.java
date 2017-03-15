@@ -27,6 +27,7 @@ import com.wismna.geoffroy.donext.adapters.SmartFragmentStatePagerAdapter;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
+import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.fragments.TaskDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
@@ -66,17 +67,14 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 
-        // Access database to retrieve Tabs
-        TaskListDataAccess taskListDataAccess = new TaskListDataAccess(this);
-        taskListDataAccess.open();
-
         // Handle Today list
-        handleTodayList(sharedPref, taskListDataAccess);
+        handleTodayList(sharedPref);
 
-        taskLists = taskListDataAccess.getAllTaskLists();
-        mSectionsPagerAdapter.notifyDataSetChanged();
-        taskListDataAccess.close();
-
+        // Access database to retrieve Tabs
+        try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(this)) {
+            taskLists = taskListDataAccess.getAllTaskLists();
+            mSectionsPagerAdapter.notifyDataSetChanged();
+        }
         if (taskLists.size() == 0) {
             Intent intent = new Intent(this, TaskListActivity.class);
             startActivity(intent);
@@ -260,21 +258,28 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         }
     }
 
-    private void handleTodayList(SharedPreferences sharedPref, TaskListDataAccess taskListDataAccess) {
+    private void handleTodayList(SharedPreferences sharedPref) {
         String todayListName = getString(R.string.task_list_today);
-        TaskList todayList = taskListDataAccess.getTaskListByName(todayListName);
-        if (sharedPref.getBoolean("pref_conf_today_enable", false)) {
-            // Get or create the Today list
-            if (todayList == null) {
-                // TODO: set order correctly
-                todayList = taskListDataAccess.createTaskList(todayListName, 0);
-            }
-            if (!todayList.isVisible()) taskListDataAccess.updateVisibility(todayList.getId(), true);
-            // Mark all tasks with an earlier do date as done
-        }
-        else {
-            if (todayList != null){
-                taskListDataAccess.updateVisibility(todayList.getId(), false);
+        try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(this, TaskListDataAccess.MODE.WRITE)) {
+            TaskList todayList = taskListDataAccess.getTaskListByName(todayListName);
+            if (sharedPref.getBoolean("pref_conf_today_enable", false)) {
+                // Get or create the Today list
+                if (todayList == null) {
+                    // TODO: set order correctly
+                    todayList = taskListDataAccess.createTaskList(todayListName, 0);
+                }
+                if (!todayList.isVisible())
+                    taskListDataAccess.updateVisibility(todayList.getId(), true);
+                // Mark all tasks with an earlier do date as done
+                try (TaskDataAccess taskDataAccess = new TaskDataAccess(this, TaskDataAccess.MODE.WRITE)) {
+                    taskDataAccess.updateExpiredTasks(
+                            Integer.valueOf(sharedPref.getString("pref_conf_today_action", "2")), todayList.getId());
+                }
+            } else {
+                // Hide the today list if it exists
+                if (todayList != null) {
+                    taskListDataAccess.updateVisibility(todayList.getId(), false);
+                }
             }
         }
     }

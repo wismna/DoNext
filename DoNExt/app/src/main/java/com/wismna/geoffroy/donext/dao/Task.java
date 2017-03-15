@@ -1,7 +1,6 @@
 package com.wismna.geoffroy.donext.dao;
 
-import java.sql.Date;
-import java.text.SimpleDateFormat;
+import org.joda.time.LocalDate;
 
 /**
  * Created by geoffroy on 15-11-25.
@@ -17,7 +16,7 @@ public class Task {
     private int deleted;
     private long taskList;
     private String taskListName;
-    private Date dueDate;
+    private LocalDate dueDate;
 
     public long getId() {
         return id;
@@ -92,10 +91,15 @@ public class Task {
     }
 
     public void setDueDate(String dueDate) {
-        this.dueDate = Date.valueOf(dueDate);
+        try {
+            this.dueDate = LocalDate.parse(dueDate);
+        }
+        catch (Exception e){
+            this.dueDate = LocalDate.now();
+        }
     }
 
-    public Date getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 

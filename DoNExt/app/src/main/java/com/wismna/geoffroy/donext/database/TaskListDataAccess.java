@@ -15,7 +15,11 @@ import java.util.List;
  * Created by geoffroy on 15-11-25.
  * Data access class that handles Task Lists
  */
-public class TaskListDataAccess {
+public class TaskListDataAccess implements AutoCloseable {
+    public enum MODE {
+        READ,
+        WRITE
+    }
     // Database fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
@@ -24,11 +28,16 @@ public class TaskListDataAccess {
             DatabaseHelper.COLUMN_ORDER, DatabaseHelper.TASKLIST_COLUMN_VISIBLE};
 
     public TaskListDataAccess(Context context) {
+        this(context, MODE.READ);
+    }
+    public TaskListDataAccess(Context context, MODE writeMode) {
         dbHelper = new DatabaseHelper(context);
+        open(writeMode);
     }
 
-    public void open() throws SQLException {
-        database = dbHelper.getWritableDatabase();
+    public void open(MODE writeMode) throws SQLException {
+        if (writeMode == MODE.WRITE) database = dbHelper.getWritableDatabase();
+        else database = dbHelper.getReadableDatabase();
     }
 
     public void close() {
@@ -114,7 +123,7 @@ public class TaskListDataAccess {
 
     private Cursor getTaskListByNameCursor(String name) {
         return database.query(true, DatabaseHelper.TASKLIST_TABLE_NAME, taskListColumns,
-                DatabaseHelper.TASKLIST_COLUMN_NAME + " = '" + name + "'", null, null, null, null, null);
+                DatabaseHelper.TASKLIST_COLUMN_NAME + " = '" + name.replace("'", "''") + "'", null, null, null, null, null);
     }
     private Cursor getAllTaskListsCursor() {
         return database.rawQuery("SELECT *," +

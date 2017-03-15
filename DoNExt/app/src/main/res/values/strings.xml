@@ -68,9 +68,9 @@
     <string name="settings_confirm_donext">Confirm on next?</string>
     <string name="settings_confirm_markdone">Confirm on done?</string>
     <string name="settings_confirm_delete">Confirm on delete?</string>
-    <string name="settings_task_layout">Task layout:</string>
+    <string name="settings_task_layout">Task layout</string>
 
-    <string name="settings_max_lists_label">Maximum number of lists:</string>
+    <string name="settings_max_lists_label">Maximum number of lists</string>
     <string name="title_activity_task_list">TaskListActivity</string>
 
     <!-- Strings related to About -->
@@ -83,4 +83,5 @@
     <string name="task_list_today">Today</string>
     <string name="task_list_today_list_error">Name \"Today\" is reserved. You may activate the Today list from the Settings.</string>
     <string name="settings_today_action_title">Action at the end of the day</string>
+    <string name="new_task_due_date">Due date</string>
 </resources>

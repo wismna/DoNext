@@ -8,8 +8,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -17,6 +19,8 @@ import android.widget.Spinner;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
@@ -33,7 +37,7 @@ public class TaskDialogFragment extends DialogFragment {
     /** The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
-    public interface NewTaskListener {
+    interface NewTaskListener {
         void onNewTaskDialogPositiveClick(DialogFragment dialog);
         void onNewTaskDialogNeutralClick(DialogFragment dialog);
     }
@@ -76,6 +80,14 @@ public class TaskDialogFragment extends DialogFragment {
                 }
             });
 
+        // Get date picker
+        final DatePicker dueDatePicker = (DatePicker) view.findViewById(R.id.new_task_due_date);
+        // Disallow past dates
+        dueDatePicker.setMinDate(LocalDate.now().toDate().getTime());
+        // TODO: set task due date
+        LocalDate dueDate = task.getDueDate();
+        dueDatePicker.updateDate(dueDate.getYear(), dueDate.getMonthOfYear(), dueDate.getDayOfMonth());
+
         // Populate spinner with task lists
         Spinner spinner = (Spinner) view.findViewById(R.id.new_task_list);
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -84,6 +96,19 @@ public class TaskDialogFragment extends DialogFragment {
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Set due date
+                dueDatePicker.setEnabled(!taskLists.get(position).getName()
+                        .equals(getString(R.string.task_list_today)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         // Auto set list value to current tab
         Bundle args = getArguments();
