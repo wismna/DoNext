@@ -30,7 +30,6 @@
                 android:id="@+id/left_arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/tab_left_arrow"
@@ -39,7 +38,6 @@
                 android:id="@+id/right_arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/tab_right_arrow"
@@ -48,9 +46,7 @@
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/left_arrow"
                 android:layout_toEndOf="@+id/left_arrow"
-                android:layout_toLeftOf="@+id/right_arrow"
                 android:layout_toStartOf="@+id/right_arrow"
                 app:tabMode="scrollable" />
         </RelativeLayout>

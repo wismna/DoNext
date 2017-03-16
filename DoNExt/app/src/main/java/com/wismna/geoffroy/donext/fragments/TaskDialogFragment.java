@@ -1,19 +1,25 @@
 package com.wismna.geoffroy.donext.fragments;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 
 import com.wismna.geoffroy.donext.R;
@@ -59,17 +65,25 @@ public class TaskDialogFragment extends DialogFragment {
         return fragment;
     }
 
+    @Nullable
     @Override
-    @NonNull
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        // Get the layout inflater
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_task_form, null);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_task_form, container, false);
 
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.new_task_toolbar);
+
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel);
+        }
+        setHasOptionsMenu(true);
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        builder.setView(view)
+        /*builder.setView(view)
             // Add action buttons
             .setPositiveButton(R.string.new_task_save, null)
             .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
@@ -78,15 +92,10 @@ public class TaskDialogFragment extends DialogFragment {
                     // Canceled creation, nothing to do
                     TaskDialogFragment.this.getDialog().cancel();
                 }
-            });
+            });*/
 
         // Get date picker
         final DatePicker dueDatePicker = (DatePicker) view.findViewById(R.id.new_task_due_date);
-        // Disallow past dates
-        dueDatePicker.setMinDate(LocalDate.now().toDate().getTime());
-        // TODO: set task due date
-        LocalDate dueDate = task.getDueDate();
-        dueDatePicker.updateDate(dueDate.getYear(), dueDate.getMonthOfYear(), dueDate.getDayOfMonth());
 
         // Populate spinner with task lists
         Spinner spinner = (Spinner) view.findViewById(R.id.new_task_list);
@@ -100,14 +109,17 @@ public class TaskDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // Set due date
-                dueDatePicker.setEnabled(!taskLists.get(position).getName()
-                        .equals(getString(R.string.task_list_today)));
+                boolean isRestricted = taskLists.get(position).getName()
+                        .equals(getString(R.string.task_list_today));
+                dueDatePicker.setEnabled(!isRestricted);
+                if (isRestricted) {
+                    LocalDate today = LocalDate.now();
+                    dueDatePicker.updateDate(today.getYear(), today.getMonthOfYear() - 1, today.getDayOfMonth());
+                }
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         // Auto set list value to current tab
@@ -117,42 +129,52 @@ public class TaskDialogFragment extends DialogFragment {
 
         // Set other properties if they exist
         if (task != null) {
+            toolbar.setTitle(R.string.action_edit_task);
+
             EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
             titleText.setText(task.getName());
             EditText descText = (EditText) view.findViewById(R.id.new_task_description);
             descText.setText(task.getDescription());
-            RadioGroup priorityGroup = (RadioGroup) view.findViewById(R.id.new_task_priority);
-            switch (task.getPriority()) {
-                case 0:
-                    priorityGroup.check(R.id.new_task_priority_low);
-                    break;
-                case 1:
-                    priorityGroup.check(R.id.new_task_priority_normal);
-                    break;
-                case 2:
-                    priorityGroup.check(R.id.new_task_priority_high);
-                    break;
-            }
+            SeekBar seekBar = (SeekBar) view.findViewById(R.id.new_task_priority);
+            seekBar.setProgress(task.getPriority());
 
-            builder.setNeutralButton(R.string.new_task_delete, new DialogInterface.OnClickListener() {
+            // Set Due Date
+            LocalDate dueDate = task.getDueDate();
+            dueDatePicker.updateDate(dueDate.getYear(), dueDate.getMonthOfYear() - 1, dueDate.getDayOfMonth());
+
+            // Add the Delete button
+/*            builder.setNeutralButton(R.string.new_task_delete, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
                 }
-            });
-            setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_Holo_Light);
+            });*/
         }
-        return builder.create();
+        else {
+            toolbar.setTitle(R.string.action_new_task);
+            // Disallow past dates on new tasks
+            dueDatePicker.setMinDate(LocalDate.now().toDate().getTime());
+        }
+        return view;
+    }
+
+    @Override
+    @NonNull
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        return dialog;
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        final AlertDialog d = (AlertDialog) getDialog();
+        final Dialog d = (Dialog) getDialog();
         if(d != null)
         {
-            Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+            //d.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            /*Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(new View.OnClickListener()
             {
                 @Override
@@ -168,8 +190,56 @@ public class TaskDialogFragment extends DialogFragment {
                         dismiss();
                     }
                 }
-            });
+            });*/
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        getActivity().getMenuInflater().inflate(R.menu.menu_new_task, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if (task == null) {
+            menu.removeItem(R.id.menu_new_task_delete);
+        }
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_new_task_save) {
+            EditText titleText = (EditText) getDialog().findViewById(R.id.new_task_name);
+            // handle confirmation button click hereEditText titleText = (EditText) d.findViewById(R.id.new_task_name);
+            if (titleText.getText().toString().matches(""))
+                titleText.setError(getResources().getString(R.string.new_task_name_error));
+            else
+            {
+                // Send the positive button event back to the host activity
+                mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this);
+                dismiss();
+            }
+            return true;
+        }
+        else if (id == R.id.menu_new_task_delete) {
+                // handle confirmation button click here
+                mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
+                dismiss();
+                return true;
+            }
+        else if (id == android.R.id.home) {
+            // handle close button click here
+            dismiss();
+            return true;
+        }
+        dismiss();
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

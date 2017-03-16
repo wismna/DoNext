@@ -6,10 +6,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.Task;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
@@ -48,6 +51,8 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
     public void onBindViewHolder(final SimpleViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(String.valueOf(holder.mItem.getId()));
+        if(holder.mItem.getDueDate().isBefore(LocalDate.now()))
+            holder.mAlarmView.setImageResource(R.drawable.ic_access_alarm_black_24dp);
         holder.mCycleView.setText(String.valueOf(holder.mItem.getCycle()));
         holder.mTitleView.setText(holder.mItem.getName());
         if (holder instanceof DetailedViewHolder)
@@ -112,21 +117,22 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
     }
 
 
-    public class SimpleViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mCycleView;
-        public final TextView mTitleView;
-        public Task mItem;
+    class SimpleViewHolder extends RecyclerView.ViewHolder {
+        final View mView;
+        final TextView mIdView;
+        final ImageView mAlarmView;
+        final TextView mCycleView;
+        final TextView mTitleView;
+        Task mItem;
 
-        public SimpleViewHolder(View view) {
+        SimpleViewHolder(View view) {
             super(view);
             mView = view;
 
             mIdView = (TextView) view.findViewById(R.id.task_id);
+            mAlarmView = (ImageView) view.findViewById(R.id.task_alarm);
             mCycleView = (TextView) view.findViewById(R.id.task_cycle);
             mTitleView = (TextView) view.findViewById(R.id.task_name);
-
         }
 
         @Override
@@ -135,10 +141,10 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         }
     }
 
-    public class DetailedViewHolder extends SimpleViewHolder {
-        public final TextView mDescriptionView;
+    private class DetailedViewHolder extends SimpleViewHolder {
+        private final TextView mDescriptionView;
 
-        public DetailedViewHolder(View view) {
+        private DetailedViewHolder(View view) {
             super(view);
             mDescriptionView = (TextView) view.findViewById(R.id.task_description);
         }

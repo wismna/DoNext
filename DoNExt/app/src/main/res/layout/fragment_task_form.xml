@@ -1,106 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <RelativeLayout
-        android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/text_margin"
-        android:orientation="vertical"
-        tools:context=".activities.MainActivity">
-        <TextView
-            android:id="@+id/new_task_list_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/new_task_list"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-        <Spinner
-            android:id="@+id/new_task_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="5dp"
-            android:layout_toEndOf="@id/new_task_list_label">
-        </Spinner>
-        <TextView
-            android:id="@+id/new_task_name_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/new_task_name"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:layout_below="@id/new_task_list_label"/>
-        <EditText
-            android:id="@+id/new_task_name"
+        android:theme="@style/AppTheme.AppBarOverlay">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/new_task_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+    </android.support.design.widget.AppBarLayout>
+
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:background="@android:color/background_light">
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/new_task_name_hint"
-            android:maxLines="1"
-            android:inputType="text"
-            android:layout_below="@id/new_task_name_label"/>
-        <TextView
-            android:id="@+id/new_task_description_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/new_task_description"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:layout_below="@id/new_task_name" />
-        <EditText
-            android:id="@+id/new_task_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/new_task_description_hint"
-            android:gravity="top|start"
-            android:lines="3"
-            android:layout_below="@id/new_task_description_label" />
-        <TextView
-            android:id="@+id/new_task_priority_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/new_task_priority"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:layout_below="@id/new_task_description" />
-        <RadioGroup
-            android:id="@+id/new_task_priority"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/new_task_priority_label" >
-            <RadioButton
-                android:id="@+id/new_task_priority_low"
-                android:text="@string/new_task_priority_low"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-            </RadioButton>
-            <RadioButton
-                android:id="@+id/new_task_priority_normal"
-                android:text="@string/new_task_priority_normal"
+            android:padding="@dimen/text_margin"
+            android:orientation="vertical"
+            tools:context=".activities.MainActivity">
+            <TextView
+                android:id="@+id/new_task_list_label"
+                android:text="@string/new_task_list"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_marginTop="3dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <Spinner
+                android:id="@+id/new_task_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_toEndOf="@id/new_task_list_label">
+            </Spinner>
+            <EditText
+                android:id="@+id/new_task_name"
+                android:hint="@string/new_task_name_hint"
+                android:maxLines="1"
+                android:inputType="text"
+                android:textSize="30sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true">
-            </RadioButton>
-            <RadioButton
-                android:id="@+id/new_task_priority_high"
-                android:text="@string/new_task_priority_high"
+                android:layout_below="@id/new_task_list"/>
+            <EditText
+                android:id="@+id/new_task_description"
+                android:hint="@string/new_task_description_hint"
+                android:gravity="top|start"
+                android:lines="3"
+                android:layout_marginTop="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-            </RadioButton>
-        </RadioGroup>
-        <TextView
-            android:id="@+id/new_task_due_date_label"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="@string/new_task_due_date"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:layout_toEndOf="@id/new_task_priority"
-            android:layout_below="@id/new_task_description" />
-        <DatePicker
-            android:id="@+id/new_task_due_date"
-            android:calendarViewShown="true"
-            android:spinnersShown="false"
-            android:layout_width="800dp"
-            android:layout_height="800dp"
-            android:layout_toEndOf="@id/new_task_priority"
-            android:layout_below="@id/new_task_due_date_label" />
-    </RelativeLayout>
-</ScrollView>
+                android:layout_height="wrap_content"
+                android:layout_below="@id/new_task_name" />
+            <TextView
+                android:id="@+id/new_task_priority_label"
+                android:text="@string/new_task_priority"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_below="@id/new_task_description" />
+            <SeekBar
+                android:id="@+id/new_task_priority"
+                android:max="2"
+                android:progress="1"
+                android:layout_width="300dp"
+                android:layout_height="30dp"
+                android:layout_toEndOf="@id/new_task_priority_label"
+                android:layout_below="@id/new_task_description" />
+            <TextView
+                android:id="@+id/new_task_due_date_label"
+                android:text="@string/new_task_due_date"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_below="@id/new_task_priority" />
+            <DatePicker
+                android:id="@+id/new_task_due_date"
+                android:datePickerMode="spinner"
+                android:calendarViewShown="false"
+                android:spinnersShown="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/new_task_due_date_label" />
+        </RelativeLayout>
+    </ScrollView>
+</android.support.design.widget.CoordinatorLayout>

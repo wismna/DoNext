@@ -6,13 +6,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.Task;
 
 import org.joda.time.LocalDate;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,18 +31,12 @@ public class TaskDataAccess implements AutoCloseable {
             DatabaseHelper.TASKS_COLUMN_CYCLE, DatabaseHelper.TASKS_COLUMN_DONE,
             DatabaseHelper.TASKS_COLUMN_DELETED, DatabaseHelper.TASKS_COLUMN_LIST,
             DatabaseHelper.TASKS_COLUMN_DUEDATE};
-    private List<String> priorities = new ArrayList<>();
 
     public TaskDataAccess(Context context) {
         this(context, MODE.READ);
     }
     public TaskDataAccess(Context context, MODE writeMode) {
         dbHelper = new DatabaseHelper(context);
-
-        priorities.add(context.getString(R.string.new_task_priority_low));
-        priorities.add(context.getString(R.string.new_task_priority_normal));
-        priorities.add(context.getString(R.string.new_task_priority_high));
-
         open(writeMode);
     }
 
@@ -59,19 +50,16 @@ public class TaskDataAccess implements AutoCloseable {
     }
 
     /** Adds or update a task in the database */
-    public Task createOrUpdateTask(long id, String name, String description, String priority, long taskList) {
+    public Task createOrUpdateTask(long id, String name, String description, int priority, long taskList) {
         return createOrUpdateTask(id, name, description, priority, taskList, LocalDate.now());
     }
-    public Task createOrUpdateTask(long id, String name, String description, String priority, long taskList, LocalDate date) {
+    public Task createOrUpdateTask(long id, String name, String description, int priority, long taskList, LocalDate date) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
         values.put(DatabaseHelper.TASKS_COLUMN_DESC, description);
-        values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priorities.indexOf(priority));
+        values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priority);
         values.put(DatabaseHelper.TASKS_COLUMN_LIST, taskList);
-        DateFormat sdf = SimpleDateFormat.getDateInstance();
-        //SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-DD", Locale.US);
-        String dateString = sdf.format(date);
-        values.put(DatabaseHelper.TASKS_COLUMN_DUEDATE, dateString);
+        values.put(DatabaseHelper.TASKS_COLUMN_DUEDATE, date.toString());
         long insertId;
         if (id == 0)
             insertId = database.insert(DatabaseHelper.TASKS_TABLE_NAME, null, values);
@@ -98,8 +86,8 @@ public class TaskDataAccess implements AutoCloseable {
         ContentValues contentValues = new ContentValues();
         contentValues.put(column, 1);
         return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues,
-                DatabaseHelper.TASKS_COLUMN_DUEDATE + " < date('now','-1 day') " +
-                "AND " + DatabaseHelper.TASKS_COLUMN_LIST + " = " + taskListId, null);
+                DatabaseHelper.TASKS_COLUMN_DUEDATE + " <= date('now','-1 day')" +
+                " AND " + DatabaseHelper.TASKS_COLUMN_LIST + " = " + taskListId, null);
     }
 
     public List<Task> getAllTasks(long id) {

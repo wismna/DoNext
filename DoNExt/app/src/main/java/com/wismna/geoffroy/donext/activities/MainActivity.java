@@ -11,6 +11,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -27,7 +28,6 @@ import com.wismna.geoffroy.donext.adapters.SmartFragmentStatePagerAdapter;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
-import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.fragments.TaskDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
@@ -51,11 +51,13 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
     private ViewPager mViewPager;
     private TabLayout tabLayout;
     private List<TaskList> taskLists;
+    private boolean mIsLargeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mIsLargeLayout = getResources().getBoolean(R.bool.large_layout);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -142,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.action_changeLayout);
+        if (item == null) return false;
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String layoutType = sharedPref.getString("pref_conf_task_layout", "1");
         switch (layoutType) {
@@ -183,17 +186,28 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
     /** Called when user clicks on the New Task floating button */
     public void onNewTaskClick(View view) {
         int currentTabPosition = mViewPager.getCurrentItem();
-        FragmentManager manager = getSupportFragmentManager();
         TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(null,
                 mSectionsPagerAdapter.getAllItems(),
                 (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(currentTabPosition));
 
+        FragmentManager fragmentManager = getSupportFragmentManager();
         // Set current tab value to new task dialog
         Bundle args = new Bundle();
         args.putInt("list", currentTabPosition);
         taskDialogFragment.setArguments(args);
 
-        taskDialogFragment.show(manager, "Create new task");
+        if (mIsLargeLayout)
+            taskDialogFragment.show(fragmentManager, getString(R.string.action_new_task));
+        else {
+            // The device is smaller, so show the fragment fullscreen
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            // For a little polish, specify a transition animation
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            // To make it fullscreen, use the 'content' root view as the container
+            // for the fragment, which is always the root view for the activity
+            transaction.replace(android.R.id.content, taskDialogFragment)
+                    .addToBackStack(null).commit();
+        }
     }
 
     /** Called when the user clicks on the Change Layout button */
@@ -270,11 +284,6 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
                 }
                 if (!todayList.isVisible())
                     taskListDataAccess.updateVisibility(todayList.getId(), true);
-                // Mark all tasks with an earlier do date as done
-                try (TaskDataAccess taskDataAccess = new TaskDataAccess(this, TaskDataAccess.MODE.WRITE)) {
-                    taskDataAccess.updateExpiredTasks(
-                            Integer.valueOf(sharedPref.getString("pref_conf_today_action", "2")), todayList.getId());
-                }
             } else {
                 // Hide the today list if it exists
                 if (todayList != null) {
@@ -298,7 +307,9 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return TasksFragment.newInstance(taskLists.get(position).getId(), MainActivity.this);
+            TaskList taskList = taskLists.get(position);
+            return TasksFragment.newInstance(taskList.getId(),
+                    taskList.getName().equals(getString(R.string.task_list_today)), MainActivity.this);
         }
 
         @Override

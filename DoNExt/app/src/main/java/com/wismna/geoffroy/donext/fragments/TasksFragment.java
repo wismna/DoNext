@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -20,8 +21,7 @@ import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -45,13 +45,16 @@ public class TasksFragment extends Fragment implements
         TaskDialogFragment.NewTaskListener,
         ConfirmDialogFragment.ConfirmDialogListener,
         TaskTouchHelper.TaskTouchHelperAdapter {
+
     public interface TaskChangedAdapter {
         void onTaskListChanged(Task task, int tabPosition);
     }
 
     private static final String TASK_LIST_ID = "task_list_id";
+    private static final String CLEAR_EXPIRED_TASKS = "clear_expired_tasks";
     private long taskListId = -1;
-    //private TaskDataAccess taskDataAccess;
+    private boolean clearExpiredTasks = false;
+    private boolean mIsLargeLayout;
     private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
     private View view;
     private RecyclerView recyclerView;
@@ -65,10 +68,11 @@ public class TasksFragment extends Fragment implements
     public TasksFragment() {
     }
 
-    public static TasksFragment newInstance(long taskListId, TaskChangedAdapter taskChangedAdapter) {
+    public static TasksFragment newInstance(long taskListId, boolean clearExpiredTasks, TaskChangedAdapter taskChangedAdapter) {
         TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
         args.putLong(TASK_LIST_ID, taskListId);
+        args.putBoolean(CLEAR_EXPIRED_TASKS, clearExpiredTasks);
         fragment.setArguments(args);
         fragment.mAdapter = taskChangedAdapter;
         fragment.setRetainInstance(true);
@@ -79,8 +83,10 @@ public class TasksFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mIsLargeLayout = getResources().getBoolean(R.bool.large_layout);
         if (getArguments() != null) {
             taskListId = getArguments().getLong(TASK_LIST_ID);
+            clearExpiredTasks = getArguments().getBoolean(CLEAR_EXPIRED_TASKS);
         }
     }
 
@@ -90,13 +96,21 @@ public class TasksFragment extends Fragment implements
         view = inflater.inflate(R.layout.fragment_tasks, container, false);
         final Context context = view.getContext();
 
-
         // Set the Recycler view
         recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
         recyclerView.setLayoutManager(new NoScrollingLayoutManager(context));
 
         // Set RecyclerView Adapter
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        // Mark all tasks with an earlier do date as done
+        if (clearExpiredTasks) {
+            try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
+                taskDataAccess.updateExpiredTasks(
+                        Integer.valueOf(sharedPref.getString("pref_conf_today_action", "2")), taskListId);
+            }
+        }
+        // Get all tasks
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext())) {
             taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
                     taskDataAccess.getAllTasks(taskListId),
@@ -127,7 +141,21 @@ public class TasksFragment extends Fragment implements
                                 ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems(), TasksFragment.this);
 
                         taskDialogFragment.setArguments(args);
-                        taskDialogFragment.show(manager, getResources().getString(R.string.action_edit_task));
+
+                        // Open the fragment as a dialog or as full-screen depending on screen size
+                        FragmentManager fragmentManager = getFragmentManager();
+                        if (mIsLargeLayout)
+                            taskDialogFragment.show(manager, getResources().getString(R.string.action_edit_task));
+                        else {
+                            // The device is smaller, so show the fragment fullscreen
+                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            // For a little polish, specify a transition animation
+                            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                            // To make it fullscreen, use the 'content' root view as the container
+                            // for the fragment, which is always the root view for the activity
+                            transaction.replace(android.R.id.content, taskDialogFragment)
+                                    .addToBackStack(null).commit();
+                        }
                     }
                 })
         );
@@ -300,8 +328,7 @@ public class TasksFragment extends Fragment implements
         Spinner listSpinner = (Spinner) dialogView.findViewById(R.id.new_task_list);
         EditText nameText = (EditText) dialogView.findViewById(R.id.new_task_name);
         EditText descText = (EditText) dialogView.findViewById(R.id.new_task_description);
-        RadioGroup priorityGroup = (RadioGroup) dialogView.findViewById(R.id.new_task_priority);
-        RadioButton priorityRadio = (RadioButton) dialogView.findViewById(priorityGroup.getCheckedRadioButtonId());
+        SeekBar seekBar = (SeekBar) dialogView.findViewById(R.id.new_task_priority);
         DatePicker dueDatePicker = (DatePicker) dialogView.findViewById(R.id.new_task_due_date);
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
 
@@ -310,9 +337,9 @@ public class TasksFragment extends Fragment implements
             Task newTask = taskDataAccess.createOrUpdateTask(id,
                     nameText.getText().toString(),
                     descText.getText().toString(),
-                    priorityRadio.getText().toString(),
+                    seekBar.getProgress(),
                     taskList.getId(),
-                    new LocalDate(dueDatePicker.getYear(), dueDatePicker.getMonth(), dueDatePicker.getDayOfMonth()));
+                    new LocalDate(dueDatePicker.getYear(), dueDatePicker.getMonth() + 1, dueDatePicker.getDayOfMonth()));
 
             Bundle args = dialog.getArguments();
             // Should never happen because we will have to be on this tab to open the dialog
@@ -320,8 +347,15 @@ public class TasksFragment extends Fragment implements
 
             // Add the task
             if (task == null) {
-                taskRecyclerViewAdapter.add(newTask, 0);
-                recyclerView.scrollToPosition(0);
+                // If the new task is added to another task list, update the tab
+                if (taskListId != taskList.getId()) {
+                    mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
+                }
+                // Otherwise add it to the current one
+                else {
+                    taskRecyclerViewAdapter.add(newTask, 0);
+                    recyclerView.scrollToPosition(0);
+                }
             }
             // Update the task
             else {

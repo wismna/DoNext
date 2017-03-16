@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">DoNext</string>
-    <string name="about_version_android">Version d\'Android: %s</string>
+    <string name="about_version_android">Version d\'Android: %d</string>
     <string name="about_version_donext">Version de DoNext: %s</string>
     <string name="action_about">À propos</string>
     <string name="action_changeLayout">Changer l\'apparence</string>
@@ -66,4 +66,5 @@
     <string name="task_list_today_list_error">Le nom \"Aujourd\'hui\" est réservé. Vous pouvez activer la liste Aujourd\'hui dans les paramètres.</string>
     <string name="settings_today_action_title">Action à entreprendre à la fin de la journée:</string>
     <string name="new_task_due_date">Date de fin</string>
+    <string name="task_alarm">Task is past due date</string>
 </resources>
