@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.fragments;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -143,12 +142,11 @@ public class TasksFragment extends Fragment implements
                         taskDialogFragment.setArguments(args);
 
                         // Open the fragment as a dialog or as full-screen depending on screen size
-                        FragmentManager fragmentManager = getFragmentManager();
                         if (mIsLargeLayout)
                             taskDialogFragment.show(manager, getResources().getString(R.string.action_edit_task));
                         else {
                             // The device is smaller, so show the fragment fullscreen
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            FragmentTransaction transaction = manager.beginTransaction();
                             // For a little polish, specify a transition animation
                             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                             // To make it fullscreen, use the 'content' root view as the container
@@ -319,7 +317,8 @@ public class TasksFragment extends Fragment implements
     @Override
     public void onNewTaskDialogPositiveClick(DialogFragment dialog) {
         // Get the dialog fragment
-        Dialog dialogView = dialog.getDialog();
+        View dialogView = dialog.getView();
+        if (dialogView == null) return;
         long id = 0;
         Task task = ((TaskDialogFragment)dialog).getTask();
         if (task != null) id = task.getId();

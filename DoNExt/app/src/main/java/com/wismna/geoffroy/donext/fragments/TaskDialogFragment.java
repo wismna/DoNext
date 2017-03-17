@@ -214,12 +214,11 @@ public class TaskDialogFragment extends DialogFragment {
         int id = item.getItemId();
 
         if (id == R.id.menu_new_task_save) {
-            EditText titleText = (EditText) getDialog().findViewById(R.id.new_task_name);
+            EditText titleText = (EditText) getView().findViewById(R.id.new_task_name);
             // handle confirmation button click hereEditText titleText = (EditText) d.findViewById(R.id.new_task_name);
             if (titleText.getText().toString().matches(""))
                 titleText.setError(getResources().getString(R.string.new_task_name_error));
-            else
-            {
+            else {
                 // Send the positive button event back to the host activity
                 mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this);
                 dismiss();
