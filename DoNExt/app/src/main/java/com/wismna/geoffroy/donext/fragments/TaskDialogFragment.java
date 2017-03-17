@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -16,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -54,7 +56,6 @@ public class TaskDialogFragment extends DialogFragment {
     private NewTaskListener mListener;
     private Task task;
     private List<TaskList> taskLists;
-    private boolean isLargeLayout;
 
     public static TaskDialogFragment newInstance(Task task, List<TaskList> taskLists, NewTaskListener newTaskListener) {
         TaskDialogFragment fragment = new TaskDialogFragment();
@@ -67,14 +68,14 @@ public class TaskDialogFragment extends DialogFragment {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        isLargeLayout = getArguments().getBoolean("layout");
         super.onCreate(savedInstanceState);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (!isLargeLayout) {
+        // This part is only needed on small layouts (large layouts use onCreateDialog)
+        if (!getArguments().getBoolean("layout")) {
             View view = inflater.inflate(R.layout.fragment_task_form, container, false);
             AppCompatActivity activity = (AppCompatActivity) getActivity();
             activity.setSupportActionBar(setToolbarTitle(view));
@@ -102,7 +103,6 @@ public class TaskDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(view)
-                //.setTitle(getString(task == null ? R.string.action_new_task : R.string.action_edit_task))
                 // Add action buttons
                 .setPositiveButton(R.string.new_task_save, null)
                 .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
@@ -122,9 +122,6 @@ public class TaskDialogFragment extends DialogFragment {
         }
         setTaskValues(view);
         return builder.create();
-        //Dialog dialog = super.onCreateDialog(savedInstanceState);
-        //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //return dialog;
     }
 
     @Override
@@ -132,7 +129,7 @@ public class TaskDialogFragment extends DialogFragment {
         super.onStart();
 
         Dialog dialog = getDialog();
-        if(dialog != null && dialog instanceof AlertDialog/* && isLargeLayout*/)
+        if(dialog != null && dialog instanceof AlertDialog)
         {
             AlertDialog d = (AlertDialog) dialog;
             Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
@@ -162,16 +159,23 @@ public class TaskDialogFragment extends DialogFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Determine which menu item was clicked
         int id = item.getItemId();
+        View view = getView();
 
+        // Hide the keyboard if present
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+        }
         if (id == R.id.menu_new_task_save) {
-            onSaveClickListener(getView());
+            // handle save button click here
+            onSaveClickListener(view);
             return true;
         }
         else if (id == R.id.menu_new_task_delete) {
-            // handle confirmation button click here
+            // handle delete button click here
             mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
-            dismiss();
             return true;
         }
         else if (id == android.R.id.home) {
@@ -179,7 +183,6 @@ public class TaskDialogFragment extends DialogFragment {
             dismiss();
             return true;
         }
-        dismiss();
 
         return super.onOptionsItemSelected(item);
     }
@@ -251,23 +254,11 @@ public class TaskDialogFragment extends DialogFragment {
 
     private Toolbar setToolbarTitle(View view) {
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.new_task_toolbar);
-        if (task == null) {
-            toolbar.setTitle(R.string.action_new_task);
-        }
-        else {
-            toolbar.setTitle(R.string.action_edit_task);
-        }
+        toolbar.setTitle(getTag());
         return toolbar;
     }
 
     private void onSaveClickListener(View view) {
-        /*if (source == null) return;
-        EditText titleText = null;
-        if (source instanceof View)
-            titleText = (EditText) ((View)source).findViewById(R.id.new_task_name);
-        if (source instanceof AlertDialog)
-            titleText = (EditText) ((AlertDialog)source).findViewById(R.id.new_task_name);
-        if (titleText == null) return;*/
         if (view == null) return;
         EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
         // handle confirmation button click hereEditText titleText = (EditText) d.findViewById(R.id.new_task_name);

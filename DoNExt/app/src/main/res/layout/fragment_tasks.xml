@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.widget.RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,23 +8,22 @@
     <TextView
         android:id="@+id/total_task_cycles"
         android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"/>
+        android:layout_height="wrap_content"/>
     <TextView
         android:id="@+id/total_task_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"/>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/task_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/text_margin"
-        android:layout_marginRight="@dimen/text_margin"
-        android:layout_below="@id/total_task_cycles"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:name="com.wismna.geoffroy.donext.activities.TaskFragment"
         app:layoutManager="LinearLayoutManager"
-        app:layout_heightPercent="90%"
         tools:context=".fragments.TasksFragment"
         tools:listitem="@layout/fragment_task_detailed" />
     <RelativeLayout
@@ -64,5 +63,5 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/task_list_view" />
-</android.support.percent.PercentRelativeLayout>
+        android:layout_below="@id/task_list_view"/>
+</android.widget.RelativeLayout>

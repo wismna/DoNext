@@ -140,12 +140,12 @@ public class TasksFragment extends Fragment implements
                                 taskRecyclerViewAdapter.getItem(position),
                                 ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems(),
                                 TasksFragment.this);
-
                         taskDialogFragment.setArguments(args);
 
                         // Open the fragment as a dialog or as full-screen depending on screen size
+                        String title = getString(R.string.action_edit_task);
                         if (mIsLargeLayout)
-                            taskDialogFragment.show(manager, getResources().getString(R.string.action_edit_task));
+                            taskDialogFragment.show(manager, title);
                         else {
                             // The device is smaller, so show the fragment fullscreen
                             FragmentTransaction transaction = manager.beginTransaction();
@@ -153,7 +153,7 @@ public class TasksFragment extends Fragment implements
                             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                             // To make it fullscreen, use the 'content' root view as the container
                             // for the fragment, which is always the root view for the activity
-                            transaction.replace(android.R.id.content, taskDialogFragment)
+                            transaction.add(android.R.id.content, taskDialogFragment, title)
                                     .addToBackStack(null).commit();
                         }
                     }
@@ -225,6 +225,9 @@ public class TasksFragment extends Fragment implements
                 taskRecyclerViewAdapter.add(task, taskRecyclerViewAdapter.getItemCount());
                 break;
             case -1:
+                FragmentManager manager = getFragmentManager();
+                DialogFragment dialog = (DialogFragment) manager.findFragmentByTag(getString(R.string.action_edit_task));
+                if (dialog != null) dialog.dismiss();
                 action = resources.getString(R.string.snackabar_action_deleted);
                 break;
         }
@@ -377,7 +380,6 @@ public class TasksFragment extends Fragment implements
     @Override
     public void onNewTaskDialogNeutralClick(DialogFragment dialog) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String title = getResources().getString(R.string.task_confirmation_delete_text);
         boolean showDialog = sharedPref.getBoolean("pref_conf_del", true);
         Bundle args = dialog.getArguments();
 
@@ -385,6 +387,7 @@ public class TasksFragment extends Fragment implements
         final int itemPosition = args.getInt("position");
 
         if (showDialog) {
+            String title = getResources().getString(R.string.task_confirmation_delete_text);
             ConfirmDialogFragment confirmDialogFragment =
                     ConfirmDialogFragment.newInstance(this);
             Bundle confirmArgs = new Bundle();
@@ -395,7 +398,9 @@ public class TasksFragment extends Fragment implements
             confirmDialogFragment.setArguments(confirmArgs);
             confirmDialogFragment.show(getFragmentManager(), title);
         }
-        else PerformTaskAction(itemPosition, -1);
+        else {
+            PerformTaskAction(itemPosition, -1);
+        }
     }
 
     @Override

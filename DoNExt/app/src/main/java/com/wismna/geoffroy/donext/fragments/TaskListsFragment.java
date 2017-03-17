@@ -185,7 +185,7 @@ public class TaskListsFragment extends Fragment implements
         }
     }
 
-    public class GetTaskListsTask extends AsyncTask<TaskListDataAccess, Void, List<TaskList>> {
+    private class GetTaskListsTask extends AsyncTask<TaskListDataAccess, Void, List<TaskList>> {
         @Override
         protected List<TaskList> doInBackground(TaskListDataAccess... params) {
             TaskListDataAccess taskListDataAccess = params[0];

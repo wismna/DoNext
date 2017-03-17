@@ -196,8 +196,9 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         args.putBoolean("layout", mIsLargeLayout);
         taskDialogFragment.setArguments(args);
 
+        String title = getString(R.string.action_new_task);
         if (mIsLargeLayout)
-            taskDialogFragment.show(fragmentManager, getString(R.string.action_new_task));
+            taskDialogFragment.show(fragmentManager, title);
         else {
             // The device is smaller, so show the fragment fullscreen
             FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -205,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             // To make it fullscreen, use the 'content' root view as the container
             // for the fragment, which is always the root view for the activity
-            transaction.replace(android.R.id.content, taskDialogFragment)
+            transaction.add(android.R.id.content, taskDialogFragment, title)
                     .addToBackStack(null).commit();
         }
     }
