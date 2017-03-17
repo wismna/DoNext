@@ -6,7 +6,7 @@
     <string name="action_about">À propos</string>
     <string name="action_changeLayout">Changer l\'apparence</string>
     <string name="action_editTabs">Éditer les listes</string>
-    <string name="action_edit_task">Éditer la tâche</string>
+    <string name="action_edit_task">Éditer</string>
     <string name="action_newTab">Nouvelle liste</string>
     <string name="action_new_task">Nouvelle tâche</string>
     <string name="action_settings">Paramètres</string>

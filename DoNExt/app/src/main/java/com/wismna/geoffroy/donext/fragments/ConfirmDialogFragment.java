@@ -13,11 +13,11 @@ import android.view.View;
 import com.wismna.geoffroy.donext.R;
 
 public class ConfirmDialogFragment extends DialogFragment {
-    public interface ConfirmDialogListener {
+    interface ConfirmDialogListener {
         void onConfirmDialogClick(DialogFragment dialog, ButtonEvent event);
     }
 
-    public enum ButtonEvent{
+    enum ButtonEvent{
         YES,
         NO
     }

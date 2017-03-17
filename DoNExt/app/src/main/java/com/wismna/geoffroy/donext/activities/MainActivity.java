@@ -174,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         int id = item.getItemId();
 
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
-
     }
 
     @Override
@@ -194,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         // Set current tab value to new task dialog
         Bundle args = new Bundle();
         args.putInt("list", currentTabPosition);
+        args.putBoolean("layout", mIsLargeLayout);
         taskDialogFragment.setArguments(args);
 
         if (mIsLargeLayout)

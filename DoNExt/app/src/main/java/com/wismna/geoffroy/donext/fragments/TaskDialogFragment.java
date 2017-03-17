@@ -1,6 +1,8 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,9 +16,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -44,7 +46,7 @@ public class TaskDialogFragment extends DialogFragment {
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
     interface NewTaskListener {
-        void onNewTaskDialogPositiveClick(DialogFragment dialog);
+        void onNewTaskDialogPositiveClick(DialogFragment dialog, View dialogView);
         void onNewTaskDialogNeutralClick(DialogFragment dialog);
     }
 
@@ -52,12 +54,10 @@ public class TaskDialogFragment extends DialogFragment {
     private NewTaskListener mListener;
     private Task task;
     private List<TaskList> taskLists;
+    private boolean isLargeLayout;
 
     public static TaskDialogFragment newInstance(Task task, List<TaskList> taskLists, NewTaskListener newTaskListener) {
-
-        Bundle args = new Bundle();
         TaskDialogFragment fragment = new TaskDialogFragment();
-        fragment.setArguments(args);
         fragment.task = task;
         fragment.taskLists = taskLists;
         fragment.mListener = newTaskListener;
@@ -65,35 +65,137 @@ public class TaskDialogFragment extends DialogFragment {
         return fragment;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        isLargeLayout = getArguments().getBoolean("layout");
+        super.onCreate(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_task_form, container, false);
+        if (!isLargeLayout) {
+            View view = inflater.inflate(R.layout.fragment_task_form, container, false);
+            AppCompatActivity activity = (AppCompatActivity) getActivity();
+            activity.setSupportActionBar(setToolbarTitle(view));
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.new_task_toolbar);
-
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel);
+            ActionBar actionBar = activity.getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                actionBar.setHomeButtonEnabled(true);
+                actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel);
+            }
+            setHasOptionsMenu(true);
+            setTaskValues(view);
+            return view;
         }
-        setHasOptionsMenu(true);
-        // Inflate and set the layout for the dialog
-        // Pass null as the parent view because its going in the dialog layout
-        /*builder.setView(view)
-            // Add action buttons
-            .setPositiveButton(R.string.new_task_save, null)
-            .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // Send the negative button event back to the host activity
-                    // Canceled creation, nothing to do
-                    TaskDialogFragment.this.getDialog().cancel();
-                }
-            });*/
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
 
+    @Override
+    @NonNull
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Inflate and set the layout for the dialog
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View view = inflater.inflate(R.layout.fragment_task_form, null);
+        setToolbarTitle(view);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        // Pass null as the parent view because its going in the dialog layout
+        builder.setView(view)
+                //.setTitle(getString(task == null ? R.string.action_new_task : R.string.action_edit_task))
+                // Add action buttons
+                .setPositiveButton(R.string.new_task_save, null)
+                .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Send the negative button event back to the host activity
+                        // Canceled creation, nothing to do
+                        TaskDialogFragment.this.getDialog().cancel();
+                    }
+                });
+        if (task != null) {
+            builder.setNeutralButton(R.string.new_task_delete, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
+                }
+            });
+        }
+        setTaskValues(view);
+        return builder.create();
+        //Dialog dialog = super.onCreateDialog(savedInstanceState);
+        //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //return dialog;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Dialog dialog = getDialog();
+        if(dialog != null && dialog instanceof AlertDialog/* && isLargeLayout*/)
+        {
+            AlertDialog d = (AlertDialog) dialog;
+            Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+            positiveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onSaveClickListener(v.getRootView());
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        getActivity().getMenuInflater().inflate(R.menu.menu_new_task, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if (task == null) {
+            menu.removeItem(R.id.menu_new_task_delete);
+        }
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_new_task_save) {
+            onSaveClickListener(getView());
+            return true;
+        }
+        else if (id == R.id.menu_new_task_delete) {
+            // handle confirmation button click here
+            mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
+            dismiss();
+            return true;
+        }
+        else if (id == android.R.id.home) {
+            // handle close button click here
+            dismiss();
+            return true;
+        }
+        dismiss();
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroyView() {
+        Dialog dialog = getDialog();
+        // Stop the dialog from being dismissed on rotation, due to a bug with the compatibility library
+        // https://code.google.com/p/android/issues/detail?id=17423
+        if (dialog != null && getRetainInstance()) {
+            dialog.setDismissMessage(null);
+        }
+        super.onDestroyView();
+    }
+
+    private void setTaskValues(View view) {
         // Get date picker
         final DatePicker dueDatePicker = (DatePicker) view.findViewById(R.id.new_task_due_date);
 
@@ -129,7 +231,6 @@ public class TaskDialogFragment extends DialogFragment {
 
         // Set other properties if they exist
         if (task != null) {
-            toolbar.setTitle(R.string.action_edit_task);
 
             EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
             titleText.setText(task.getName());
@@ -141,114 +242,41 @@ public class TaskDialogFragment extends DialogFragment {
             // Set Due Date
             LocalDate dueDate = task.getDueDate();
             dueDatePicker.updateDate(dueDate.getYear(), dueDate.getMonthOfYear() - 1, dueDate.getDayOfMonth());
-
-            // Add the Delete button
-/*            builder.setNeutralButton(R.string.new_task_delete, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
-                }
-            });*/
         }
         else {
-            toolbar.setTitle(R.string.action_new_task);
             // Disallow past dates on new tasks
             dueDatePicker.setMinDate(LocalDate.now().toDate().getTime());
         }
-        return view;
     }
 
-    @Override
-    @NonNull
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        return dialog;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        final Dialog d = (Dialog) getDialog();
-        if(d != null)
-        {
-            //d.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            /*Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
-            positiveButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    EditText titleText = (EditText) d.findViewById(R.id.new_task_name);
-                    if (titleText.getText().toString().matches(""))
-                        titleText.setError(getResources().getString(R.string.new_task_name_error));
-                    else
-                    {
-                        // Send the positive button event back to the host activity
-                        mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this);
-                        dismiss();
-                    }
-                }
-            });*/
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //super.onCreateOptionsMenu(menu, inflater);
-        menu.clear();
-        getActivity().getMenuInflater().inflate(R.menu.menu_new_task, menu);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
+    private Toolbar setToolbarTitle(View view) {
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.new_task_toolbar);
         if (task == null) {
-            menu.removeItem(R.id.menu_new_task_delete);
+            toolbar.setTitle(R.string.action_new_task);
         }
-        super.onPrepareOptionsMenu(menu);
+        else {
+            toolbar.setTitle(R.string.action_edit_task);
+        }
+        return toolbar;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.menu_new_task_save) {
-            EditText titleText = (EditText) getView().findViewById(R.id.new_task_name);
-            // handle confirmation button click hereEditText titleText = (EditText) d.findViewById(R.id.new_task_name);
-            if (titleText.getText().toString().matches(""))
-                titleText.setError(getResources().getString(R.string.new_task_name_error));
-            else {
-                // Send the positive button event back to the host activity
-                mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this);
-                dismiss();
-            }
-            return true;
-        }
-        else if (id == R.id.menu_new_task_delete) {
-                // handle confirmation button click here
-                mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
-                dismiss();
-                return true;
-            }
-        else if (id == android.R.id.home) {
-            // handle close button click here
+    private void onSaveClickListener(View view) {
+        /*if (source == null) return;
+        EditText titleText = null;
+        if (source instanceof View)
+            titleText = (EditText) ((View)source).findViewById(R.id.new_task_name);
+        if (source instanceof AlertDialog)
+            titleText = (EditText) ((AlertDialog)source).findViewById(R.id.new_task_name);
+        if (titleText == null) return;*/
+        if (view == null) return;
+        EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
+        // handle confirmation button click hereEditText titleText = (EditText) d.findViewById(R.id.new_task_name);
+        if (titleText.getText().toString().matches(""))
+            titleText.setError(getResources().getString(R.string.new_task_name_error));
+        else {
+            // Send the positive button event back to the host activity
+            mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this, view);
             dismiss();
-            return true;
         }
-        dismiss();
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onDestroyView() {
-        Dialog dialog = getDialog();
-        // Stop the dialog from being dismissed on rotation, due to a bug with the compatibility library
-        // https://code.google.com/p/android/issues/detail?id=17423
-        if (dialog != null && getRetainInstance()) {
-            dialog.setDismissMessage(null);
-        }
-        super.onDestroyView();
     }
 }

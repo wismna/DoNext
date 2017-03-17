@@ -129,6 +129,7 @@ public class TasksFragment extends Fragment implements
                     public void onItemClick(View view, int position) {
                         Bundle args = new Bundle();
                         args.putInt("position", position);
+                        args.putBoolean("layout", mIsLargeLayout);
 
                         // Set current tab value to new task dialog
                         ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.container);
@@ -137,7 +138,8 @@ public class TasksFragment extends Fragment implements
                         FragmentManager manager = getFragmentManager();
                         TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(
                                 taskRecyclerViewAdapter.getItem(position),
-                                ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems(), TasksFragment.this);
+                                ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems(),
+                                TasksFragment.this);
 
                         taskDialogFragment.setArguments(args);
 
@@ -315,9 +317,8 @@ public class TasksFragment extends Fragment implements
     }
 
     @Override
-    public void onNewTaskDialogPositiveClick(DialogFragment dialog) {
+    public void onNewTaskDialogPositiveClick(DialogFragment dialog, View dialogView) {
         // Get the dialog fragment
-        View dialogView = dialog.getView();
         if (dialogView == null) return;
         long id = 0;
         Task task = ((TaskDialogFragment)dialog).getTask();

@@ -1,4 +1,6 @@
 <resources>
+    <string name="title_activity_task_list">TaskListActivity</string>
+
     <!-- Activities and menu strings -->
     <string name="app_name">DoNext</string>
     <string name="action_settings">Settings</string>
@@ -6,7 +8,7 @@
     <string name="action_editTabs">Edit lists</string>
     <string name="action_about">About</string>
     <string name="action_new_task">New task</string>
-    <string name="action_edit_task">Edit task</string>
+    <string name="action_edit_task">Edit</string>
     <string name="action_changeLayout">Change layout</string>
 
     <!-- Strings related to tabs -->
@@ -20,6 +22,8 @@
     <string name="task_list_delete">Delete</string>
     <string name="task_list_confirmation_delete">Delete task list?</string>
     <string name="task_list_drag_handle">Drag handle</string>
+    <string name="task_list_today">Today</string>
+    <string name="task_list_today_list_error">Name \"Today\" is reserved. You may activate the Today list from the Settings.</string>
 
     <!-- Strings related to new task dialog -->
     <string name="new_task_list">List</string>
@@ -32,6 +36,7 @@
     <string name="new_task_priority_low">Low</string>
     <string name="new_task_priority_normal">Normal</string>
     <string name="new_task_priority_high">High</string>
+    <string name="new_task_due_date">Due date</string>
     <string name="new_task_save">Save</string>
     <string name="new_task_cancel">Cancel</string>
     <string name="new_task_delete">Delete</string>
@@ -42,6 +47,7 @@
     <string name="task_total_cycles">%1$d cycle%2$s</string>
     <string name="task_total">%1$d task%2$s</string>
     <string name="task_remaining">%1$d more task%2$s</string>
+    <string name="task_alarm">Task is past due date</string>
 
     <!-- String related to the SnackBar -->
     <string name="snackabar_label">Task %s</string>
@@ -69,20 +75,14 @@
     <string name="settings_confirm_markdone">Confirm on done?</string>
     <string name="settings_confirm_delete">Confirm on delete?</string>
     <string name="settings_task_layout">Task layout</string>
-
+    <string name="settings_today_title">Today list</string>
+    <string name="settings_today_enable">Enable Today list?</string>
+    <string name="settings_today_desc">The Today list is a special kind of list, in which tasks only exist for the current day. Each day, the list is reset.</string>
+    <string name="settings_today_action_title">Action at the end of the day</string>
     <string name="settings_max_lists_label">Maximum number of lists</string>
-    <string name="title_activity_task_list">TaskListActivity</string>
 
     <!-- Strings related to About -->
     <string name="about_version_donext">DoNext version %s</string>
     <string name="about_version_android">Android version %d</string>
     <string name="about_link" translatable="false">https://github.com/wismna</string>
-    <string name="settings_today_title">Today list</string>
-    <string name="settings_today_enable">Enable Today list?</string>
-    <string name="settings_today_desc">The Today list is a special kind of list, in which tasks only exist for the current day. Each day, the list is reset.</string>
-    <string name="task_list_today">Today</string>
-    <string name="task_list_today_list_error">Name \"Today\" is reserved. You may activate the Today list from the Settings.</string>
-    <string name="settings_today_action_title">Action at the end of the day</string>
-    <string name="new_task_due_date">Due date</string>
-    <string name="task_alarm">Task is past due date</string>
 </resources>
