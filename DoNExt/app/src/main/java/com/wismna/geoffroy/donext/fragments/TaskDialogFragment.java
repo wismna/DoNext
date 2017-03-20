@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -67,11 +66,6 @@ public class TaskDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -99,48 +93,35 @@ public class TaskDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Inflate and set the layout for the dialog
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_task_form, null);
+        final View view = inflater.inflate(R.layout.fragment_task_form, null);
         setToolbarTitle(view);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(view)
                 // Add action buttons
-                .setPositiveButton(R.string.new_task_save, null)
+                .setPositiveButton(R.string.new_task_save, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        onPositiveButtonClick(view);
+                    }
+                })
                 .setNegativeButton(R.string.new_task_cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // Send the negative button event back to the host activity
                         // Canceled creation, nothing to do
-                        TaskDialogFragment.this.getDialog().cancel();
+                        //dialog.cancel();
+                        onNegativeButtonClick();
                     }
                 });
         if (task != null) {
             builder.setNeutralButton(R.string.new_task_delete, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
+                    onNeutralButtonClick();
                 }
             });
         }
         setTaskValues(view);
         return builder.create();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        Dialog dialog = getDialog();
-        if(dialog != null && dialog instanceof AlertDialog)
-        {
-            AlertDialog d = (AlertDialog) dialog;
-            Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
-            positiveButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onSaveClickListener(v.getRootView());
-                }
-            });
-        }
     }
 
     @Override
@@ -171,17 +152,17 @@ public class TaskDialogFragment extends DialogFragment {
         }
         if (id == R.id.menu_new_task_save) {
             // handle save button click here
-            onSaveClickListener(view);
+            onPositiveButtonClick(view);
             return true;
         }
         else if (id == R.id.menu_new_task_delete) {
             // handle delete button click here
-            mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
+            onNeutralButtonClick();
             return true;
         }
         else if (id == android.R.id.home) {
             // handle close button click here
-            dismiss();
+            onNegativeButtonClick();
             return true;
         }
 
@@ -251,7 +232,7 @@ public class TaskDialogFragment extends DialogFragment {
         return toolbar;
     }
 
-    private void onSaveClickListener(View view) {
+    protected void onPositiveButtonClick(View view) {
         if (view == null) return;
         EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
         // handle confirmation button click hereEditText titleText = (EditText) d.findViewById(R.id.new_task_name);
@@ -262,5 +243,13 @@ public class TaskDialogFragment extends DialogFragment {
             mListener.onNewTaskDialogPositiveClick(TaskDialogFragment.this, view);
             dismiss();
         }
+    }
+
+    protected /*abstract*/ void onNeutralButtonClick() {
+        mListener.onNewTaskDialogNeutralClick(TaskDialogFragment.this);
+    }
+
+    protected /*abstract*/ void onNegativeButtonClick() {
+        dismiss();
     }
 }
