@@ -30,12 +30,15 @@ import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
+import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.helpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
 import com.wismna.geoffroy.donext.widgets.DividerItemDecoration;
 import com.wismna.geoffroy.donext.widgets.NoScrollingLayoutManager;
 
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -50,10 +53,9 @@ public class TasksFragment extends Fragment implements
     }
 
     private static final String TASK_LIST_ID = "task_list_id";
-    private static final String CLEAR_EXPIRED_TASKS = "clear_expired_tasks";
     private long taskListId = -1;
-    private boolean clearExpiredTasks = false;
     private boolean mIsLargeLayout;
+    private boolean isTodayView = true;
     private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
     private View view;
     private RecyclerView recyclerView;
@@ -67,13 +69,13 @@ public class TasksFragment extends Fragment implements
     public TasksFragment() {
     }
 
-    public static TasksFragment newInstance(long taskListId, boolean clearExpiredTasks, TaskChangedAdapter taskChangedAdapter) {
+    public static TasksFragment newTaskListInstance(long taskListId, TaskChangedAdapter taskChangedAdapter) {
         TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
         args.putLong(TASK_LIST_ID, taskListId);
-        args.putBoolean(CLEAR_EXPIRED_TASKS, clearExpiredTasks);
         fragment.setArguments(args);
         fragment.mAdapter = taskChangedAdapter;
+        fragment.isTodayView = false;
         fragment.setRetainInstance(true);
         return fragment;
     }
@@ -85,7 +87,6 @@ public class TasksFragment extends Fragment implements
         mIsLargeLayout = getResources().getBoolean(R.bool.large_layout);
         if (getArguments() != null) {
             taskListId = getArguments().getLong(TASK_LIST_ID);
-            clearExpiredTasks = getArguments().getBoolean(CLEAR_EXPIRED_TASKS);
         }
     }
 
@@ -102,17 +103,10 @@ public class TasksFragment extends Fragment implements
         // Set RecyclerView Adapter
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-        // Mark all tasks with an earlier do date as done
-        if (clearExpiredTasks) {
-            try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
-                taskDataAccess.updateExpiredTasks(
-                        Integer.valueOf(sharedPref.getString("pref_conf_today_action", "2")), taskListId);
-            }
-        }
         // Get all tasks
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext())) {
             taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
-                    taskDataAccess.getAllTasks(taskListId),
+                    isTodayView? taskDataAccess.getTodayTasks() : taskDataAccess.getAllTasks(taskListId),
                     Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")));
         }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
@@ -127,19 +121,36 @@ public class TasksFragment extends Fragment implements
                 new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
+                        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
                         Bundle args = new Bundle();
                         args.putInt("position", position);
                         args.putBoolean("layout", mIsLargeLayout);
+                        args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
 
                         // Set current tab value to new task dialog
                         ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.container);
-                        args.putInt("list", viewPager.getCurrentItem());
+                        List<TaskList> taskLists;
+                        Task task = taskRecyclerViewAdapter.getItem(position);
+                        if (viewPager != null) {
+                            taskLists = ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems();
+                            args.putInt("list", viewPager.getCurrentItem());
+                        }
+                        else {
+                            try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(getActivity())) {
+                                taskLists = taskListDataAccess.getAllTaskLists();
+                            }
+                            for (TaskList taskList :
+                                    taskLists) {
+                                if (taskList.getId() == task.getTaskListId()) {
+                                    args.putInt("list", taskLists.indexOf(taskList));
+                                    break;
+                                }
+                            }
+                        }
 
                         FragmentManager manager = getFragmentManager();
                         TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(
-                                taskRecyclerViewAdapter.getItem(position),
-                                ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems(),
-                                TasksFragment.this);
+                                task, taskLists, TasksFragment.this);
                         taskDialogFragment.setArguments(args);
 
                         // Open the fragment as a dialog or as full-screen depending on screen size
@@ -334,6 +345,7 @@ public class TasksFragment extends Fragment implements
         SeekBar seekBar = (SeekBar) dialogView.findViewById(R.id.new_task_priority);
         DatePicker dueDatePicker = (DatePicker) dialogView.findViewById(R.id.new_task_due_date);
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
+        CheckBox todayList = (CheckBox) dialogView.findViewById(R.id.new_task_today);
 
         // Add the task to the database
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
@@ -342,7 +354,8 @@ public class TasksFragment extends Fragment implements
                     descText.getText().toString(),
                     seekBar.getProgress(),
                     taskList.getId(),
-                    new LocalDate(dueDatePicker.getYear(), dueDatePicker.getMonth() + 1, dueDatePicker.getDayOfMonth()));
+                    new LocalDate(dueDatePicker.getYear(), dueDatePicker.getMonth() + 1, dueDatePicker.getDayOfMonth()),
+                    todayList.isChecked());
 
             Bundle args = dialog.getArguments();
             // Should never happen because we will have to be on this tab to open the dialog
@@ -351,7 +364,7 @@ public class TasksFragment extends Fragment implements
             // Add the task
             if (task == null) {
                 // If the new task is added to another task list, update the tab
-                if (taskListId != taskList.getId()) {
+                if (mAdapter != null && taskListId != taskList.getId()) {
                     mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
                 }
                 // Otherwise add it to the current one
@@ -364,7 +377,7 @@ public class TasksFragment extends Fragment implements
             else {
                 int position = args.getInt("position");
                 // Check if task list was changed
-                if (task.getTaskListId() != taskList.getId())
+                if (mAdapter != null && task.getTaskListId() != taskList.getId())
                 {
                     // Remove item from current tab
                     taskRecyclerViewAdapter.remove(position);

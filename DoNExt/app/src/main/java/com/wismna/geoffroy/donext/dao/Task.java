@@ -17,6 +17,7 @@ public class Task {
     private long taskList;
     private String taskListName;
     private LocalDate dueDate;
+    private LocalDate todayDate;
 
     public long getId() {
         return id;
@@ -101,6 +102,19 @@ public class Task {
 
     public LocalDate getDueDate() {
         return dueDate;
+    }
+
+    public void setTodayDate(String todayDate) {
+        try {
+            this.todayDate = LocalDate.parse(todayDate);
+        }
+        catch (Exception e){
+            this.todayDate = null;
+        }
+    }
+
+    public boolean isToday() {
+        return todayDate!= null && todayDate.isEqual(LocalDate.now());
     }
 
     // Will be used by the ArrayAdapter in the ListView

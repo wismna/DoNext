@@ -6,7 +6,6 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -69,9 +68,6 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 
-        // Handle Today list
-        handleTodayList(sharedPref);
-
         // Access database to retrieve Tabs
         try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(this)) {
             taskLists = taskListDataAccess.getAllTaskLists();
@@ -121,9 +117,6 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
                     }
                 });
             }
-            // Hide or show new task floating button
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.show();
         }
     }
 
@@ -143,18 +136,23 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.action_changeLayout);
-        if (item == null) return false;
+        // Handles layout change button
+        MenuItem displayLayoutItem = menu.findItem(R.id.action_changeLayout);
+        if (displayLayoutItem == null) return false;
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String layoutType = sharedPref.getString("pref_conf_task_layout", "1");
         switch (layoutType) {
             case "1" :
-                item.setIcon(R.drawable.ic_list_white_24dp);
+                displayLayoutItem.setIcon(R.drawable.ic_list_white_24dp);
                 break;
             case "2" :
-                item.setIcon(R.drawable.ic_view_list_white_24dp);
+                displayLayoutItem.setIcon(R.drawable.ic_view_list_white_24dp);
                 break;
         }
+
+        // Handles today list
+        MenuItem todayListItem = menu.findItem(R.id.action_todayList);
+        todayListItem.setVisible(sharedPref.getBoolean("pref_conf_today_enable", false));
 
         return super.onPrepareOptionsMenu(menu);
     }
@@ -191,9 +189,11 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         // Set current tab value to new task dialog
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         Bundle args = new Bundle();
         args.putInt("list", currentTabPosition);
         args.putBoolean("layout", mIsLargeLayout);
+        args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
         taskDialogFragment.setArguments(args);
 
         String title = getString(R.string.action_new_task);
@@ -209,6 +209,12 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             transaction.add(android.R.id.content, taskDialogFragment, title)
                     .addToBackStack(null).commit();
         }
+    }
+
+    /** Called when the user clicks on the Today List button */
+    public void showTodayList(MenuItem item) {
+        Intent intent = new Intent(this, TodayActivity.class);
+        startActivity(intent);
     }
 
     /** Called when the user clicks on the Change Layout button */
@@ -273,27 +279,6 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         }
     }
 
-    private void handleTodayList(SharedPreferences sharedPref) {
-        String todayListName = getString(R.string.task_list_today);
-        try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(this, TaskListDataAccess.MODE.WRITE)) {
-            TaskList todayList = taskListDataAccess.getTaskListByName(todayListName);
-            if (sharedPref.getBoolean("pref_conf_today_enable", false)) {
-                // Get or create the Today list
-                if (todayList == null) {
-                    // TODO: set order correctly
-                    todayList = taskListDataAccess.createTaskList(todayListName, 0);
-                }
-                if (!todayList.isVisible())
-                    taskListDataAccess.updateVisibility(todayList.getId(), true);
-            } else {
-                // Hide the today list if it exists
-                if (todayList != null) {
-                    taskListDataAccess.updateVisibility(todayList.getId(), false);
-                }
-            }
-        }
-    }
-
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -309,8 +294,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             TaskList taskList = taskLists.get(position);
-            return TasksFragment.newInstance(taskList.getId(),
-                    taskList.getName().equals(getString(R.string.task_list_today)), MainActivity.this);
+            return TasksFragment.newTaskListInstance(taskList.getId(), MainActivity.this);
         }
 
         @Override

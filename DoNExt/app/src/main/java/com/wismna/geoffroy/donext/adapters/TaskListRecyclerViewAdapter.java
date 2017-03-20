@@ -17,7 +17,6 @@ import com.wismna.geoffroy.donext.helpers.TaskListTouchHelper;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link TaskList}.
@@ -35,14 +34,11 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
 
     private final List<TaskList> mValues;
     private TaskListRecyclerViewAdapterListener mListener;
-    private String mReservedTaskListName;
 
     public TaskListRecyclerViewAdapter(List<TaskList> items,
-                                       TaskListRecyclerViewAdapterListener listener,
-                                       String reservedTaskListName) {
+                                       TaskListRecyclerViewAdapterListener listener) {
         mValues = items;
         mListener = listener;
-        mReservedTaskListName = reservedTaskListName;
     }
 
     @Override
@@ -70,10 +66,8 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
             }
         });
 
-        Boolean isReservedName = Objects.equals(holder.mItem.getName(), mReservedTaskListName);
-        holder.mTaskNameView.setEnabled(!isReservedName);
         // Handle inline name change
-        if (!isReservedName) holder.mTaskNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        holder.mTaskNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 EditText editText = (EditText) v;
@@ -88,9 +82,8 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
             }
         });
 
-        holder.mTaskDeleteButton.setEnabled(!isReservedName);
         // Handle click on delete button
-        if (!isReservedName) holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
+        holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Disable the OnFocusChanged listener as it is now pointless and harmful

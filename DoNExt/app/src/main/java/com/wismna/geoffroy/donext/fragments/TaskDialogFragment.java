@@ -18,13 +18,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.Task;
@@ -210,27 +211,17 @@ public class TaskDialogFragment extends DialogFragment {
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Set due date
-                boolean isRestricted = taskLists.get(position).getName()
-                        .equals(getString(R.string.task_list_today));
-                dueDatePicker.setEnabled(!isRestricted);
-                if (isRestricted) {
-                    LocalDate today = LocalDate.now();
-                    dueDatePicker.updateDate(today.getYear(), today.getMonthOfYear() - 1, today.getDayOfMonth());
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
 
         // Auto set list value to current tab
         Bundle args = getArguments();
         int id = args.getInt("list");
         spinner.setSelection(id);
+
+        CheckBox checkBox = (CheckBox) view.findViewById(R.id.new_task_today);
+        TextView todayLabel = (TextView) view.findViewById(R.id.new_task_today_label);
+        boolean isTodayActive = args.getBoolean("today");
+        checkBox.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
+        todayLabel.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
 
         // Set other properties if they exist
         if (task != null) {
@@ -245,6 +236,8 @@ public class TaskDialogFragment extends DialogFragment {
             // Set Due Date
             LocalDate dueDate = task.getDueDate();
             dueDatePicker.updateDate(dueDate.getYear(), dueDate.getMonthOfYear() - 1, dueDate.getDayOfMonth());
+
+            checkBox.setChecked(task.isToday());
         }
         else {
             // Disallow past dates on new tasks

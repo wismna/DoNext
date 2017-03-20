@@ -30,7 +30,7 @@ public class TaskDataAccess implements AutoCloseable {
             DatabaseHelper.TASKS_COLUMN_DESC, DatabaseHelper.TASKS_COLUMN_PRIORITY,
             DatabaseHelper.TASKS_COLUMN_CYCLE, DatabaseHelper.TASKS_COLUMN_DONE,
             DatabaseHelper.TASKS_COLUMN_DELETED, DatabaseHelper.TASKS_COLUMN_LIST,
-            DatabaseHelper.TASKS_COLUMN_DUEDATE};
+            DatabaseHelper.TASKS_COLUMN_DUEDATE, DatabaseHelper.TASKS_COLUMN_TODAYDATE};
 
     public TaskDataAccess(Context context) {
         this(context, MODE.READ);
@@ -50,16 +50,15 @@ public class TaskDataAccess implements AutoCloseable {
     }
 
     /** Adds or update a task in the database */
-    public Task createOrUpdateTask(long id, String name, String description, int priority, long taskList) {
-        return createOrUpdateTask(id, name, description, priority, taskList, LocalDate.now());
-    }
-    public Task createOrUpdateTask(long id, String name, String description, int priority, long taskList, LocalDate date) {
+    public Task createOrUpdateTask(long id, String name, String description, int priority,
+                                   long taskList, LocalDate date, boolean isTodayList) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
         values.put(DatabaseHelper.TASKS_COLUMN_DESC, description);
         values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priority);
         values.put(DatabaseHelper.TASKS_COLUMN_LIST, taskList);
         values.put(DatabaseHelper.TASKS_COLUMN_DUEDATE, date.toString());
+        values.put(DatabaseHelper.TASKS_COLUMN_TODAYDATE, isTodayList? LocalDate.now().toString() : "");
         long insertId;
         if (id == 0)
             insertId = database.insert(DatabaseHelper.TASKS_TABLE_NAME, null, values);
@@ -76,6 +75,7 @@ public class TaskDataAccess implements AutoCloseable {
         return newTask;
     }
 
+    @Deprecated
     public int updateExpiredTasks(int action, long taskListId){
         String column = DatabaseHelper.TASKS_COLUMN_DELETED;
         if (action == 1)
@@ -91,28 +91,22 @@ public class TaskDataAccess implements AutoCloseable {
     }
 
     public List<Task> getAllTasks(long id) {
-        List<Task> tasks = new ArrayList<>();
-
-        Cursor cursor = getAllTasksCursor(id);
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Task task = cursorToTask(cursor);
-            tasks.add(task);
-            cursor.moveToNext();
-        }
-        // make sure to close the cursor
-        cursor.close();
-        return tasks;
-    }
-
-    private Cursor getAllTasksCursor(long id) {
-        return database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
+        Cursor cursor = database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
                 DatabaseHelper.TASKS_COLUMN_LIST + " = " + id +
-                    " AND " + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
-                    " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0,
+                        " AND " + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
+                        " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0,
                 null, null, null,
                 DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " DESC");
+        return getTasksFromCursor(cursor);
+    }
+
+    public List<Task> getTodayTasks() {
+        Cursor cursor = database.query(DatabaseHelper.TASKS_VIEW_TODAY_NAME, taskColumns,
+                DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
+                        " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0,
+                null, null, null,
+                DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " DESC");
+        return getTasksFromCursor(cursor);
     }
 
     public int setDone(long id) {
@@ -147,6 +141,21 @@ public class TaskDataAccess implements AutoCloseable {
         task.setDeleted(cursor.getInt(6));
         task.setTaskList(cursor.getLong(7));
         task.setDueDate(cursor.getString(8));
+        task.setTodayDate(cursor.getString(9));
         return task;
+    }
+
+    private List<Task> getTasksFromCursor(Cursor cursor) {
+        List<Task> tasks = new ArrayList<>();
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Task task = cursorToTask(cursor);
+            tasks.add(task);
+            cursor.moveToNext();
+        }
+        // make sure to close the cursor
+        cursor.close();
+        return tasks;
     }
 }

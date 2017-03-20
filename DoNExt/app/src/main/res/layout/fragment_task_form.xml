@@ -78,13 +78,27 @@
                 android:layout_toEndOf="@id/new_task_priority_label"
                 android:layout_below="@id/new_task_description" />
             <TextView
+                android:id="@+id/new_task_today_label"
+                android:text="@string/new_task_today"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_below="@id/new_task_priority" />
+            <CheckBox
+                android:id="@+id/new_task_today"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/new_task_today_label"
+                android:layout_below="@id/new_task_priority"  />
+            <TextView
                 android:id="@+id/new_task_due_date_label"
                 android:text="@string/new_task_due_date"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:layout_below="@id/new_task_priority" />
+                android:layout_below="@id/new_task_today" />
             <DatePicker
                 android:id="@+id/new_task_due_date"
                 android:datePickerMode="spinner"

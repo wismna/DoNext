@@ -67,4 +67,7 @@
     <string name="settings_today_action_title">Action à entreprendre à la fin de la journée:</string>
     <string name="new_task_due_date">Date de fin</string>
     <string name="task_alarm">Task is past due date</string>
+    <string name="action_todayList">Vue Aujourd\'hui</string>
+    <string name="title_activity_today">Aujourd\'hui</string>
+    <string name="new_task_today">Ajouter la tâche à la vue Aujourd\'hui?</string>
 </resources>

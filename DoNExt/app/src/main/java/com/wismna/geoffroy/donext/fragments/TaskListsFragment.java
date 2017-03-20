@@ -70,10 +70,6 @@ public class TaskListsFragment extends Fragment implements
                     editText.setError(getResources().getString(R.string.task_list_new_list_error));
                     return;
                 }
-                else if (text.matches(getString(R.string.task_list_today))) {
-                    editText.setError(getResources().getString(R.string.task_list_today_list_error));
-                    return;
-                }
                 int position = taskListRecyclerViewAdapter.getItemCount();
 
                 TaskList taskList = taskListDataAccess.createTaskList(text, position);
@@ -196,7 +192,7 @@ public class TaskListsFragment extends Fragment implements
         protected void onPostExecute(List<TaskList> taskLists) {
             super.onPostExecute(taskLists);
             taskListRecyclerViewAdapter =
-                    new TaskListRecyclerViewAdapter(taskLists, TaskListsFragment.this, getString(R.string.task_list_today));
+                    new TaskListRecyclerViewAdapter(taskLists, TaskListsFragment.this);
 
             // Set the adapter
             Context context = mView.getContext();

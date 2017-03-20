@@ -85,4 +85,8 @@
     <string name="about_version_donext">DoNext version %s</string>
     <string name="about_version_android">Android version %d</string>
     <string name="about_link" translatable="false">https://github.com/wismna</string>
+    <string name="action_todayList">Today View</string>
+    <string name="title_activity_today">Today</string>
+    <string name="new_task_today">Add task to Today View?</string>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>
