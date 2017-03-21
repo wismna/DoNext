@@ -38,6 +38,7 @@ import java.util.List;
  * Created by geoffroy on 15-11-26.
  * Represents a New or Edit Task dialog
  */
+@Deprecated
 public class TaskDialogFragment extends DialogFragment {
 
     public Task getTask() {
@@ -128,13 +129,13 @@ public class TaskDialogFragment extends DialogFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
-        getActivity().getMenuInflater().inflate(R.menu.menu_new_task, menu);
+        getActivity().getMenuInflater().inflate(R.menu.menu_dynamic_fragment, menu);
     }
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         if (task == null) {
-            menu.removeItem(R.id.menu_new_task_delete);
+            menu.removeItem(R.id.menu_neutral_button);
         }
         super.onPrepareOptionsMenu(menu);
     }
@@ -150,12 +151,12 @@ public class TaskDialogFragment extends DialogFragment {
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
         }
-        if (id == R.id.menu_new_task_save) {
+        if (id == R.id.menu_positive_button) {
             // handle save button click here
             onPositiveButtonClick(view);
             return true;
         }
-        else if (id == R.id.menu_new_task_delete) {
+        else if (id == R.id.menu_neutral_button) {
             // handle delete button click here
             onNeutralButtonClick();
             return true;
@@ -227,7 +228,7 @@ public class TaskDialogFragment extends DialogFragment {
     }
 
     private Toolbar setToolbarTitle(View view) {
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.new_task_toolbar);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.dialog_toolbar);
         toolbar.setTitle(getTag());
         return toolbar;
     }

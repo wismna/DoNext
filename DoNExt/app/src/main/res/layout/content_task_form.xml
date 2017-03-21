@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="?attr/actionBarSize"
+    android:background="@android:color/background_light">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/text_margin"
+        android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        tools:context=".activities.MainActivity">
+        <TextView
+            android:id="@+id/new_task_list_label"
+            android:text="@string/new_task_list"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_marginTop="3dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Spinner
+            android:id="@+id/new_task_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_toEndOf="@id/new_task_list_label">
+        </Spinner>
+        <EditText
+            android:id="@+id/new_task_name"
+            android:hint="@string/new_task_name_hint"
+            android:maxLines="1"
+            android:inputType="text"
+            android:textSize="30sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/new_task_list"/>
+        <EditText
+            android:id="@+id/new_task_description"
+            android:hint="@string/new_task_description_hint"
+            android:gravity="top|start"
+            android:lines="3"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/new_task_name" />
+        <TextView
+            android:id="@+id/new_task_priority_label"
+            android:text="@string/new_task_priority"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_below="@id/new_task_description" />
+        <SeekBar
+            android:id="@+id/new_task_priority"
+            android:max="2"
+            android:progress="1"
+            android:layout_width="300dp"
+            android:layout_height="30dp"
+            android:layout_toEndOf="@id/new_task_priority_label"
+            android:layout_below="@id/new_task_description" />
+        <TextView
+            android:id="@+id/new_task_today_label"
+            android:text="@string/new_task_today"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_below="@id/new_task_priority" />
+        <CheckBox
+            android:id="@+id/new_task_today"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/new_task_today_label"
+            android:layout_below="@id/new_task_priority"  />
+        <TextView
+            android:id="@+id/new_task_due_date_label"
+            android:text="@string/new_task_due_date"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/new_task_today" />
+        <DatePicker
+            android:id="@+id/new_task_due_date"
+            android:datePickerMode="spinner"
+            android:calendarViewShown="false"
+            android:spinnersShown="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/new_task_due_date_label" />
+    </RelativeLayout>
+</ScrollView>

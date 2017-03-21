@@ -70,4 +70,6 @@
     <string name="action_todayList">Vue Aujourd\'hui</string>
     <string name="title_activity_today">Aujourd\'hui</string>
     <string name="new_task_today">Ajouter la tâche à la vue Aujourd\'hui?</string>
+    <string name="today_search_hint">Rechercher...</string>
+    <string name="action_today_select">Choisissez des tâches</string>
 </resources>

@@ -114,7 +114,7 @@ public class Task {
     }
 
     public boolean isToday() {
-        return todayDate!= null && todayDate.isEqual(LocalDate.now());
+        return todayDate != null && todayDate.isEqual(LocalDate.now());
     }
 
     // Will be used by the ArrayAdapter in the ListView

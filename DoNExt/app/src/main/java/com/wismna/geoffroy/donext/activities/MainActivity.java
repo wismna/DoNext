@@ -28,7 +28,7 @@ import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
-import com.wismna.geoffroy.donext.fragments.TaskDialogFragment;
+import com.wismna.geoffroy.donext.fragments.TaskFormDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
 
 import java.util.List;
@@ -183,20 +183,24 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
     /** Called when user clicks on the New Task floating button */
     public void onNewTaskClick(View view) {
         int currentTabPosition = mViewPager.getCurrentItem();
-        TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(null,
+        TaskFormDialogFragment taskDialogFragment = TaskFormDialogFragment.newInstance(null,
                 mSectionsPagerAdapter.getAllItems(),
                 (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(currentTabPosition));
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        // Set current tab value to new task dialog
+        // Set some configuration values for the tab
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         Bundle args = new Bundle();
         args.putInt("list", currentTabPosition);
         args.putBoolean("layout", mIsLargeLayout);
         args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
+        args.putBoolean("neutral", false);
+        args.putString("button_positive", getString(R.string.new_task_save));
+        args.putString("button_negative", getString(R.string.new_task_cancel));
+        args.putString("button_neutral", getString(R.string.new_task_delete));
         taskDialogFragment.setArguments(args);
 
         String title = getString(R.string.action_new_task);
+        FragmentManager fragmentManager = getSupportFragmentManager();
         if (mIsLargeLayout)
             taskDialogFragment.show(fragmentManager, title);
         else {

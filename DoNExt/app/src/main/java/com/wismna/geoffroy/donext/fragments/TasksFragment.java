@@ -44,7 +44,7 @@ import java.util.List;
  * A fragment representing a list of Items.
  */
 public class TasksFragment extends Fragment implements
-        TaskDialogFragment.NewTaskListener,
+        TaskFormDialogFragment.NewTaskListener,
         ConfirmDialogFragment.ConfirmDialogListener,
         TaskTouchHelper.TaskTouchHelperAdapter {
 
@@ -106,7 +106,7 @@ public class TasksFragment extends Fragment implements
         // Get all tasks
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext())) {
             taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
-                    isTodayView? taskDataAccess.getTodayTasks() : taskDataAccess.getAllTasks(taskListId),
+                    isTodayView? taskDataAccess.getTodayTasks() : taskDataAccess.getAllTasksFromList(taskListId),
                     Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")));
         }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
@@ -126,6 +126,10 @@ public class TasksFragment extends Fragment implements
                         args.putInt("position", position);
                         args.putBoolean("layout", mIsLargeLayout);
                         args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
+                        args.putBoolean("neutral", true);
+                        args.putString("button_positive", getString(R.string.new_task_save));
+                        args.putString("button_negative", getString(R.string.new_task_cancel));
+                        args.putString("button_neutral", getString(R.string.new_task_delete));
 
                         // Set current tab value to new task dialog
                         ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.container);
@@ -149,7 +153,7 @@ public class TasksFragment extends Fragment implements
                         }
 
                         FragmentManager manager = getFragmentManager();
-                        TaskDialogFragment taskDialogFragment = TaskDialogFragment.newInstance(
+                        TaskFormDialogFragment taskDialogFragment = TaskFormDialogFragment.newInstance(
                                 task, taskLists, TasksFragment.this);
                         taskDialogFragment.setArguments(args);
 
@@ -335,7 +339,7 @@ public class TasksFragment extends Fragment implements
         // Get the dialog fragment
         if (dialogView == null) return;
         long id = 0;
-        Task task = ((TaskDialogFragment)dialog).getTask();
+        Task task = ((TaskFormDialogFragment)dialog).getTask();
         if (task != null) id = task.getId();
 
         // Get the controls
@@ -346,7 +350,7 @@ public class TasksFragment extends Fragment implements
         DatePicker dueDatePicker = (DatePicker) dialogView.findViewById(R.id.new_task_due_date);
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
         CheckBox todayList = (CheckBox) dialogView.findViewById(R.id.new_task_today);
-
+        boolean isToday = todayList.isChecked();
         // Add the task to the database
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
             Task newTask = taskDataAccess.createOrUpdateTask(id,
@@ -355,7 +359,7 @@ public class TasksFragment extends Fragment implements
                     seekBar.getProgress(),
                     taskList.getId(),
                     new LocalDate(dueDatePicker.getYear(), dueDatePicker.getMonth() + 1, dueDatePicker.getDayOfMonth()),
-                    todayList.isChecked());
+                    isToday);
 
             Bundle args = dialog.getArguments();
             // Should never happen because we will have to be on this tab to open the dialog
@@ -377,15 +381,16 @@ public class TasksFragment extends Fragment implements
             else {
                 int position = args.getInt("position");
                 // Check if task list was changed
-                if (mAdapter != null && task.getTaskListId() != taskList.getId())
+                if ((isTodayView && !isToday) || (!isTodayView && task.getTaskListId() != taskList.getId()))
                 {
                     // Remove item from current tab
                     taskRecyclerViewAdapter.remove(position);
-                    //UpdateCycleCount();
 
                     // Add it to the corresponding tab provided it is already instantiated
-                    mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
-                } else taskRecyclerViewAdapter.update(newTask, position);
+                    if (mAdapter != null) mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
+                } else {
+                    taskRecyclerViewAdapter.update(newTask, position);
+                }
             }
         }
     }
