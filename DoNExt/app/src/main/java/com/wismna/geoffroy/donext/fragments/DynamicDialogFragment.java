@@ -110,10 +110,15 @@ public abstract class DynamicDialogFragment extends DialogFragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
+        Bundle args = getArguments();
         // Show the neutral button if needed
         if (!mHasNeutralButton) {
             menu.removeItem(R.id.menu_neutral_button);
         }
+        else {
+            menu.findItem(R.id.menu_neutral_button).setTitle(args.getString("button_neutral"));
+        }
+        menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
         super.onPrepareOptionsMenu(menu);
     }
 

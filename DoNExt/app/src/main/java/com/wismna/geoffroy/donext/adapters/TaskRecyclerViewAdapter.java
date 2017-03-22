@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.SimpleViewHolder> {
 
-    private final List<Task> mValues;
+    private List<Task> mValues;
     private int viewType;
 
     public TaskRecyclerViewAdapter(List<Task> items, int viewType) {
@@ -112,10 +112,14 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         return count;
     }
 
+    public void setItems(List<Task> tasks) {
+        this.mValues = tasks;
+        notifyDataSetChanged();
+    }
+
     public Task getItem(int position) {
         return mValues.get(position);
     }
-
 
     class SimpleViewHolder extends RecyclerView.ViewHolder {
         final View mView;

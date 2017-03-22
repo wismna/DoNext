@@ -1,18 +1,22 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
 import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.adapters.TodayArrayAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
+import com.wismna.geoffroy.donext.database.TaskDataAccess;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
@@ -26,16 +30,20 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface TodayTaskListener {
-        void onTodayTaskDialogPositiveClick(DialogFragment dialog, View dialogView);
+        void onTodayTaskDialogPositiveClick(View dialogView);
+        void onTodayTasksUpdated();
     }
-
     private TodayFormDialogFragment.TodayTaskListener mListener;
     private List<Task> tasks;
 
-    public static TodayFormDialogFragment newInstance(List<Task> tasks, TodayTaskListener todayTaskListener) {
+    public static TodayFormDialogFragment newInstance(Context context, TodayTaskListener todayTaskListener) {
         TodayFormDialogFragment fragment = new TodayFormDialogFragment();
-        fragment.tasks = tasks;
+
         fragment.mListener = todayTaskListener;
+        // TODO: put this in an AsyncTask
+        try(TaskDataAccess taskDataAccess = new TaskDataAccess(context)) {
+            fragment.tasks = taskDataAccess.getAllTasks();
+        }
         fragment.setRetainInstance(true);
         return fragment;
     }
@@ -59,15 +67,17 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
 
     private void setLayoutValues(View view) {
         EditText editText = (EditText) view.findViewById(R.id.today_search);
-        ListView listView = (ListView) view.findViewById(R.id.today_tasks);
-        final ArrayAdapter<Task> adapter = new ArrayAdapter<>(getActivity(), R.layout.list_task_item, tasks);
+        final ListView listView = (ListView) view.findViewById(R.id.today_tasks);
+        final TodayArrayAdapter adapter = new TodayArrayAdapter(getActivity(), tasks);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Set as selected
-                Task task = tasks.get(position);
-                view.setSelected(!view.isSelected());
+                // Set Today date for the task
+                Task task = adapter.getItem(position);
+                if (task == null) return;
+                task.setTodayDate(task.isToday() ? "" : LocalDate.now().toString());
+                adapter.notifyDataSetChanged();
             }
         });
         editText.addTextChangedListener(new TextWatcher() {
@@ -90,7 +100,10 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
 
     @Override
     protected void onPositiveButtonClick(View view) {
-        mListener.onTodayTaskDialogPositiveClick(TodayFormDialogFragment.this, view);
+        mListener.onTodayTaskDialogPositiveClick(view);
+        // TODO: find a way to filter this list to only get changed tasks
+        new UpdateTasks().execute(tasks.toArray(new Task[tasks.size()]));
+        dismiss();
     }
 
     @Override
@@ -102,4 +115,25 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     protected void onNegativeButtonClick() {
         dismiss();
     }
-}
+
+    private class UpdateTasks extends AsyncTask<Task, Void, Integer> {
+        @Override
+        protected Integer doInBackground(Task... params) {
+            int elementsUpdated = 0;
+            try (TaskDataAccess taskDataAccess = new TaskDataAccess(getActivity(), TaskDataAccess.MODE.WRITE)) {
+                for (Task task :
+                        params) {
+                    taskDataAccess.updateTodayTasks(task.getId(), task.isToday());
+                    elementsUpdated++;
+                }
+            }
+            return elementsUpdated;
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
+            mListener.onTodayTasksUpdated();
+        }
+    }
+ }

@@ -90,6 +90,13 @@ public class TaskDataAccess implements AutoCloseable {
                     " AND " + DatabaseHelper.TASKS_COLUMN_LIST + " = " + taskListId, null);
     }
 
+    public int updateTodayTasks(long id, boolean isTodayList){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseHelper.TASKS_COLUMN_TODAYDATE, isTodayList? LocalDate.now().toString() : "");
+        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues,
+                DatabaseHelper.COLUMN_ID + " == " + id, null);
+    }
+
     public List<Task> getAllTasks() {
         Cursor cursor = database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
                 DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +

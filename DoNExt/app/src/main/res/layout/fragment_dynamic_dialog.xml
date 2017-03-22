@@ -10,6 +10,7 @@
         android:theme="@style/AppTheme.AppBarOverlay">
         <include layout="@layout/toolbar" android:id="@+id/dialog_toolbar" />
     </android.support.design.widget.AppBarLayout>
+    <!-- This will contain the actual contents of the dialog -->
     <FrameLayout
         android:id="@+id/dynamic_fragment_content"
         android:layout_width="match_parent"

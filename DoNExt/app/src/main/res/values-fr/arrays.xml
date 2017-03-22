@@ -6,6 +6,6 @@
     </string-array>
     <string-array name="settings_today_actions">
         <item>Terminer</item>
-        <item>Supprimer</item>
+        <item>Réinitialiser</item>
     </string-array>
 </resources>

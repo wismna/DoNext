@@ -46,7 +46,7 @@ import java.util.List;
 public class TasksFragment extends Fragment implements
         TaskFormDialogFragment.NewTaskListener,
         ConfirmDialogFragment.ConfirmDialogListener,
-        TaskTouchHelper.TaskTouchHelperAdapter {
+        TaskTouchHelper.TaskTouchHelperAdapter{
 
     public interface TaskChangedAdapter {
         void onTaskListChanged(Task task, int tabPosition);
