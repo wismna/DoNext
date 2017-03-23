@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical|start"
         android:scaleType="center"
-        android:src="@drawable/ic_reorder_grey_500_24dp"
+        android:src="@drawable/ic_reorder"
         android:contentDescription="@string/task_list_drag_handle"/>
     <TextView
         android:id="@+id/task_list_count"
@@ -23,6 +23,7 @@
         android:layout_height="?listPreferredItemHeight"
         android:layout_weight="2"
         android:inputType="text"
+        android:hint="@string/task_list_edit_list_hint"
         android:textAppearance="?android:attr/textAppearanceLarge"/>
     <Button
         android:id="@+id/task_list_delete"

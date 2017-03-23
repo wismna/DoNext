@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -47,7 +48,8 @@ public class ConfirmDialogFragment extends DialogFragment {
 
         Bundle args = getArguments();
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_task_confirmation, null);
+        // No need for a parent in a Dialog Fragment
+        @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.fragment_task_confirmation, null);
         builder.setView(view).setMessage(args.getString("message"))
             .setPositiveButton(args.getInt("button"), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {

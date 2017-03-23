@@ -22,7 +22,7 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
         void onItemSwiped(int position, int direction);
     }
 
-    private TaskTouchHelperAdapter mAdapter;
+    private final TaskTouchHelperAdapter mAdapter;
 
     public TaskTouchHelper(TaskTouchHelperAdapter adapter){
         // No drag moves, no swipes (except for 1st element, see getSwipeDirs method)

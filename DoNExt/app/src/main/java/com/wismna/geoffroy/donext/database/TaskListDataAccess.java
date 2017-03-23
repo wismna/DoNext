@@ -22,8 +22,8 @@ public class TaskListDataAccess implements AutoCloseable {
     }
     // Database fields
     private SQLiteDatabase database;
-    private DatabaseHelper dbHelper;
-    private String[] taskListColumns =
+    private final DatabaseHelper dbHelper;
+    private final String[] taskListColumns =
             {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME,
             DatabaseHelper.COLUMN_ORDER, DatabaseHelper.TASKLIST_COLUMN_VISIBLE};
 
@@ -45,14 +45,10 @@ public class TaskListDataAccess implements AutoCloseable {
     }
 
     public TaskList createTaskList(String name, int order) {
-        return createTaskList(name, order, true);
-    }
-
-    public TaskList createTaskList(String name, int order, Boolean visible) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
         values.put(DatabaseHelper.COLUMN_ORDER, order);
-        values.put(DatabaseHelper.TASKLIST_COLUMN_VISIBLE, visible ? 1 : 0);
+        values.put(DatabaseHelper.TASKLIST_COLUMN_VISIBLE, 1);
         long insertId = database.insert(DatabaseHelper.TASKLIST_TABLE_NAME, null,
                 values);
         Cursor cursor = database.query(DatabaseHelper.TASKLIST_TABLE_NAME,
@@ -79,10 +75,6 @@ public class TaskListDataAccess implements AutoCloseable {
 
     public void updateName(long id, String name) {
         update(id, DatabaseHelper.TASKLIST_COLUMN_NAME, name);
-    }
-
-    public void updateVisibility(long id, boolean visible){
-        update(id, DatabaseHelper.TASKLIST_COLUMN_VISIBLE, visible ? 1 : 0);
     }
 
     public TaskList getTaskListByName(String name) {

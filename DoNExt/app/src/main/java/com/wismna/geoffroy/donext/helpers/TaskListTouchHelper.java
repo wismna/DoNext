@@ -11,7 +11,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 public class TaskListTouchHelper extends ItemTouchHelper.SimpleCallback  {
 
     public interface TaskListTouchHelperAdapter {
-        boolean onItemMove (int fromPosition, int toPosition);
+        boolean onItemMove(int fromPosition, int toPosition);
     }
 
     private final TaskListTouchHelperAdapter mAdapter;

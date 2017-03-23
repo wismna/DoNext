@@ -187,21 +187,21 @@ public class TasksFragment extends Fragment implements
                 int totalCycles = taskRecyclerViewAdapter.getCycleCount();
                 TextView totalCyclesView = (TextView) view.findViewById(R.id.total_task_cycles);
                 if (totalCycles != 0)
-                    totalCyclesView.setText(resources.getString(R.string.task_total_cycles, totalCycles, (totalCycles > 1 ? "s" : "")));
+                    totalCyclesView.setText(resources.getQuantityString(R.plurals.task_total_cycles, totalCycles, totalCycles));
                 else totalCyclesView.setText("");
 
                 // Update total tasks
                 int totalTasks = taskRecyclerViewAdapter.getItemCount();
                 TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
-                if (totalTasks == 0) totalTasksView.setText(resources.getText(R.string.task_no_tasks));
-                else totalTasksView.setText(resources.getString(R.string.task_total, totalTasks, (totalTasks > 1 ? "s" : "")));
+                if (totalTasks == 0) view.findViewById(R.id.no_more_tasks).setVisibility(View.VISIBLE);
+                else totalTasksView.setText(resources.getQuantityString(R.plurals.task_total, totalTasks, totalTasks));
 
                 // Update remaining tasks
                 TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
                 NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
                 int remainingTaskCount = totalTasks - layoutManager.findLastVisibleItemPosition() - 1;
                 if (remainingTaskCount == 0) remainingTasksView.setText("");
-                else remainingTasksView.setText(resources.getString(R.string.task_remaining, remainingTaskCount, (remainingTaskCount > 1 ? "s" : "")));
+                else remainingTasksView.setText(resources.getQuantityString(R.plurals.task_remaining, remainingTaskCount, remainingTaskCount));
 
                 //recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 return true;
@@ -214,89 +214,8 @@ public class TasksFragment extends Fragment implements
 
     @Override
     public void onPause() {
-        super.onPause();
         if (snackbar != null) snackbar.dismiss();
-    }
-
-    /** Performs an action on a task: done, next or delete */
-    public void PerformTaskAction(final int itemPosition, final int direction) {
-        final long itemId = taskRecyclerViewAdapter.getItemId(itemPosition);
-        final Task task = taskRecyclerViewAdapter.getItem(itemPosition);
-        String action = "";
-        Resources resources = getResources();
-
-        taskRecyclerViewAdapter.remove(itemPosition);
-
-        switch (direction)
-        {
-            // Mark item as Done
-            case ItemTouchHelper.LEFT:
-                action = resources.getString(R.string.snackabar_action_done);
-                break;
-            // Increase task cycle count
-            case ItemTouchHelper.RIGHT:
-                action = resources.getString(R.string.snackabar_action_next);
-                task.setCycle(task.getCycle() + 1);
-                taskRecyclerViewAdapter.add(task, taskRecyclerViewAdapter.getItemCount());
-                break;
-            case -1:
-                FragmentManager manager = getFragmentManager();
-                DialogFragment dialog = (DialogFragment) manager.findFragmentByTag(getString(R.string.action_edit_task));
-                if (dialog != null) dialog.dismiss();
-                action = resources.getString(R.string.snackabar_action_deleted);
-                break;
-        }
-
-        // Setup the snack bar
-        snackbar = Snackbar.make(view, resources.getString(R.string.snackabar_label, action), Snackbar.LENGTH_LONG)
-            .setAction(resources.getString(R.string.snackabar_button), new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Undo adapter changes
-                    switch (direction) {
-                        // Nothing special to do for done
-                        case ItemTouchHelper.LEFT:
-                            break;
-                        // Remove the last item
-                        case ItemTouchHelper.RIGHT:
-                            taskRecyclerViewAdapter.remove(taskRecyclerViewAdapter.getItemCount() - 1);
-                            task.setCycle(task.getCycle() - 1);
-                            break;
-                        // Nothing special to do for delete
-                        case -1:
-                            break;
-                    }
-                    // Reset the first item
-                    taskRecyclerViewAdapter.add(task, itemPosition);
-                    recyclerView.scrollToPosition(0);
-                }
-            });
-        snackbar.addCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar snackbar, int event) {
-                super.onDismissed(snackbar, event);
-
-                // When clicked on undo, do not write to DB
-                if (event == DISMISS_EVENT_ACTION) return;
-
-                // Commit the changes to DB
-                try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
-                    switch (direction) {
-                        // Mark item as Done
-                        case ItemTouchHelper.LEFT:
-                            taskDataAccess.setDone(itemId);
-                            break;
-                        // Increase task cycle count
-                        case ItemTouchHelper.RIGHT:
-                            taskDataAccess.increaseCycle(task.getCycle(), itemId);
-                            break;
-                        case -1:
-                            // Commit the changes to DB
-                            taskDataAccess.deleteTask(itemId);
-                    }
-                }
-            }
-        }).show();
+        super.onPause();
     }
 
     @Override
@@ -455,5 +374,86 @@ public class TasksFragment extends Fragment implements
             confirmDialogFragment.show(getFragmentManager(), title);
         }
         else PerformTaskAction(itemPosition, direction);
+    }
+
+    /** Performs an action on a task: done, next or delete */
+    private void PerformTaskAction(final int itemPosition, final int direction) {
+        final long itemId = taskRecyclerViewAdapter.getItemId(itemPosition);
+        final Task task = taskRecyclerViewAdapter.getItem(itemPosition);
+        String action = "";
+        Resources resources = getResources();
+
+        taskRecyclerViewAdapter.remove(itemPosition);
+
+        switch (direction)
+        {
+            // Mark item as Done
+            case ItemTouchHelper.LEFT:
+                action = resources.getString(R.string.snackabar_action_done);
+                break;
+            // Increase task cycle count
+            case ItemTouchHelper.RIGHT:
+                action = resources.getString(R.string.snackabar_action_next);
+                task.setCycle(task.getCycle() + 1);
+                taskRecyclerViewAdapter.add(task, taskRecyclerViewAdapter.getItemCount());
+                break;
+            case -1:
+                FragmentManager manager = getFragmentManager();
+                DialogFragment dialog = (DialogFragment) manager.findFragmentByTag(getString(R.string.action_edit_task));
+                if (dialog != null) dialog.dismiss();
+                action = resources.getString(R.string.snackabar_action_deleted);
+                break;
+        }
+
+        // Setup the snack bar
+        snackbar = Snackbar.make(view, resources.getString(R.string.snackabar_label, action), Snackbar.LENGTH_LONG)
+                .setAction(resources.getString(R.string.snackabar_button), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Undo adapter changes
+                        switch (direction) {
+                            // Nothing special to do for done
+                            case ItemTouchHelper.LEFT:
+                                break;
+                            // Remove the last item
+                            case ItemTouchHelper.RIGHT:
+                                taskRecyclerViewAdapter.remove(taskRecyclerViewAdapter.getItemCount() - 1);
+                                task.setCycle(task.getCycle() - 1);
+                                break;
+                            // Nothing special to do for delete
+                            case -1:
+                                break;
+                        }
+                        // Reset the first item
+                        taskRecyclerViewAdapter.add(task, itemPosition);
+                        recyclerView.scrollToPosition(0);
+                    }
+                });
+        snackbar.addCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+
+                // When clicked on undo, do not write to DB
+                if (event == DISMISS_EVENT_ACTION) return;
+
+                // Commit the changes to DB
+                try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
+                    switch (direction) {
+                        // Mark item as Done
+                        case ItemTouchHelper.LEFT:
+                            taskDataAccess.setDone(itemId);
+                            break;
+                        // Increase task cycle count
+                        case ItemTouchHelper.RIGHT:
+                            taskDataAccess.increaseCycle(task.getCycle(), itemId);
+                            break;
+                        case -1:
+                            // Delete the task
+                            taskDataAccess.deleteTask(itemId);
+                    }
+                }
+            }
+        }).show();
     }
 }

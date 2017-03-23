@@ -23,7 +23,7 @@ import java.util.List;
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.SimpleViewHolder> {
 
     private List<Task> mValues;
-    private int viewType;
+    private final int viewType;
 
     public TaskRecyclerViewAdapter(List<Task> items, int viewType) {
         mValues = items;
@@ -52,7 +52,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(String.valueOf(holder.mItem.getId()));
         if(holder.mItem.getDueDate().isBefore(LocalDate.now()))
-            holder.mAlarmView.setImageResource(R.drawable.ic_access_alarm_black_24dp);
+            holder.mAlarmView.setImageResource(R.drawable.ic_access_alarm);
         holder.mCycleView.setText(String.valueOf(holder.mItem.getCycle()));
         holder.mTitleView.setText(holder.mItem.getName());
         if (holder instanceof DetailedViewHolder)

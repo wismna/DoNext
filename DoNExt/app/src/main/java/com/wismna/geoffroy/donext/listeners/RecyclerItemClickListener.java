@@ -11,13 +11,13 @@ import android.view.View;
  * Listener class on RecyclerView to intercept touch events
  */
 public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
-    private OnItemClickListener mListener;
+    private final OnItemClickListener mListener;
 
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
     }
 
-    GestureDetector mGestureDetector;
+    private final GestureDetector mGestureDetector;
 
     public RecyclerItemClickListener(Context context, OnItemClickListener listener) {
         mListener = listener;

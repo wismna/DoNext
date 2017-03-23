@@ -24,8 +24,8 @@ public class TaskDataAccess implements AutoCloseable {
     }
 
     private SQLiteDatabase database;
-    private DatabaseHelper dbHelper;
-    private String[] taskColumns = {
+    private final DatabaseHelper dbHelper;
+    private final String[] taskColumns = {
             DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKS_COLUMN_NAME,
             DatabaseHelper.TASKS_COLUMN_DESC, DatabaseHelper.TASKS_COLUMN_PRIORITY,
             DatabaseHelper.TASKS_COLUMN_CYCLE, DatabaseHelper.TASKS_COLUMN_DONE,
@@ -40,7 +40,7 @@ public class TaskDataAccess implements AutoCloseable {
         open(writeMode);
     }
 
-    public void open(MODE writeMode) throws SQLException {
+    private void open(MODE writeMode) throws SQLException {
         if (writeMode == MODE.WRITE) database = dbHelper.getWritableDatabase();
         else database = dbHelper.getReadableDatabase();
     }
@@ -75,25 +75,10 @@ public class TaskDataAccess implements AutoCloseable {
         return newTask;
     }
 
-    @Deprecated
-    public int updateExpiredTasks(int action, long taskListId){
-        String column = DatabaseHelper.TASKS_COLUMN_DELETED;
-        if (action == 1)
-            column = DatabaseHelper.TASKS_COLUMN_DONE;
-        else if (action == 2)
-            column = DatabaseHelper.TASKS_COLUMN_DELETED;
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(column, 1);
-        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues,
-                DatabaseHelper.TASKS_COLUMN_DUEDATE + " <= date('now','-1 day')" +
-                    " AND " + DatabaseHelper.TASKS_COLUMN_LIST + " = " + taskListId, null);
-    }
-
-    public int updateTodayTasks(long id, boolean isTodayList){
+    public void updateTodayTasks(long id, boolean isTodayList){
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper.TASKS_COLUMN_TODAYDATE, isTodayList? LocalDate.now().toString() : "");
-        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues,
+        database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues,
                 DatabaseHelper.COLUMN_ID + " == " + id, null);
     }
 

@@ -49,8 +49,7 @@ public class TaskListsFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        taskListDataAccess = new TaskListDataAccess(getContext());
-        taskListDataAccess.open(TaskListDataAccess.MODE.WRITE);
+        taskListDataAccess = new TaskListDataAccess(getContext(), TaskListDataAccess.MODE.WRITE);
         new GetTaskListsTask().execute(taskListDataAccess);
     }
 

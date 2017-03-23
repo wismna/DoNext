@@ -58,6 +58,6 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         android:onClick="onNewTaskClick"
-        android:src="@drawable/ic_add_white_24dp" />
+        android:src="@drawable/ic_add" />
 
 </android.support.design.widget.CoordinatorLayout>

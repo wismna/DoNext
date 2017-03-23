@@ -17,12 +17,4 @@
         <item>1</item>
         <item>2</item>
     </string-array>
-    <string-array name="settings_today_actions">
-        <item>Done</item>
-        <item>Reset</item>
-    </string-array>
-    <string-array name="settings_today_action_values" translatable="false">
-        <item>1</item>
-        <item>2</item>
-    </string-array>
 </resources>

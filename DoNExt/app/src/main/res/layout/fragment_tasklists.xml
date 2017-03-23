@@ -16,7 +16,6 @@
         android:id="@+id/new_task_list_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="75dp"
         android:layout_marginStart="75dp">
         <EditText
             android:id="@+id/new_task_list_name"

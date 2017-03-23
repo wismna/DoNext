@@ -33,7 +33,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
     }
 
     private final List<TaskList> mValues;
-    private TaskListRecyclerViewAdapterListener mListener;
+    private final TaskListRecyclerViewAdapterListener mListener;
 
     public TaskListRecyclerViewAdapter(List<TaskList> items,
                                        TaskListRecyclerViewAdapterListener listener) {
@@ -110,7 +110,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         notifyItemRemoved(position);
     }
 
-    public void update(TaskList item, int position) {
+    private void update(TaskList item, int position) {
         mValues.set(position, item);
         notifyItemChanged(position);
     }

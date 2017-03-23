@@ -18,6 +18,7 @@ import com.wismna.geoffroy.donext.database.TaskDataAccess;
 
 import org.joda.time.LocalDate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,16 +35,12 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         void onTodayTasksUpdated();
     }
     private TodayFormDialogFragment.TodayTaskListener mListener;
-    private List<Task> tasks;
+    private final List<Task> mUpdatedTasks = new ArrayList<>();
 
     public static TodayFormDialogFragment newInstance(Context context, TodayTaskListener todayTaskListener) {
         TodayFormDialogFragment fragment = new TodayFormDialogFragment();
 
         fragment.mListener = todayTaskListener;
-        // TODO: put this in an AsyncTask
-        try(TaskDataAccess taskDataAccess = new TaskDataAccess(context)) {
-            fragment.tasks = taskDataAccess.getAllTasks();
-        }
         fragment.setRetainInstance(true);
         return fragment;
     }
@@ -53,19 +50,15 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContentFragment = new TodayFormContentFragment();
+        // Load the tasks asynchronously
+        new LoadTasks().execute(getActivity());
         Bundle args = getArguments();
         if (args != null) {
             mIsLargeLayout = args.getBoolean("layout");
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        setLayoutValues(getView());
-    }
-
-    private void setLayoutValues(View view) {
+    private void setLayoutValues(View view, List<Task> tasks) {
         EditText editText = (EditText) view.findViewById(R.id.today_search);
         final ListView listView = (ListView) view.findViewById(R.id.today_tasks);
         final TodayArrayAdapter adapter = new TodayArrayAdapter(getActivity(), tasks);
@@ -77,6 +70,10 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
                 Task task = adapter.getItem(position);
                 if (task == null) return;
                 task.setTodayDate(task.isToday() ? "" : LocalDate.now().toString());
+                // Maintain a list of actually updated tasks to commit to DB
+                if (!mUpdatedTasks.contains(task)) mUpdatedTasks.add(task);
+                else mUpdatedTasks.remove(task);
+                // Refresh the view
                 adapter.notifyDataSetChanged();
             }
         });
@@ -101,8 +98,8 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     @Override
     protected void onPositiveButtonClick(View view) {
         mListener.onTodayTaskDialogPositiveClick(view);
-        // TODO: find a way to filter this list to only get changed tasks
-        new UpdateTasks().execute(tasks.toArray(new Task[tasks.size()]));
+        // Only commit the updated tasks to DB
+        new UpdateTasks().execute(mUpdatedTasks.toArray(new Task[mUpdatedTasks.size()]));
         dismiss();
     }
 
@@ -114,6 +111,21 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     @Override
     protected void onNegativeButtonClick() {
         dismiss();
+    }
+
+    private class LoadTasks extends AsyncTask<Context, Void, List<Task>> {
+        @Override
+        protected  List<Task> doInBackground(Context... params) {
+            try(TaskDataAccess taskDataAccess = new TaskDataAccess(params[0])) {
+                return taskDataAccess.getAllTasks();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(List<Task> tasks) {
+            super.onPostExecute(tasks);
+            setLayoutValues(getView(), tasks);
+        }
     }
 
     private class UpdateTasks extends AsyncTask<Task, Void, Integer> {

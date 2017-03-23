@@ -1,5 +1,11 @@
 package com.wismna.geoffroy.donext.adapters;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.SparseArray;
+import android.view.ViewGroup;
+
 /**
  * Created by geoffroy on 15-11-28.
  * Extension of FragmentStatePagerAdapter which intelligently caches
@@ -7,15 +13,9 @@ package com.wismna.geoffroy.donext.adapters;
  * Usage involves extending from SmartFragmentStatePagerAdapter as you would any other PagerAdapter.
  */
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.util.SparseArray;
-import android.view.ViewGroup;
-
 public abstract class SmartFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
     // Sparse array to keep track of registered fragments in memory
-    private SparseArray<Fragment> registeredFragments = new SparseArray<>();
+    private final SparseArray<Fragment> registeredFragments = new SparseArray<>();
 
     public SmartFragmentStatePagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);

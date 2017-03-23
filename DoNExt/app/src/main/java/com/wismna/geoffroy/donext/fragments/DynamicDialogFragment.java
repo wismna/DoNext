@@ -32,9 +32,9 @@ import com.wismna.geoffroy.donext.R;
 
 public abstract class DynamicDialogFragment extends DialogFragment {
     private View mDialogView = null;
-    protected boolean mHasNeutralButton = false;
-    protected boolean mIsLargeLayout = false;
-    protected Fragment mContentFragment = new Fragment();
+    boolean mHasNeutralButton = false;
+    boolean mIsLargeLayout = false;
+    Fragment mContentFragment = new Fragment();
 
     @Nullable
     @Override

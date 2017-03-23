@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="task_total_cycles">
+        <item quantity="one">%1$d cycle</item>
+        <item quantity="other">%1$d cycles</item>
+    </plurals>
+    <plurals name="task_total">
+        <item quantity="one">%1$d task</item>
+        <item quantity="other">%1$d tasks</item>
+    </plurals>
+    <plurals name="task_remaining">
+        <item quantity="one">%1$d more task</item>
+        <item quantity="other">%1$d more tasks</item>
+    </plurals>
+</resources>

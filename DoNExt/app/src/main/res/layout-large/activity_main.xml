@@ -12,7 +12,6 @@
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/appbar_padding_top"
         android:theme="@style/AppTheme.AppBarOverlay">
         <include layout="@layout/toolbar" android:id="@+id/toolbar" />
     </android.support.design.widget.AppBarLayout>
@@ -24,7 +23,7 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         android:onClick="onNewTaskClick"
-        android:src="@drawable/ic_add_white_24dp" />
+        android:src="@drawable/ic_add" />
 
     <LinearLayout
         android:layout_width="wrap_content"

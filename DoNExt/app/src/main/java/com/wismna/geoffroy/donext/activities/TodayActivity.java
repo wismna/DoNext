@@ -49,23 +49,6 @@ public class TodayActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem displayLayoutItem = menu.findItem(R.id.action_changeLayout);
-        if (displayLayoutItem == null) return false;
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String layoutType = sharedPref.getString("pref_conf_task_layout", "1");
-        switch (layoutType) {
-            case "1" :
-                displayLayoutItem.setIcon(R.drawable.ic_list_white_24dp);
-                break;
-            case "2" :
-                displayLayoutItem.setIcon(R.drawable.ic_view_list_white_24dp);
-                break;
-        }
-        return super.onPrepareOptionsMenu(menu);
-    }
-
     /** Called when the user clicks on the Change Layout button */
     public void changeLayout(MenuItem item) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -75,10 +58,9 @@ public class TodayActivity extends AppCompatActivity
         editor.putString("pref_conf_task_layout", String.valueOf(layoutType % 2 + 1));
         editor.apply();
 
+        // TODO: refresh the task list
         // Update the ViewPagerAdapter to refresh all tabs
         //mSectionsPagerAdapter.notifyDataSetChanged();
-        // Invalidate the menu to redraw the icon
-        invalidateOptionsMenu();
     }
 
 
