@@ -193,8 +193,16 @@ public class TasksFragment extends Fragment implements
                 // Update total tasks
                 int totalTasks = taskRecyclerViewAdapter.getItemCount();
                 TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
-                if (totalTasks == 0) view.findViewById(R.id.no_more_tasks).setVisibility(View.VISIBLE);
-                else totalTasksView.setText(resources.getQuantityString(R.plurals.task_total, totalTasks, totalTasks));
+                View noMoreTasks = view.findViewById(R.id.no_more_tasks);
+                if (totalTasks == 0) {
+                    noMoreTasks.setVisibility(View.VISIBLE);
+                    totalTasksView.setVisibility(View.GONE);
+                }
+                else {
+                    noMoreTasks.setVisibility(View.GONE);
+                    totalTasksView.setVisibility(View.VISIBLE);
+                    totalTasksView.setText(resources.getQuantityString(R.plurals.task_total, totalTasks, totalTasks));
+                }
 
                 // Update remaining tasks
                 TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
@@ -433,7 +441,6 @@ public class TasksFragment extends Fragment implements
             @Override
             public void onDismissed(Snackbar snackbar, int event) {
                 super.onDismissed(snackbar, event);
-
                 // When clicked on undo, do not write to DB
                 if (event == DISMISS_EVENT_ACTION) return;
 

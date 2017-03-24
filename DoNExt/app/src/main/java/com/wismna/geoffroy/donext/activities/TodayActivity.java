@@ -58,9 +58,9 @@ public class TodayActivity extends AppCompatActivity
         editor.putString("pref_conf_task_layout", String.valueOf(layoutType % 2 + 1));
         editor.apply();
 
-        // TODO: refresh the task list
+        // TODO: find a less ugly way to refresh the list
         // Update the ViewPagerAdapter to refresh all tabs
-        //mSectionsPagerAdapter.notifyDataSetChanged();
+        this.recreate();
     }
 
 

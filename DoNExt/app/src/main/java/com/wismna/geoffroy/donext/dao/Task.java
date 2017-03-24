@@ -87,7 +87,6 @@ public class Task {
         return taskListName;
     }
 
-    // TODO: implement this via SQL
     public void setTaskListName(String taskListName) {
         this.taskListName = taskListName;
     }

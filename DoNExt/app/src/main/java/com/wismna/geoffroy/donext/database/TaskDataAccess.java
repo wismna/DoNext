@@ -83,20 +83,17 @@ public class TaskDataAccess implements AutoCloseable {
     }
 
     public List<Task> getAllTasks() {
-        /*Cursor cursor = database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
-                DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
-                        " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0,
-                null, null, null,
-                DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " DESC");*/
         Cursor cursor = database.rawQuery("SELECT " +
                 DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID + "," +
                 DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_NAME + "," +
                 DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_TODAYDATE + "," +
                 DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.TASKLIST_COLUMN_NAME + " AS tasklistname " +
-                " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME +
-                " LEFT JOIN " + DatabaseHelper.TASKS_TABLE_NAME +
+                " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
+                " LEFT JOIN " + DatabaseHelper.TASKLIST_TABLE_NAME +
                 " ON " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST +
-                    " = " + DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID
+                    " = " + DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID +
+                " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
+                    " AND " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0
                 , null);
         List<Task> tasks = new ArrayList<>();
 
@@ -114,7 +111,6 @@ public class TaskDataAccess implements AutoCloseable {
         cursor.close();
 
         return tasks;
-        //return getTasksFromCursor(cursor);
     }
 
     public List<Task> getAllTasksFromList(long id) {

@@ -9,7 +9,7 @@
         <item quantity="other">%1$d tâches</item>
     </plurals>
     <plurals name="task_remaining">
-        <item quantity="one">%1$d tâche%2$s restante</item>
-        <item quantity="other">%1$d tâche%2$s restantes</item>
+        <item quantity="one">%1$d tâche restante</item>
+        <item quantity="other">%1$d tâches restantes</item>
     </plurals>
 </resources>

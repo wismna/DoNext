@@ -72,7 +72,7 @@
     <!-- Strings related to Today -->
     <string name="title_activity_today">Today</string>
     <string name="action_todayList">Today View</string>
-    <string name="new_task_today">Add task to Today View?</string>
+    <string name="new_task_today">Do this task today?</string>
     <string name="today_search_hint">Search…</string>
     <string name="action_today_select">Select tasks</string>
     <string name="task_list_edit_list_hint">List name</string>

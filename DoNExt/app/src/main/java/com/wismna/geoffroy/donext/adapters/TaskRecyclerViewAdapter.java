@@ -23,7 +23,7 @@ import java.util.List;
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.SimpleViewHolder> {
 
     private List<Task> mValues;
-    private final int viewType;
+    private int viewType;
 
     public TaskRecyclerViewAdapter(List<Task> items, int viewType) {
         mValues = items;
@@ -87,6 +87,10 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
     @Override
     public int getItemViewType(int position) {
         return viewType;
+    }
+
+    public void setItemViewType(int viewType) {
+        this.viewType = viewType;
     }
 
     public void add(Task item, int position) {
