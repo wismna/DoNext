@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
 
         // Handles today list
         MenuItem todayListItem = menu.findItem(R.id.action_todayList);
+        if (todayListItem == null) return false;
         todayListItem.setVisible(sharedPref.getBoolean("pref_conf_today_enable", false));
 
         return super.onPrepareOptionsMenu(menu);

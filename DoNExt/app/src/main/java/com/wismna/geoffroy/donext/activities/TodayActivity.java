@@ -66,7 +66,7 @@ public class TodayActivity extends AppCompatActivity
 
     public void onNewTaskClick(View view) {
         TodayFormDialogFragment taskDialogFragment =
-                TodayFormDialogFragment.newInstance(this, TodayActivity.this);
+                TodayFormDialogFragment.newInstance(TodayActivity.this);
 
         // Set some configuration values for the dialog
         Bundle args = new Bundle();

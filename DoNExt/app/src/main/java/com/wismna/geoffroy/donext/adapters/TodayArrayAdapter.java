@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
@@ -34,15 +35,18 @@ public class TodayArrayAdapter extends ArrayAdapter<Task> {
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_task_item, parent, false);
         }
         TextView titleView = (TextView) convertView.findViewById(R.id.task_list_item_title);
+        TextView taskView = (TextView) convertView.findViewById(R.id.task_list_item_tasklist);
+        LinearLayout layoutView = (LinearLayout) convertView.findViewById(R.id.task_list_item_layout);
         Task item = this.getItem(position);
         if (item != null) {
             titleView.setText(item.getName());
+            taskView.setText(item.getTaskListName());
             if (item.isToday()) {
                 titleView.setTypeface(titleView.getTypeface(), Typeface.BOLD);
-                titleView.setBackgroundColor(Color.parseColor("#B2DFDB"));
+                layoutView.setBackgroundColor(Color.parseColor("#B2DFDB"));
             } else {
                 titleView.setTypeface(Typeface.DEFAULT);
-                titleView.setBackgroundColor(Color.WHITE);
+                layoutView.setBackgroundColor(Color.WHITE);
             }
         }
         return convertView;

@@ -37,7 +37,7 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     private TodayFormDialogFragment.TodayTaskListener mListener;
     private final List<Task> mUpdatedTasks = new ArrayList<>();
 
-    public static TodayFormDialogFragment newInstance(Context context, TodayTaskListener todayTaskListener) {
+    public static TodayFormDialogFragment newInstance(TodayTaskListener todayTaskListener) {
         TodayFormDialogFragment fragment = new TodayFormDialogFragment();
 
         fragment.mListener = todayTaskListener;
