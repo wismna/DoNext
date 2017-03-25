@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Database helper class that contains table and column names as well as handles database creation
  */
 class DatabaseHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     private static final String DATABASE_NAME = "donext.db";
     static final String COLUMN_ID = "_id";
     static final String COLUMN_ORDER = "displayorder";
@@ -55,9 +55,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     static final String TASKS_VIEW_TODAY_NAME = "today";
     private static final String TASKS_VIEW_TODAY_CREATE =
-            "CREATE VIEW IF NOT EXISTS " + TASKS_VIEW_TODAY_NAME + " AS" +
+            "CREATE VIEW " + TASKS_VIEW_TODAY_NAME + " AS" +
                     " SELECT * FROM " + TASKS_TABLE_NAME +
-                    " WHERE " + TASKS_COLUMN_TODAYDATE + " = date('now')";
+                    " WHERE " + TASKS_COLUMN_TODAYDATE + " = date('now','localtime')";
     DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -85,6 +85,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 // Add new Today Date column
                 db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TASKS_COLUMN_TODAYDATE + " DATE");
                 // Create the Today view
+                db.execSQL(TASKS_VIEW_TODAY_CREATE);
+            case 4:
+                db.execSQL("DROP VIEW " + TASKS_VIEW_TODAY_NAME);
                 db.execSQL(TASKS_VIEW_TODAY_CREATE);
         }
     }
