@@ -46,11 +46,10 @@ class DatabaseHelper extends SQLiteOpenHelper {
             TASKS_COLUMN_DONE + " INTEGER DEFAULT 0, " +
             TASKS_COLUMN_DELETED + " INTEGER DEFAULT 0, " +
             COLUMN_ORDER + " INTEGER, " +
-            TASKS_COLUMN_LIST + " INTEGER NOT NULL, " +
-                "FOREIGN KEY(" + TASKS_COLUMN_LIST + ") REFERENCES " +
-                TASKLIST_TABLE_NAME + "(" + COLUMN_ID + ")" +
+            TASKS_COLUMN_LIST + " INTEGER NOT NULL " +
+                "REFERENCES " + TASKLIST_TABLE_NAME + "(" + COLUMN_ID + "), " +
             TASKS_COLUMN_DUEDATE + " DATE, " +
-            TASKS_COLUMN_TODAYDATE + " DATE " +
+            TASKS_COLUMN_TODAYDATE + " DATE" +
          ");";
 
     static final String TASKS_VIEW_TODAY_NAME = "today";
