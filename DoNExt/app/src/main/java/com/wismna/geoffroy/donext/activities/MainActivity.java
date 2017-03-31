@@ -83,11 +83,11 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
             mViewPager = (ViewPager) findViewById(R.id.container);
             mViewPager.setAdapter(mSectionsPagerAdapter);
             // Open last opened tab
-            mViewPager.setCurrentItem(sharedPref.getInt("last_opened_tab", 0));
+            int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
+            mViewPager.setCurrentItem(lastOpenedList);
 
-            View tabs = findViewById(R.id.tabs);
-            if (tabs instanceof TabLayout) {
-                tabLayout = (TabLayout) tabs;
+            if (!mIsLargeLayout) {
+                tabLayout = (TabLayout) findViewById(R.id.tabs);
                 tabLayout.setupWithViewPager(mViewPager);
 
                 // Handles scroll detection (only available for SDK version >=23)
@@ -102,18 +102,14 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
                     });
                 }
             }
-            else if (tabs instanceof ListView) {
-                ListView listView = (ListView) tabs;
+            else {
+                ListView listView = (ListView) findViewById(R.id.list);
                 //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
                 listView.setAdapter(new ArrayAdapter<>(this, R.layout.list_tasklist_item, taskLists));
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         mViewPager.setCurrentItem(position);
-                        view.setSelected(true);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            parent.setElevation(10);
-                        }
                     }
                 });
             }

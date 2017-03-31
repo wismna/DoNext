@@ -8,8 +8,8 @@ android {
         applicationId "com.wismna.geoffroy.donext"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 17
-        versionName "1.4.2"
+        versionCode 18
+        versionName "1.4.3"
     }
     buildTypes {
         release {

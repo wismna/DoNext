@@ -31,10 +31,11 @@
         android:layout_marginTop="?attr/actionBarSize"
         android:orientation="horizontal">
         <android.widget.ListView
-            android:id="@+id/tabs"
+            android:id="@+id/list"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.2"
+            android:choiceMode="singleChoice"
             android:listSelector="@drawable/tasklist_select"/>
         <com.wismna.geoffroy.donext.widgets.NonSwipeableViewPager
             android:id="@+id/container"
