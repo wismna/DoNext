@@ -6,6 +6,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -95,8 +96,6 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
     }
 
     private void setTaskValues(View view) {
-        // Get date picker
-        final DatePicker dueDatePicker = (DatePicker) view.findViewById(R.id.new_task_due_date);
 
         // Populate spinner with task lists
         Spinner spinner = (Spinner) view.findViewById(R.id.new_task_list);
@@ -118,6 +117,17 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         checkBox.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
         todayLabel.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
 
+        // Get date picker
+        final DatePicker dueDatePicker = (DatePicker) view.findViewById(R.id.new_task_due_date);
+        // Handle due date spinner depending on check box
+        CheckBox setDueDate = (CheckBox) view.findViewById(R.id.new_task_due_date_set);
+        setDueDate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                dueDatePicker.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
+
         // Set other properties if they exist
         if (task != null) {
 
@@ -130,7 +140,10 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
 
             // Set Due Date
             LocalDate dueDate = task.getDueDate();
-            dueDatePicker.updateDate(dueDate.getYear(), dueDate.getMonthOfYear() - 1, dueDate.getDayOfMonth());
+            if (dueDate != null) {
+                setDueDate.setChecked(true);
+                dueDatePicker.updateDate(dueDate.getYear(), dueDate.getMonthOfYear() - 1, dueDate.getDayOfMonth());
+            }
 
             checkBox.setChecked(task.isToday());
         }

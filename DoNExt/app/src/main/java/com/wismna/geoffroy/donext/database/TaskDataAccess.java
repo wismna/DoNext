@@ -51,13 +51,13 @@ public class TaskDataAccess implements AutoCloseable {
 
     /** Adds or update a task in the database */
     public Task createOrUpdateTask(long id, String name, String description, int priority,
-                                   long taskList, LocalDate date, boolean isTodayList) {
+                                   long taskList, String dueDate, boolean isTodayList) {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.TASKS_COLUMN_NAME, name);
         values.put(DatabaseHelper.TASKS_COLUMN_DESC, description);
         values.put(DatabaseHelper.TASKS_COLUMN_PRIORITY, priority);
         values.put(DatabaseHelper.TASKS_COLUMN_LIST, taskList);
-        values.put(DatabaseHelper.TASKS_COLUMN_DUEDATE, date.toString());
+        values.put(DatabaseHelper.TASKS_COLUMN_DUEDATE, dueDate);
         values.put(DatabaseHelper.TASKS_COLUMN_TODAYDATE, isTodayList? LocalDate.now().toString() : "");
         long insertId;
         if (id == 0)

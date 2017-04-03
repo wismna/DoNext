@@ -25,24 +25,22 @@
         android:onClick="onNewTaskClick"
         android:src="@drawable/ic_add" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <android.support.percent.PercentRelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:orientation="horizontal">
+        android:layout_marginTop="?attr/actionBarSize">
         <android.widget.ListView
             android:id="@+id/list"
-            android:layout_width="0dp"
+            app:layout_widthPercent="20%"
             android:layout_height="wrap_content"
-            android:layout_weight="0.2"
             android:choiceMode="singleChoice"
             android:listSelector="@drawable/tasklist_select"/>
         <com.wismna.geoffroy.donext.widgets.NonSwipeableViewPager
             android:id="@+id/container"
-            android:layout_width="0dp"
+            app:layout_widthPercent="80%"
             android:layout_height="match_parent"
-            android:layout_weight="0.8"
+            android:layout_toEndOf="@id/list"
             android:background="@android:color/background_light"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-    </LinearLayout>
+    </android.support.percent.PercentRelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

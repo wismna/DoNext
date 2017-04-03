@@ -26,7 +26,7 @@
     <string name="new_task_name_error">Task name cannot be blank</string>
     <string name="new_task_description_hint">Optional task description</string>
     <string name="new_task_priority">Priority</string>
-    <string name="new_task_due_date">Due date</string>
+    <string name="new_task_due_date">Set a due date?</string>
     <string name="new_task_save">Save</string>
     <string name="new_task_cancel">Cancel</string>
     <string name="new_task_delete">Delete</string>

@@ -49,7 +49,7 @@
     <string name="settings_today_title">Vue Aujourd\'hui</string>
     <string name="settings_today_enable">Activer la vue Aujourd\'hui?</string>
     <string name="settings_today_desc">La vue Aujourd\'hui est une façon particulière d\'organiser vos tâches. Choisissez quelles tâches vous voulez faire dans la journée et elles apparaîtront dans cette vue. À la fin de la journée, cette vue est réinitialisée.</string>
-    <string name="new_task_due_date">Date de fin</string>
+    <string name="new_task_due_date">Mettre une date de fin?</string>
     <string name="task_alarm">Task is past due date</string>
     <string name="action_todayList">Vue Aujourd\'hui</string>
     <string name="title_activity_today">Aujourd\'hui</string>

@@ -96,7 +96,7 @@ public class Task {
             this.dueDate = LocalDate.parse(dueDate);
         }
         catch (Exception e){
-            this.dueDate = LocalDate.now();
+            this.dueDate = null;
         }
     }
 

@@ -274,6 +274,7 @@ public class TasksFragment extends Fragment implements
         EditText nameText = (EditText) dialogView.findViewById(R.id.new_task_name);
         EditText descText = (EditText) dialogView.findViewById(R.id.new_task_description);
         SeekBar seekBar = (SeekBar) dialogView.findViewById(R.id.new_task_priority);
+        CheckBox setDueDate = (CheckBox) dialogView.findViewById(R.id.new_task_due_date_set);
         DatePicker dueDatePicker = (DatePicker) dialogView.findViewById(R.id.new_task_due_date);
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
         CheckBox todayList = (CheckBox) dialogView.findViewById(R.id.new_task_today);
@@ -285,7 +286,11 @@ public class TasksFragment extends Fragment implements
                     descText.getText().toString(),
                     seekBar.getProgress(),
                     taskList.getId(),
-                    new LocalDate(dueDatePicker.getYear(), dueDatePicker.getMonth() + 1, dueDatePicker.getDayOfMonth()),
+                    setDueDate.isChecked() ?
+                        new LocalDate(dueDatePicker.getYear(),
+                                dueDatePicker.getMonth() + 1,
+                                dueDatePicker.getDayOfMonth()).toString()
+                        : "",
                     isToday);
 
             Bundle args = dialog.getArguments();

@@ -51,7 +51,8 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
     public void onBindViewHolder(final SimpleViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(String.valueOf(holder.mItem.getId()));
-        if(holder.mItem.getDueDate().isBefore(LocalDate.now()))
+        LocalDate dueDate = holder.mItem.getDueDate();
+        if(dueDate != null && dueDate.isBefore(LocalDate.now()))
             holder.mAlarmView.setImageResource(R.drawable.ic_access_alarm);
         holder.mCycleView.setText(String.valueOf(holder.mItem.getCycle()));
         holder.mTitleView.setText(holder.mItem.getName());
