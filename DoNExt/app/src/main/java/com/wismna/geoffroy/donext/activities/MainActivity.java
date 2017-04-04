@@ -176,7 +176,6 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         Bundle args = new Bundle();
         args.putInt("list", currentTabPosition);
-        args.putBoolean("layout", mIsLargeLayout);
         args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
         args.putBoolean("neutral", false);
         args.putString("button_positive", getString(R.string.new_task_save));
@@ -186,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
 
         String title = getString(R.string.action_new_task);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (mIsLargeLayout)
+        if (mIsLargeLayout && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             taskDialogFragment.show(fragmentManager, title);
         else {
             // The device is smaller, so show the fragment fullscreen

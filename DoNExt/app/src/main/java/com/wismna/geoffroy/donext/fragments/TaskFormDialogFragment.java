@@ -58,7 +58,6 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         mContentFragment = new TaskFormContentFragment();
         Bundle args = getArguments();
         if (args != null) {
-            mIsLargeLayout = args.getBoolean("layout");
             mHasNeutralButton = args.getBoolean("neutral");
         }
     }
@@ -96,7 +95,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
     }
 
     private void setTaskValues(View view) {
-
+        if (view == null) return;
         // Populate spinner with task lists
         Spinner spinner = (Spinner) view.findViewById(R.id.new_task_list);
         // Create an ArrayAdapter using the string array and a default spinner layout

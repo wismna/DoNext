@@ -15,6 +15,7 @@ import com.wismna.geoffroy.donext.R;
  */
 
 public class TaskFormContentFragment extends Fragment {
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {

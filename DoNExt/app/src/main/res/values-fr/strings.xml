@@ -57,4 +57,5 @@
     <string name="today_search_hint">Rechercher…</string>
     <string name="action_today_select">Choisissez des tâches</string>
     <string name="task_list_edit_list_hint">Nom de la liste</string>
+    <string name="incompatible_sdk_version">Sorry, your Android version is not supported.</string>
 </resources>

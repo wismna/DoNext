@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -33,14 +34,13 @@ import com.wismna.geoffroy.donext.R;
 public abstract class DynamicDialogFragment extends DialogFragment {
     private View mDialogView = null;
     boolean mHasNeutralButton = false;
-    boolean mIsLargeLayout = false;
     Fragment mContentFragment = new Fragment();
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // This part is only needed on small layouts (large layouts use onCreateDialog)
-        if (!mIsLargeLayout) {
+        if (!getShowsDialog()) {
             View view = inflater.inflate(R.layout.fragment_dynamic_dialog, container, false);
             AppCompatActivity activity = (AppCompatActivity) getActivity();
             activity.setSupportActionBar(setToolbarTitle(view));
@@ -52,12 +52,29 @@ public abstract class DynamicDialogFragment extends DialogFragment {
                 actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel);
             }
             setHasOptionsMenu(true);
-            setContentFragment();
             return view;
         }
-        //return super.onCreateView(inflater, container, savedInstanceState);
-        // Returns the saved view from Dialog Builder on large screens
-        return mDialogView;
+        // TODO: find a way to correct this
+        // Handle nasty bug: requestFeature() must be called before adding content
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            // This returns null. No content will be loaded in dialog mode, but no errors either.
+            return super.onCreateView(inflater, container, savedInstanceState);
+        }
+        else {
+            // Returns the saved view from Dialog Builder on large screens
+            return mDialogView;
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Get the child fragment manager (and not the "main" one)
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        // Set the actual content of the fragment
+        transaction.replace(R.id.dynamic_fragment_content, mContentFragment);
+        // Commit the transaction instantly
+        transaction.commitNow();
     }
 
     @Override
@@ -67,7 +84,6 @@ public abstract class DynamicDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         // As it is a Dialog, the root ViewGroup can be null without issues
         @SuppressLint("InflateParams") final View view = inflater.inflate(R.layout.fragment_dynamic_dialog, null);
-        setToolbarTitle(view);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         Bundle args = getArguments();
         // Pass null as the parent view because its going in the dialog layout
@@ -94,7 +110,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
                 }
             });
         }
-        setContentFragment();
+        setToolbarTitle(view);
         // Save the View so that it can returned by onCreateView
         // (otherwise it is null and it poses problems when committing child fragment transactions)
         mDialogView = view;
@@ -161,17 +177,6 @@ public abstract class DynamicDialogFragment extends DialogFragment {
             dialog.setDismissMessage(null);
         }
         super.onDestroyView();
-    }
-
-    private void setContentFragment() {
-        // Get the child fragment manager (and not the "normal" one)
-        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-
-        // Set the actual content of the fragment
-        transaction.replace(R.id.dynamic_fragment_content, mContentFragment);
-
-        // Commit the transaction instantly
-        transaction.commitNow();
     }
 
     /** Sets the title of the Fragment from the Tag */

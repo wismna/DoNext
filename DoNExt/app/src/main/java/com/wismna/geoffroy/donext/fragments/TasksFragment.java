@@ -3,6 +3,7 @@ package com.wismna.geoffroy.donext.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
@@ -54,7 +55,6 @@ public class TasksFragment extends Fragment implements
 
     private static final String TASK_LIST_ID = "task_list_id";
     private long taskListId = -1;
-    private boolean mIsLargeLayout;
     private boolean isTodayView = true;
     private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
     private View view;
@@ -84,7 +84,6 @@ public class TasksFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mIsLargeLayout = getResources().getBoolean(R.bool.large_layout);
         if (getArguments() != null) {
             taskListId = getArguments().getLong(TASK_LIST_ID);
         }
@@ -121,10 +120,10 @@ public class TasksFragment extends Fragment implements
                 new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
+                        boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
                         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
                         Bundle args = new Bundle();
                         args.putInt("position", position);
-                        args.putBoolean("layout", mIsLargeLayout);
                         args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
                         args.putBoolean("neutral", true);
                         args.putString("button_positive", getString(R.string.new_task_save));
@@ -159,8 +158,9 @@ public class TasksFragment extends Fragment implements
 
                         // Open the fragment as a dialog or as full-screen depending on screen size
                         String title = getString(R.string.action_edit_task);
-                        if (mIsLargeLayout)
+                        if (isLargeLayout && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             taskDialogFragment.show(manager, title);
+                        }
                         else {
                             // The device is smaller, so show the fragment fullscreen
                             FragmentTransaction transaction = manager.beginTransaction();

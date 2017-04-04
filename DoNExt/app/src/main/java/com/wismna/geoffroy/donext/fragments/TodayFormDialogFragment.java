@@ -45,20 +45,16 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         return fragment;
     }
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContentFragment = new TodayFormContentFragment();
         // Load the tasks asynchronously
         new LoadTasks().execute(getActivity());
-        Bundle args = getArguments();
-        if (args != null) {
-            mIsLargeLayout = args.getBoolean("layout");
-        }
     }
 
     private void setLayoutValues(View view, List<Task> tasks) {
+        if (view == null) return;
         EditText editText = (EditText) view.findViewById(R.id.today_search);
         final ListView listView = (ListView) view.findViewById(R.id.today_tasks);
         final TodayArrayAdapter adapter = new TodayArrayAdapter(getActivity(), tasks);

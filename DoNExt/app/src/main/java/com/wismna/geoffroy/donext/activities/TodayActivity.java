@@ -1,6 +1,7 @@
 package com.wismna.geoffroy.donext.activities;
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -22,8 +23,6 @@ import com.wismna.geoffroy.donext.fragments.TodayFormDialogFragment;
 public class TodayActivity extends AppCompatActivity
     implements TodayFormDialogFragment.TodayTaskListener {
 
-    private boolean mIsLargeLayout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +38,6 @@ public class TodayActivity extends AppCompatActivity
             ab.setDisplayHomeAsUpEnabled(true);
             ab.setHomeButtonEnabled(true);
         }
-
-        mIsLargeLayout = getResources().getBoolean(R.bool.large_layout);
     }
 
     @Override
@@ -68,16 +65,17 @@ public class TodayActivity extends AppCompatActivity
         TodayFormDialogFragment taskDialogFragment =
                 TodayFormDialogFragment.newInstance(TodayActivity.this);
 
+        boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
         // Set some configuration values for the dialog
         Bundle args = new Bundle();
-        args.putBoolean("layout", mIsLargeLayout);
+        args.putBoolean("layout", isLargeLayout);
         args.putString("button_positive", getString(R.string.new_task_save));
         args.putString("button_negative", getString(R.string.new_task_cancel));
         taskDialogFragment.setArguments(args);
 
         String title = getString(R.string.action_today_select);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (mIsLargeLayout)
+        if (isLargeLayout && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             taskDialogFragment.show(fragmentManager, title);
         else {
             // The device is smaller, so show the fragment fullscreen
