@@ -1,7 +1,6 @@
 package com.wismna.geoffroy.donext.activities;
 
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -75,7 +74,7 @@ public class TodayActivity extends AppCompatActivity
 
         String title = getString(R.string.action_today_select);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (isLargeLayout && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        if (isLargeLayout)
             taskDialogFragment.show(fragmentManager, title);
         else {
             // The device is smaller, so show the fragment fullscreen

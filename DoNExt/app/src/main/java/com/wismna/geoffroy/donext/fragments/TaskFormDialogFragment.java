@@ -55,7 +55,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContentFragment = new TaskFormContentFragment();
+        mContentLayoutId = R.layout.content_task_form;
         Bundle args = getArguments();
         if (args != null) {
             mHasNeutralButton = args.getBoolean("neutral");
@@ -67,7 +67,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         super.onStart();
         // Set Task Form specific information at that point because we are sure that the view is
         // entirely inflated (with the content fragment)
-        setTaskValues(getView());
+        setTaskValues();
     }
 
     @Override
@@ -94,10 +94,9 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         dismiss();
     }
 
-    private void setTaskValues(View view) {
-        if (view == null) return;
+    private void setTaskValues() {
         // Populate spinner with task lists
-        Spinner spinner = (Spinner) view.findViewById(R.id.new_task_list);
+        Spinner spinner = (Spinner) findViewById(R.id.new_task_list);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<TaskList> adapter = new ArrayAdapter<>(
                 getActivity(), android.R.layout.simple_spinner_item, taskLists);
@@ -110,16 +109,16 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         int id = args.getInt("list");
         spinner.setSelection(id);
 
-        CheckBox checkBox = (CheckBox) view.findViewById(R.id.new_task_today);
-        TextView todayLabel = (TextView) view.findViewById(R.id.new_task_today_label);
+        CheckBox checkBox = (CheckBox) findViewById(R.id.new_task_today);
+        TextView todayLabel = (TextView) findViewById(R.id.new_task_today_label);
         boolean isTodayActive = args.getBoolean("today");
         checkBox.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
         todayLabel.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
 
         // Get date picker
-        final DatePicker dueDatePicker = (DatePicker) view.findViewById(R.id.new_task_due_date);
+        final DatePicker dueDatePicker = (DatePicker) findViewById(R.id.new_task_due_date);
         // Handle due date spinner depending on check box
-        CheckBox setDueDate = (CheckBox) view.findViewById(R.id.new_task_due_date_set);
+        CheckBox setDueDate = (CheckBox) findViewById(R.id.new_task_due_date_set);
         setDueDate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -130,11 +129,11 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         // Set other properties if they exist
         if (task != null) {
 
-            EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
+            EditText titleText = (EditText) findViewById(R.id.new_task_name);
             titleText.setText(task.getName());
-            EditText descText = (EditText) view.findViewById(R.id.new_task_description);
+            EditText descText = (EditText) findViewById(R.id.new_task_description);
             descText.setText(task.getDescription());
-            SeekBar seekBar = (SeekBar) view.findViewById(R.id.new_task_priority);
+            SeekBar seekBar = (SeekBar) findViewById(R.id.new_task_priority);
             seekBar.setProgress(task.getPriority());
 
             // Set Due Date

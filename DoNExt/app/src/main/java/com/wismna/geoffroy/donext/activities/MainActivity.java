@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements TasksFragment.Tas
 
         String title = getString(R.string.action_new_task);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (mIsLargeLayout && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        if (mIsLargeLayout)
             taskDialogFragment.show(fragmentManager, title);
         else {
             // The device is smaller, so show the fragment fullscreen

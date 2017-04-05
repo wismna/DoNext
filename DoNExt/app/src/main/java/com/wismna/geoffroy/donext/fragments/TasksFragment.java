@@ -3,7 +3,6 @@ package com.wismna.geoffroy.donext.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
@@ -158,7 +157,7 @@ public class TasksFragment extends Fragment implements
 
                         // Open the fragment as a dialog or as full-screen depending on screen size
                         String title = getString(R.string.action_edit_task);
-                        if (isLargeLayout && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (isLargeLayout) {
                             taskDialogFragment.show(manager, title);
                         }
                         else {

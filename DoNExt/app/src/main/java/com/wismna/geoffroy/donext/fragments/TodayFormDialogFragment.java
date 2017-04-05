@@ -48,15 +48,14 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContentFragment = new TodayFormContentFragment();
+        mContentLayoutId = R.layout.content_today_form;
         // Load the tasks asynchronously
         new LoadTasks().execute(getActivity());
     }
 
-    private void setLayoutValues(View view, List<Task> tasks) {
-        if (view == null) return;
-        EditText editText = (EditText) view.findViewById(R.id.today_search);
-        final ListView listView = (ListView) view.findViewById(R.id.today_tasks);
+    private void setLayoutValues(List<Task> tasks) {
+        EditText editText = (EditText) findViewById(R.id.today_search);
+        final ListView listView = (ListView) findViewById(R.id.today_tasks);
         final TodayArrayAdapter adapter = new TodayArrayAdapter(getActivity(), tasks);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -120,7 +119,7 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         @Override
         protected void onPostExecute(List<Task> tasks) {
             super.onPostExecute(tasks);
-            setLayoutValues(getView(), tasks);
+            setLayoutValues(tasks);
         }
     }
 

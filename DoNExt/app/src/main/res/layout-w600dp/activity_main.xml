@@ -16,15 +16,6 @@
         <include layout="@layout/toolbar" android:id="@+id/toolbar" />
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/fab_margin"
-        android:onClick="onNewTaskClick"
-        android:src="@drawable/ic_add" />
-
     <android.support.percent.PercentRelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -43,4 +34,14 @@
             android:background="@android:color/background_light"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     </android.support.percent.PercentRelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/fab_margin"
+        android:onClick="onNewTaskClick"
+        android:src="@drawable/ic_add" />
+
 </android.support.design.widget.CoordinatorLayout>
