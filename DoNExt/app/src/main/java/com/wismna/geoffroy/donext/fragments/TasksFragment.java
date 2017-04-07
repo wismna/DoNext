@@ -10,6 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -105,12 +106,15 @@ public class TasksFragment extends Fragment implements
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext())) {
             taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
                     isTodayView? taskDataAccess.getTodayTasks() : taskDataAccess.getAllTasksFromList(taskListId),
-                    Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")));
+                    Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")), isTodayView);
         }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
 
         // Set ItemTouch helper in RecyclerView to handle swipe move on elements
-        ItemTouchHelper.Callback callback = new TaskTouchHelper(this);
+        final Resources resources = getResources();
+        ItemTouchHelper.Callback callback = new TaskTouchHelper(this,
+                ContextCompat.getColor(context, R.color.colorAccent),
+                ContextCompat.getColor(context, R.color.colorPrimary));
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(recyclerView);
 
@@ -119,7 +123,7 @@ public class TasksFragment extends Fragment implements
                 new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
+                        boolean isLargeLayout = resources.getBoolean(R.bool.large_layout);
                         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
                         Bundle args = new Bundle();
                         args.putInt("position", position);

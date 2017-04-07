@@ -23,10 +23,14 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     private final TaskTouchHelperAdapter mAdapter;
+    private int colorDone;
+    private int colorNext;
 
-    public TaskTouchHelper(TaskTouchHelperAdapter adapter){
+    public TaskTouchHelper(TaskTouchHelperAdapter adapter, int colorDone, int colorNext){
         // No drag moves, no swipes (except for 1st element, see getSwipeDirs method)
         super(0, 0);
+        this.colorDone = colorDone;
+        this.colorNext = colorNext;
         this.mAdapter = adapter;
     }
 
@@ -53,25 +57,9 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
                             float dX, float dY, int actionState, boolean isCurrentlyActive) {
         // Get RecyclerView item from the ViewHolder
         View itemView = viewHolder.itemView;
-        //View backgroundView = recyclerView.getRootView().findViewById(R.id.task_list_background);
-        //View textView;
-        /*if (dX > 0) {
-            textView = recyclerView.getRootView().findViewById(R.id.task_background_next);
-        } else {
-            textView = recyclerView.getRootView().findViewById(R.id.task_background_done);
-        }
-        //backgroundView.setY(itemView.getTop());
 
-        if (isCurrentlyActive) {
-            backgroundView.setVisibility(View.VISIBLE);
-            textView.setVisibility(View.VISIBLE);
-        } else {
-            backgroundView.setVisibility(View.GONE);
-            textView.setVisibility(View.GONE);
-        }*/
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             Paint background = new Paint();
-            background.setARGB(255, 222, 222, 222);
 
             TextPaint textPaint = new TextPaint();
             textPaint.setAntiAlias(true);
@@ -80,9 +68,11 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
 
             int heightOffset = itemView.getHeight() / 2 - (int)textPaint.getTextSize() / 2;
             int widthOffset = 30;
-            // Set your color for positive displacement
             if (dX > 0) {
+                // Set your color for positive displacement
+                //background.setARGB(255, 222, 222, 222);
                 //p.setARGB(255, 204, 229, 255);
+                background.setColor(colorNext);
                 // Draw Rect with varying right side, equal to displacement dX
                 Rect rect = new Rect(itemView.getLeft(), itemView.getTop(), (int) dX,
                         itemView.getBottom());
@@ -99,6 +89,7 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
 
             } else {
                 // Set your color for negative displacement
+                background.setColor(colorDone);
                 //p.setARGB(255, 204, 255, 229);
                 // Draw Rect with varying left side, equal to the item's right side plus negative displacement dX
                 Rect rect = new Rect(itemView.getRight() + (int)dX, itemView.getTop(),

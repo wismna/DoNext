@@ -13,7 +13,8 @@
         android:inputType="text"
         android:textSize="30sp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:imeOptions="flagNoFullscreen" />
     <ListView
         android:id="@+id/today_tasks"
         android:layout_width="match_parent"

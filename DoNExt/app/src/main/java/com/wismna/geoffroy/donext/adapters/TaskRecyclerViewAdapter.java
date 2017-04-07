@@ -24,9 +24,11 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     private List<Task> mValues;
     private int viewType;
+    private boolean mIsToday;
 
-    public TaskRecyclerViewAdapter(List<Task> items, int viewType) {
+    public TaskRecyclerViewAdapter(List<Task> items, int viewType, boolean isToday) {
         mValues = items;
+        mIsToday = isToday;
         this.viewType = viewType;
     }
 
@@ -49,21 +51,27 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public void onBindViewHolder(final SimpleViewHolder holder, int position) {
+        // Set basic information
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(String.valueOf(holder.mItem.getId()));
-        LocalDate dueDate = holder.mItem.getDueDate();
-        if(dueDate != null && dueDate.isBefore(LocalDate.now()))
-            holder.mAlarmView.setImageResource(R.drawable.ic_access_alarm);
         holder.mCycleView.setText(String.valueOf(holder.mItem.getCycle()));
         holder.mTitleView.setText(holder.mItem.getName());
+        // Set optional description
         if (holder instanceof DetailedViewHolder)
             ((DetailedViewHolder)holder).mDescriptionView.setText(holder.mItem.getDescription());
-        int priority = holder.mItem.getPriority();
-
-        // Reset task rendering
+        // Set task rendering
         holder.mTitleView.setTypeface(Typeface.DEFAULT);
         holder.mTitleView.setTextColor(Color.BLACK);
 
+        // Additional information will not be displayed in Today view
+        if (mIsToday) return;
+        // Set alarm if past due date
+        LocalDate dueDate = holder.mItem.getDueDate();
+        if(dueDate != null && dueDate.isBefore(LocalDate.now()))
+            holder.mAlarmView.setImageResource(R.drawable.ic_access_alarm);
+        int priority = holder.mItem.getPriority();
+
+        // Set priority
         switch (priority)
         {
             case 0:
