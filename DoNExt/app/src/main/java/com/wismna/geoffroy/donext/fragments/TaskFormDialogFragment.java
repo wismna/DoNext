@@ -126,6 +126,26 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
             }
         });
 
+        // Handle priority changes
+        final TextView tooltip = (TextView) findViewById(R.id.new_task_priority_tooltip);
+        SeekBar seekBar = (SeekBar) findViewById(R.id.new_task_priority);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tooltip.setText(getResources().getStringArray(R.array.task_priority)[progress]);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                tooltip.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                tooltip.setVisibility(View.GONE);
+            }
+        });
+        tooltip.setText(getResources().getStringArray(R.array.task_priority)[seekBar.getProgress()]);
         // Set other properties if they exist
         if (task != null) {
 
@@ -133,7 +153,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
             titleText.setText(task.getName());
             EditText descText = (EditText) findViewById(R.id.new_task_description);
             descText.setText(task.getDescription());
-            SeekBar seekBar = (SeekBar) findViewById(R.id.new_task_priority);
+
             seekBar.setProgress(task.getPriority());
 
             // Set Due Date

@@ -23,14 +23,14 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     private final TaskTouchHelperAdapter mAdapter;
-    private int colorDone;
-    private int colorNext;
+    private int colorRight;
+    private int colorLeft;
 
-    public TaskTouchHelper(TaskTouchHelperAdapter adapter, int colorDone, int colorNext){
+    public TaskTouchHelper(TaskTouchHelperAdapter adapter, int colorRight, int colorLeft){
         // No drag moves, no swipes (except for 1st element, see getSwipeDirs method)
         super(0, 0);
-        this.colorDone = colorDone;
-        this.colorNext = colorNext;
+        this.colorRight = colorRight;
+        this.colorLeft = colorLeft;
         this.mAdapter = adapter;
     }
 
@@ -59,72 +59,48 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
         View itemView = viewHolder.itemView;
 
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-            Paint background = new Paint();
 
-            TextPaint textPaint = new TextPaint();
-            textPaint.setAntiAlias(true);
-            textPaint.setTextSize(25 * itemView.getResources().getDisplayMetrics().density);
-            textPaint.setColor(Color.WHITE);
-
-            int heightOffset = itemView.getHeight() / 2 - (int)textPaint.getTextSize() / 2;
-            int widthOffset = 30;
             if (dX > 0) {
-                // Set your color for positive displacement
-                //background.setARGB(255, 222, 222, 222);
-                //p.setARGB(255, 204, 229, 255);
-                background.setColor(colorNext);
-                // Draw Rect with varying right side, equal to displacement dX
                 Rect rect = new Rect(itemView.getLeft(), itemView.getTop(), (int) dX,
                         itemView.getBottom());
-                c.drawRect(rect, background);
-
-                // Draw text in the rectangle
-                String text = itemView.getResources().getString(R.string.task_confirmation_next_button).toUpperCase();
-                int width = (int) textPaint.measureText(text);
-                float textXCoordinate = rect.left + widthOffset;
-                c.translate(textXCoordinate, dY + heightOffset);
-                StaticLayout staticLayout = new StaticLayout(text, textPaint, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
-                staticLayout.draw(c);
-                //textView = recyclerView.getRootView().findViewById(R.id.task_background_next);
-
+                setBackground(c, itemView, rect, dX, dY,
+                        colorLeft, R.string.task_confirmation_next_button);
             } else {
-                // Set your color for negative displacement
-                background.setColor(colorDone);
-                //p.setARGB(255, 204, 255, 229);
                 // Draw Rect with varying left side, equal to the item's right side plus negative displacement dX
                 Rect rect = new Rect(itemView.getRight() + (int)dX, itemView.getTop(),
                         itemView.getRight(), itemView.getBottom());
-                c.drawRect(rect, background);
-
-                // Draw text in the rectangle
-                String text = itemView.getResources().getString(R.string.task_confirmation_done_button).toUpperCase();
-                int width = (int) textPaint.measureText(text);
-                float textXCoordinate = rect.right - width - widthOffset;
-                c.translate(textXCoordinate, dY + heightOffset);
-                StaticLayout staticLayout = new StaticLayout(text, textPaint, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
-                staticLayout.draw(c);
-                //textView = recyclerView.getRootView().findViewById(R.id.task_background_done);
+                setBackground(c, itemView, rect, dX, dY,
+                        colorRight, R.string.task_confirmation_done_button);
             }
-            //textView.draw(c);
         }
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 
-    /*@Override
-    public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
-        if (actionState != ItemTouchHelper.ACTION_STATE_IDLE)
-        {
-            viewHolder.itemView.setBackgroundColor(Color.LTGRAY);
-        }
+    private void setBackground(Canvas c, View itemView,
+            Rect rect, float dX, float dY, int color, int textId) {
 
-        super.onSelectedChanged(viewHolder, actionState);
+        TextPaint textPaint = new TextPaint();
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(25 * itemView.getResources().getDisplayMetrics().density);
+        textPaint.setColor(Color.WHITE);
+
+        int heightOffset = itemView.getHeight() / 2 - (int)textPaint.getTextSize() / 2;
+        int widthOffset = 30;
+
+        Paint background = new Paint();
+        // Set your color for negative displacement
+        background.setColor(color);
+        // Draw Rect with varying left side, equal to the item's right side plus negative displacement dX
+        c.drawRect(rect, background);
+
+        // Draw text in the rectangle
+        String text = itemView.getResources().getString(textId).toUpperCase();
+        int width = (int) textPaint.measureText(text);
+        float textXCoordinate;
+        if (dX > 0) textXCoordinate = rect.left + widthOffset;
+        else textXCoordinate = rect.right - width - widthOffset;
+        c.translate(textXCoordinate, dY + heightOffset);
+        StaticLayout staticLayout = new StaticLayout(text, textPaint, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+        staticLayout.draw(c);
     }
-
-    @Override
-    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        super.clearView(recyclerView, viewHolder);
-
-        viewHolder.itemView.setAlpha(1.0f);
-        viewHolder.itemView.setBackgroundColor(0);
-    }*/
 }

@@ -4,4 +4,9 @@
         <item>Simple</item>
         <item>Détaillée</item>
     </string-array>
+    <string-array name="task_priority">
+        <item>Basse</item>
+        <item>Moyenne</item>
+        <item>Haute</item>
+    </string-array>
 </resources>

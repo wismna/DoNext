@@ -64,6 +64,19 @@
             android:layout_height="30dp"
             android:layout_toEndOf="@id/new_task_priority_label"
             android:layout_below="@id/new_task_description" />
+        <TextView
+            android:id="@+id/new_task_priority_tooltip"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:padding="10dp"
+            android:layout_above="@id/new_task_priority"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/darker_gray"
+            android:textColor="@android:color/white"
+            android:textAlignment="center"
+            android:visibility="gone" />
         <CheckBox
             android:id="@+id/new_task_today"
             android:layout_width="wrap_content"

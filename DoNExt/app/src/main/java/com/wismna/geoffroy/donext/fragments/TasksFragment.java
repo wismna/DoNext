@@ -113,8 +113,8 @@ public class TasksFragment extends Fragment implements
         // Set ItemTouch helper in RecyclerView to handle swipe move on elements
         final Resources resources = getResources();
         ItemTouchHelper.Callback callback = new TaskTouchHelper(this,
-                ContextCompat.getColor(context, R.color.colorAccent),
-                ContextCompat.getColor(context, R.color.colorPrimary));
+                ContextCompat.getColor(context, R.color.colorPrimary),
+                ContextCompat.getColor(context, R.color.colorAccent));
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(recyclerView);
 
