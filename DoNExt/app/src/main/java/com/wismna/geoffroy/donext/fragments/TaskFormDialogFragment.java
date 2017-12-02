@@ -73,7 +73,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
     @Override
     protected void onPositiveButtonClick(View view) {
         if (view == null) return;
-        EditText titleText = (EditText) view.findViewById(R.id.new_task_name);
+        EditText titleText = view.findViewById(R.id.new_task_name);
         // handle confirmation button click hereEditText titleText = (EditText) d.findViewById(R.id.new_task_name);
         if (titleText.getText().toString().matches(""))
             titleText.setError(getResources().getString(R.string.new_task_name_error));

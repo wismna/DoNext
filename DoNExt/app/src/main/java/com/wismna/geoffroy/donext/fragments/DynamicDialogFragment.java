@@ -164,7 +164,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
 
     /** Sets the title of the Fragment from the Tag */
     private Toolbar setToolbarTitle(View view) {
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.dialog_toolbar);
+        Toolbar toolbar = view.findViewById(R.id.dialog_toolbar);
         toolbar.setTitle(getTag());
         return toolbar;
     }
@@ -174,7 +174,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
         // Ensure that the content view is set
         if (mContentLayoutId == 0) return;
         // Insert the content view
-        FrameLayout content = (FrameLayout) view.findViewById(R.id.dynamic_fragment_content);
+        FrameLayout content = view.findViewById(R.id.dynamic_fragment_content);
         content.addView(inflater.inflate(mContentLayoutId, (ViewGroup) view.getParent()));
     }
 

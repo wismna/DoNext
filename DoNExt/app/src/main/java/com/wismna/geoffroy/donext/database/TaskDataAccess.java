@@ -93,7 +93,7 @@ public class TaskDataAccess implements AutoCloseable {
                 " ON " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST +
                     " = " + DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID +
                 " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
-                    " AND " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0
+                     " AND " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0
                 , null);
         List<Task> tasks = new ArrayList<>();
 
@@ -113,11 +113,12 @@ public class TaskDataAccess implements AutoCloseable {
         return tasks;
     }
 
-    public List<Task> getAllTasksFromList(long id) {
+    public List<Task> getAllTasksFromList(long id, boolean isHistory) {
+        int history = isHistory ? 1 : 0;
         Cursor cursor = database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
                 DatabaseHelper.TASKS_COLUMN_LIST + " = " + id +
-                        " AND " + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
-                        " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0,
+                        " AND (" + DatabaseHelper.TASKS_COLUMN_DONE + " = " + history +
+                        (isHistory ? " OR " : " AND ") + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + history + ")",
                 null, null, null,
                 DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " DESC");
         return getTasksFromCursor(cursor);

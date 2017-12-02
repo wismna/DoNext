@@ -31,6 +31,13 @@
         android:icon="@drawable/ic_list_white_24dp"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/action_history"
+        android:orderInCategory="25"
+        android:title="@string/action_history"
+        android:onClick="openHistory"
+        android:icon="@drawable/ic_list_white_24dp"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="30"
         android:title="@string/action_settings"

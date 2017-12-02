@@ -59,11 +59,11 @@ public class TaskListsFragment extends Fragment implements
 
         mView = inflater.inflate(R.layout.fragment_tasklists, container, false);
 
-        Button createTaskListButton = (Button) mView.findViewById(R.id.new_task_list_button);
+        Button createTaskListButton = mView.findViewById(R.id.new_task_list_button);
         createTaskListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText editText = (EditText) mView.findViewById(R.id.new_task_list_name);
+                EditText editText = mView.findViewById(R.id.new_task_list_name);
                 String text = editText.getText().toString();
                 if (text.matches("")) {
                     editText.setError(getResources().getString(R.string.task_list_new_list_error));
@@ -97,7 +97,7 @@ public class TaskListsFragment extends Fragment implements
     }
 
     private void toggleVisibleCreateNewTaskListLayout(View view) {
-        LinearLayout layout = (LinearLayout) view.findViewById(R.id.new_task_list_layout);
+        LinearLayout layout = view.findViewById(R.id.new_task_list_layout);
         int taskListCount = taskListRecyclerViewAdapter.getItemCount();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String maxTaskListsString = sharedPref.getString("pref_conf_max_lists", "5");
@@ -134,7 +134,7 @@ public class TaskListsFragment extends Fragment implements
     @Override
     public void onConfirmDialogClick(DialogFragment dialog, ConfirmDialogFragment.ButtonEvent event) {
         // Handle never ask again checkbox
-        CheckBox neverAskAgainCheckBox = (CheckBox) dialog.getDialog().findViewById(R.id.task_confirmation_never);
+        CheckBox neverAskAgainCheckBox = dialog.getDialog().findViewById(R.id.task_confirmation_never);
         if (neverAskAgainCheckBox.isChecked()) {
 
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -195,7 +195,7 @@ public class TaskListsFragment extends Fragment implements
 
             // Set the adapter
             Context context = mView.getContext();
-            RecyclerView recyclerView = (RecyclerView) mView.findViewById(R.id.task_lists_view);
+            RecyclerView recyclerView = mView.findViewById(R.id.task_lists_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(taskListRecyclerViewAdapter);
 

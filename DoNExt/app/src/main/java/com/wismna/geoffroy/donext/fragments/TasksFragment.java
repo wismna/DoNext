@@ -26,7 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.activities.MainActivity;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
@@ -49,13 +48,14 @@ public class TasksFragment extends Fragment implements
         ConfirmDialogFragment.ConfirmDialogListener,
         TaskTouchHelper.TaskTouchHelperAdapter{
 
-    public interface TaskChangedAdapter {
+    interface TaskChangedAdapter {
         void onTaskListChanged(Task task, int tabPosition);
     }
 
     private static final String TASK_LIST_ID = "task_list_id";
     private long taskListId = -1;
     private boolean isTodayView = true;
+    private boolean isHistory = false;
     private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
     private View view;
     private RecyclerView recyclerView;
@@ -69,10 +69,12 @@ public class TasksFragment extends Fragment implements
     public TasksFragment() {
     }
 
-    public static TasksFragment newTaskListInstance(long taskListId, TaskChangedAdapter taskChangedAdapter) {
+    public static TasksFragment newTaskListInstance(long taskListId, boolean isHistory,
+                                                    TaskChangedAdapter taskChangedAdapter) {
         TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
         args.putLong(TASK_LIST_ID, taskListId);
+        args.putBoolean("history", isHistory);
         fragment.setArguments(args);
         fragment.mAdapter = taskChangedAdapter;
         fragment.isTodayView = false;
@@ -86,6 +88,7 @@ public class TasksFragment extends Fragment implements
 
         if (getArguments() != null) {
             taskListId = getArguments().getLong(TASK_LIST_ID);
+            isHistory = getArguments().getBoolean("history");
         }
     }
 
@@ -96,7 +99,7 @@ public class TasksFragment extends Fragment implements
         final Context context = view.getContext();
 
         // Set the Recycler view
-        recyclerView = (RecyclerView) view.findViewById(R.id.task_list_view);
+        recyclerView = view.findViewById(R.id.task_list_view);
         recyclerView.setLayoutManager(new NoScrollingLayoutManager(context));
 
         // Set RecyclerView Adapter
@@ -105,7 +108,7 @@ public class TasksFragment extends Fragment implements
         // Get all tasks
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext())) {
             taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
-                    isTodayView? taskDataAccess.getTodayTasks() : taskDataAccess.getAllTasksFromList(taskListId),
+                    isTodayView? taskDataAccess.getTodayTasks() : taskDataAccess.getAllTasksFromList(taskListId, isHistory),
                     Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")), isTodayView);
         }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
@@ -134,11 +137,11 @@ public class TasksFragment extends Fragment implements
                         args.putString("button_neutral", getString(R.string.new_task_delete));
 
                         // Set current tab value to new task dialog
-                        ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.container);
+                        ViewPager viewPager = getActivity().findViewById(R.id.container);
                         List<TaskList> taskLists;
                         Task task = taskRecyclerViewAdapter.getItem(position);
                         if (viewPager != null) {
-                            taskLists = ((MainActivity.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems();
+                            taskLists = ((MainFragment.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems();
                             args.putInt("list", viewPager.getCurrentItem());
                         }
                         else {
@@ -188,14 +191,14 @@ public class TasksFragment extends Fragment implements
 
                 // Update total cycle count
                 int totalCycles = taskRecyclerViewAdapter.getCycleCount();
-                TextView totalCyclesView = (TextView) view.findViewById(R.id.total_task_cycles);
+                TextView totalCyclesView = view.findViewById(R.id.total_task_cycles);
                 if (totalCycles != 0)
                     totalCyclesView.setText(resources.getQuantityString(R.plurals.task_total_cycles, totalCycles, totalCycles));
                 else totalCyclesView.setText("");
 
                 // Update total tasks
                 int totalTasks = taskRecyclerViewAdapter.getItemCount();
-                TextView totalTasksView = (TextView) view.findViewById(R.id.total_task_count);
+                TextView totalTasksView = view.findViewById(R.id.total_task_count);
                 View noMoreTasks = view.findViewById(R.id.no_more_tasks);
                 if (totalTasks == 0) {
                     noMoreTasks.setVisibility(View.VISIBLE);
@@ -208,7 +211,7 @@ public class TasksFragment extends Fragment implements
                 }
 
                 // Update remaining tasks
-                TextView remainingTasksView = (TextView) view.findViewById(R.id.remaining_task_count);
+                TextView remainingTasksView = view.findViewById(R.id.remaining_task_count);
                 NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
                 int remainingTaskCount = totalTasks - layoutManager.findLastVisibleItemPosition() - 1;
                 if (remainingTaskCount == 0) remainingTasksView.setText("");
@@ -236,7 +239,7 @@ public class TasksFragment extends Fragment implements
         int direction = args.getInt("Direction");
 
         // Handle never ask again checkbox
-        CheckBox neverAskAgainCheckBox = (CheckBox) dialog.getDialog().findViewById(R.id.task_confirmation_never);
+        CheckBox neverAskAgainCheckBox = dialog.getDialog().findViewById(R.id.task_confirmation_never);
         if (neverAskAgainCheckBox.isChecked()) {
 
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -273,14 +276,14 @@ public class TasksFragment extends Fragment implements
         if (task != null) id = task.getId();
 
         // Get the controls
-        Spinner listSpinner = (Spinner) dialogView.findViewById(R.id.new_task_list);
-        EditText nameText = (EditText) dialogView.findViewById(R.id.new_task_name);
-        EditText descText = (EditText) dialogView.findViewById(R.id.new_task_description);
-        SeekBar seekBar = (SeekBar) dialogView.findViewById(R.id.new_task_priority);
-        CheckBox setDueDate = (CheckBox) dialogView.findViewById(R.id.new_task_due_date_set);
-        DatePicker dueDatePicker = (DatePicker) dialogView.findViewById(R.id.new_task_due_date);
+        Spinner listSpinner = dialogView.findViewById(R.id.new_task_list);
+        EditText nameText = dialogView.findViewById(R.id.new_task_name);
+        EditText descText = dialogView.findViewById(R.id.new_task_description);
+        SeekBar seekBar = dialogView.findViewById(R.id.new_task_priority);
+        CheckBox setDueDate = dialogView.findViewById(R.id.new_task_due_date_set);
+        DatePicker dueDatePicker = dialogView.findViewById(R.id.new_task_due_date);
         TaskList taskList = (TaskList) listSpinner.getSelectedItem();
-        CheckBox todayList = (CheckBox) dialogView.findViewById(R.id.new_task_today);
+        CheckBox todayList = dialogView.findViewById(R.id.new_task_today);
         boolean isToday = todayList.isChecked();
         // Add the task to the database
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
