@@ -106,15 +106,15 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
             startActivity(intent);
         }
         else {
-
-            // Set up the ViewPager with the sections adapter.
-            mViewPager = mView.findViewById(R.id.container);
-            mViewPager.setAdapter(mSectionsPagerAdapter);
-            // Open last opened tab
             int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
-            mViewPager.setCurrentItem(lastOpenedList);
 
             if (!getResources().getBoolean(R.bool.large_layout)) {
+                // Set up the ViewPager with the sections adapter.
+                mViewPager = mView.findViewById(R.id.container);
+                mViewPager.setAdapter(mSectionsPagerAdapter);
+                // Open last opened tab
+                mViewPager.setCurrentItem(lastOpenedList);
+
                 tabLayout = mView.findViewById(R.id.tabs);
                 tabLayout.setupWithViewPager(mViewPager);
 
@@ -134,6 +134,7 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
                 ListView listView = mView.findViewById(R.id.list);
                 //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
                 listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
+                listView.setSelection(lastOpenedList);
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
