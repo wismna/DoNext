@@ -15,6 +15,7 @@ import android.view.View;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.fragments.MainFragment;
 import com.wismna.geoffroy.donext.fragments.TaskFormDialogFragment;
+import com.wismna.geoffroy.donext.fragments.TaskListsFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
 
 /**
@@ -80,8 +81,32 @@ public class MainActivity extends AppCompatActivity {
 
     /** Called when the user clicks the Edit Lists button  */
     public void openTaskLists(MenuItem menuItem) {
-        Intent intent = new Intent(this, TaskListActivity.class);
-        startActivity(intent);
+        /*Intent intent = new Intent(this, TaskListActivity.class);
+        startActivity(intent);*/
+        // Create the fragment
+        TaskListsFragment taskListFragment = new TaskListsFragment();
+        String title = getString(R.string.action_edit_task);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        // Set the arguments
+        Bundle args = new Bundle();
+        args.putBoolean("neutral", false);
+        args.putString("button_positive", getString(R.string.new_task_save));
+        args.putString("button_negative", getString(R.string.new_task_cancel));
+        taskListFragment.setArguments(args);
+
+        if (getResources().getBoolean(R.bool.large_layout))
+            taskListFragment.show(fragmentManager, title);
+        else {
+            // The device is smaller, so show the fragment fullscreen
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            // For a little polish, specify a transition animation
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            // To make it fullscreen, use the 'content' root view as the container
+            // for the fragment, which is always the root view for the activity
+            transaction.add(android.R.id.content, taskListFragment, title)
+                    .addToBackStack(null).commit();
+        }
     }
 
     /** Called when the user clicks the History button*/

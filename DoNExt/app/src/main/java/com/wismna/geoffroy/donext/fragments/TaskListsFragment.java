@@ -6,13 +6,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -30,12 +27,12 @@ import java.util.List;
 /**
  * A fragment representing a list of Items.
  */
-public class TaskListsFragment extends Fragment implements
+public class TaskListsFragment extends DynamicDialogFragment implements
         TaskListRecyclerViewAdapter.TaskListRecyclerViewAdapterListener,
         ConfirmDialogFragment.ConfirmDialogListener {
     private TaskListRecyclerViewAdapter taskListRecyclerViewAdapter;
     private TaskListDataAccess taskListDataAccess;
-    private View mView;
+    //private View mView;
     private ItemTouchHelper mItemTouchHelper;
 
     /**
@@ -49,11 +46,17 @@ public class TaskListsFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Bundle args = getArguments();
+        if (args != null) {
+            mHasNeutralButton = args.getBoolean("neutral");
+        }
+
+        mContentLayoutId = R.layout.fragment_tasklists;
         taskListDataAccess = new TaskListDataAccess(getContext(), TaskListDataAccess.MODE.WRITE);
         new GetTaskListsTask().execute(taskListDataAccess);
     }
 
-    @Override
+    /*@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -80,6 +83,45 @@ public class TaskListsFragment extends Fragment implements
         });
 
         return mView;
+    }*/
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Button createTaskListButton = (Button) findViewById(R.id.new_task_list_button);
+        createTaskListButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText editText = (EditText) findViewById(R.id.new_task_list_name);
+                String text = editText.getText().toString();
+                if (text.matches("")) {
+                    editText.setError(getResources().getString(R.string.task_list_new_list_error));
+                    return;
+                }
+                int position = taskListRecyclerViewAdapter.getItemCount();
+
+                TaskList taskList = taskListDataAccess.createTaskList(text, position);
+                taskListRecyclerViewAdapter.add(taskList, position);
+
+                editText.setText("");
+                toggleVisibleCreateNewTaskListLayout();
+            }
+        });
+    }
+
+    @Override
+    protected void onPositiveButtonClick(View view) {
+
+    }
+
+    @Override
+    protected void onNeutralButtonClick(View view) {
+
+    }
+
+    @Override
+    protected void onNegativeButtonClick() {
+
     }
 
     @Override
@@ -96,8 +138,8 @@ public class TaskListsFragment extends Fragment implements
         taskListDataAccess.open(TaskListDataAccess.MODE.WRITE);
     }
 
-    private void toggleVisibleCreateNewTaskListLayout(View view) {
-        LinearLayout layout = view.findViewById(R.id.new_task_list_layout);
+    private void toggleVisibleCreateNewTaskListLayout() {
+        LinearLayout layout = (LinearLayout) findViewById(R.id.new_task_list_layout);
         int taskListCount = taskListRecyclerViewAdapter.getItemCount();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String maxTaskListsString = sharedPref.getString("pref_conf_max_lists", "5");
@@ -147,6 +189,7 @@ public class TaskListsFragment extends Fragment implements
         if (event == ConfirmDialogFragment.ButtonEvent.NO) return;
 
         Bundle args = dialog.getArguments();
+        assert args != null;
         deleteTaskList(args.getInt("ItemPosition"), args.getLong("ItemId"));
     }
 
@@ -165,7 +208,7 @@ public class TaskListsFragment extends Fragment implements
     {
         taskListRecyclerViewAdapter.remove(position);
         taskListDataAccess.deleteTaskList(id);
-        toggleVisibleCreateNewTaskListLayout(mView);
+        toggleVisibleCreateNewTaskListLayout();
     }
 
     /** Helper method to clear focus by giving it to the parent layout */
@@ -194,8 +237,8 @@ public class TaskListsFragment extends Fragment implements
                     new TaskListRecyclerViewAdapter(taskLists, TaskListsFragment.this);
 
             // Set the adapter
-            Context context = mView.getContext();
-            RecyclerView recyclerView = mView.findViewById(R.id.task_lists_view);
+            Context context = getContext();
+            RecyclerView recyclerView = (RecyclerView) findViewById(R.id.task_lists_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(taskListRecyclerViewAdapter);
 
@@ -204,7 +247,7 @@ public class TaskListsFragment extends Fragment implements
             mItemTouchHelper = new ItemTouchHelper(callback);
             mItemTouchHelper.attachToRecyclerView(recyclerView);
 
-            toggleVisibleCreateNewTaskListLayout(mView);
+            toggleVisibleCreateNewTaskListLayout();
         }
     }
 }
