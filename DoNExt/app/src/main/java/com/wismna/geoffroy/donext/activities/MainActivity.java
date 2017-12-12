@@ -90,9 +90,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the arguments
         Bundle args = new Bundle();
-        args.putBoolean("neutral", false);
-        args.putString("button_positive", getString(R.string.new_task_save));
-        args.putString("button_negative", getString(R.string.new_task_cancel));
+        args.putInt("button_count", 1);
+        args.putString("button_negative", getString(R.string.task_list_ok));
         taskListFragment.setArguments(args);
 
         if (getResources().getBoolean(R.bool.large_layout))
@@ -143,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         Bundle args = new Bundle();
         args.putInt("list", currentTabPosition);
         args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
-        args.putBoolean("neutral", false);
+        args.putInt("button_count", 2);
         args.putString("button_positive", getString(R.string.new_task_save));
         args.putString("button_negative", getString(R.string.new_task_cancel));
         args.putString("button_neutral", getString(R.string.new_task_delete));

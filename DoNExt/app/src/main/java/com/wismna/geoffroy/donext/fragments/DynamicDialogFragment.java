@@ -30,16 +30,17 @@ import com.wismna.geoffroy.donext.R;
  */
 
 public abstract class DynamicDialogFragment extends DialogFragment {
-    boolean mHasNeutralButton = false;
+    int mButtonCount = 2;
     int mContentLayoutId = 0;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // This part is only needed on small layouts (large layouts use onCreateDialog)
         if (!getShowsDialog()) {
             View view = inflater.inflate(R.layout.fragment_dynamic_dialog, container, false);
             AppCompatActivity activity = (AppCompatActivity) getActivity();
+            assert activity != null;
             activity.setSupportActionBar(setToolbarTitle(view));
 
             ActionBar actionBar = activity.getSupportActionBar();
@@ -66,13 +67,9 @@ public abstract class DynamicDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         Bundle args = getArguments();
         // Set the dialog buttons
+        assert args != null;
+        // Add action buttons
         builder.setView(view)
-                // Add action buttons
-                .setPositiveButton(args.getString("button_positive"), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        onPositiveButtonClick(view);
-                    }
-                })
                 .setNegativeButton(args.getString("button_negative"), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // Send the negative button event back to the host activity
@@ -81,7 +78,14 @@ public abstract class DynamicDialogFragment extends DialogFragment {
                         onNegativeButtonClick();
                     }
                 });
-        if (mHasNeutralButton) {
+        if (mButtonCount == 2) {
+            builder.setPositiveButton(args.getString("button_positive"), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    onPositiveButtonClick(view);
+                }
+            });
+        }
+        if (mButtonCount == 3) {
             builder.setNeutralButton(args.getString("button_neutral"), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -105,13 +109,20 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     public void onPrepareOptionsMenu(Menu menu) {
         Bundle args = getArguments();
         // Show the neutral button if needed
-        if (!mHasNeutralButton) {
+        if (mButtonCount < 3) {
             menu.removeItem(R.id.menu_neutral_button);
         }
         else {
             menu.findItem(R.id.menu_neutral_button).setTitle(args.getString("button_neutral"));
         }
-        menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
+
+        // Show the positive button if needed
+        if (mButtonCount < 2) {
+            menu.removeItem(R.id.menu_positive_button);
+        }
+        else {
+            menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
+        }
         super.onPrepareOptionsMenu(menu);
     }
 
@@ -124,6 +135,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
         // Hide the keyboard if present
         if (view != null) {
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+            assert imm != null;
             imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
         }
         if (id == R.id.menu_positive_button) {

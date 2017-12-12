@@ -48,7 +48,7 @@ public class TaskListsFragment extends DynamicDialogFragment implements
 
         Bundle args = getArguments();
         if (args != null) {
-            mHasNeutralButton = args.getBoolean("neutral");
+            mButtonCount = args.getInt("button_count");
         }
 
         mContentLayoutId = R.layout.fragment_tasklists;

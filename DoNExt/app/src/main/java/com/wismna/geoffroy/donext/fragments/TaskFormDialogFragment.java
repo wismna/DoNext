@@ -58,7 +58,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         mContentLayoutId = R.layout.content_task_form;
         Bundle args = getArguments();
         if (args != null) {
-            mHasNeutralButton = args.getBoolean("neutral");
+            mButtonCount = args.getInt("button_count");
         }
     }
 
@@ -106,6 +106,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
 
         // Auto set list value to current tab
         Bundle args = getArguments();
+        assert args != null;
         int id = args.getInt("list");
         spinner.setSelection(id);
 
