@@ -103,7 +103,7 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
         }
         if (taskLists.size() == 0) {
             Intent intent = new Intent(getContext(), TaskListActivity.class);
-            startActivity(intent);
+            //startActivity(intent);
         }
         else {
             int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
