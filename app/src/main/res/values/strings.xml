@@ -19,6 +19,7 @@
     <string name="task_list_delete">Delete</string>
     <string name="task_list_confirmation_delete">Delete task list?</string>
     <string name="task_list_drag_handle">Drag handle</string>
+    <string name="task_list_no_lists">Create a new task list</string>
 
     <!-- Strings related to new task dialog -->
     <string name="new_task_list">List</string>
@@ -79,8 +80,5 @@
     <string name="incompatible_sdk_version">Sorry, your Android version is not supported.</string>
     <string name="action_history">History</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_main2">Main2Activity</string>
     <string name="task_list_ok">OK</string>
 </resources>

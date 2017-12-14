@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -15,7 +14,7 @@ import android.view.View;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.fragments.MainFragment;
 import com.wismna.geoffroy.donext.fragments.TaskFormDialogFragment;
-import com.wismna.geoffroy.donext.fragments.TaskListsFragment;
+import com.wismna.geoffroy.donext.fragments.TaskListsDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
 
 /**
@@ -81,10 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
     /** Called when the user clicks the Edit Lists button  */
     public void openTaskLists(MenuItem menuItem) {
-        /*Intent intent = new Intent(this, TaskListActivity.class);
-        startActivity(intent);*/
         // Create the fragment
-        TaskListsFragment taskListFragment = new TaskListsFragment();
+        TaskListsDialogFragment taskListFragment = new TaskListsDialogFragment();
         String title = getString(R.string.action_edit_task);
         FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -94,18 +91,7 @@ public class MainActivity extends AppCompatActivity {
         args.putString("button_negative", getString(R.string.task_list_ok));
         taskListFragment.setArguments(args);
 
-        if (getResources().getBoolean(R.bool.large_layout))
-            taskListFragment.show(fragmentManager, title);
-        else {
-            // The device is smaller, so show the fragment fullscreen
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            // For a little polish, specify a transition animation
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            // To make it fullscreen, use the 'content' root view as the container
-            // for the fragment, which is always the root view for the activity
-            transaction.add(android.R.id.content, taskListFragment, title)
-                    .addToBackStack(null).commit();
-        }
+        taskListFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
     }
 
     /** Called when the user clicks the History button*/
@@ -131,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
         MainFragment fragment = getMainFragment();
         ViewPager viewPager = fragment.getViewPager();
+        if (viewPager == null) return;
         int currentTabPosition = viewPager.getCurrentItem();
         MainFragment.SectionsPagerAdapter pagerAdapter = (MainFragment.SectionsPagerAdapter) viewPager.getAdapter();
         TaskFormDialogFragment taskDialogFragment = TaskFormDialogFragment.newInstance(null,
@@ -150,18 +137,8 @@ public class MainActivity extends AppCompatActivity {
 
         String title = getString(R.string.action_new_task);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (getResources().getBoolean(R.bool.large_layout))
-            taskDialogFragment.show(fragmentManager, title);
-        else {
-            // The device is smaller, so show the fragment fullscreen
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            // For a little polish, specify a transition animation
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            // To make it fullscreen, use the 'content' root view as the container
-            // for the fragment, which is always the root view for the activity
-            transaction.add(android.R.id.content, taskDialogFragment, title)
-                    .addToBackStack(null).commit();
-        }
+
+        taskDialogFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
     }
 
     private MainFragment getMainFragment(){

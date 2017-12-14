@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.fragments;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Build;
@@ -22,7 +21,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.activities.TaskListActivity;
 import com.wismna.geoffroy.donext.adapters.SmartFragmentStatePagerAdapter;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
@@ -102,8 +100,17 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
             mSectionsPagerAdapter.notifyDataSetChanged();
         }
         if (taskLists.size() == 0) {
-            Intent intent = new Intent(getContext(), TaskListActivity.class);
-            //startActivity(intent);
+            TaskListsDialogFragment taskListFragment = new TaskListsDialogFragment();
+            String title = getString(R.string.task_list_no_lists);
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+
+            // Set the arguments
+            Bundle args = new Bundle();
+            args.putInt("button_count", 1);
+            args.putString("button_negative", getString(R.string.task_list_ok));
+            taskListFragment.setArguments(args);
+
+            taskListFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
         }
         else {
             int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);

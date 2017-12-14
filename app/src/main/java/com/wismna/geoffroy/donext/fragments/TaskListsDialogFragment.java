@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * A fragment representing a list of Items.
  */
-public class TaskListsFragment extends DynamicDialogFragment implements
+public class TaskListsDialogFragment extends DynamicDialogFragment implements
         TaskListRecyclerViewAdapter.TaskListRecyclerViewAdapterListener,
         ConfirmDialogFragment.ConfirmDialogListener {
     private TaskListRecyclerViewAdapter taskListRecyclerViewAdapter;
@@ -39,7 +39,7 @@ public class TaskListsFragment extends DynamicDialogFragment implements
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public TaskListsFragment() {
+    public TaskListsDialogFragment() {
     }
 
     @Override
@@ -51,7 +51,7 @@ public class TaskListsFragment extends DynamicDialogFragment implements
             mButtonCount = args.getInt("button_count");
         }
 
-        mContentLayoutId = R.layout.fragment_tasklists;
+        mContentLayoutId = R.layout.content_tasklists;
         taskListDataAccess = new TaskListDataAccess(getContext(), TaskListDataAccess.MODE.WRITE);
         new GetTaskListsTask().execute(taskListDataAccess);
     }
@@ -60,7 +60,7 @@ public class TaskListsFragment extends DynamicDialogFragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mView = inflater.inflate(R.layout.fragment_tasklists, container, false);
+        mView = inflater.inflate(R.layout.content_tasklists, container, false);
 
         Button createTaskListButton = mView.findViewById(R.id.new_task_list_button);
         createTaskListButton.setOnClickListener(new View.OnClickListener() {
@@ -111,17 +111,17 @@ public class TaskListsFragment extends DynamicDialogFragment implements
 
     @Override
     protected void onPositiveButtonClick(View view) {
-
+        // Not implemented
     }
 
     @Override
     protected void onNeutralButtonClick(View view) {
-
+        // Not implemented
     }
 
     @Override
     protected void onNegativeButtonClick() {
-
+        // TODO: close fragment
     }
 
     @Override
@@ -234,7 +234,7 @@ public class TaskListsFragment extends DynamicDialogFragment implements
         protected void onPostExecute(List<TaskList> taskLists) {
             super.onPostExecute(taskLists);
             taskListRecyclerViewAdapter =
-                    new TaskListRecyclerViewAdapter(taskLists, TaskListsFragment.this);
+                    new TaskListRecyclerViewAdapter(taskLists, TaskListsDialogFragment.this);
 
             // Set the adapter
             Context context = getContext();

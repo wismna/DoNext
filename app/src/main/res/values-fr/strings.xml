@@ -45,6 +45,7 @@
     <string name="task_list_new_list_create">Créer</string>
     <string name="task_list_new_list_error">Le nom de la liste ne peut pas être vide</string>
     <string name="task_list_new_list_hint">Nom de la liste</string>
+    <string name="task_list_no_lists">Créer une nouvelle liste de tâches</string>
     <string name="task_no_tasks">Super! Aucune tâche en cours!</string>
     <string name="settings_today_title">Vue Aujourd\'hui</string>
     <string name="settings_today_enable">Activer la vue Aujourd\'hui?</string>
