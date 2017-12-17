@@ -121,7 +121,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
 
     @Override
     protected void onNegativeButtonClick() {
-        // TODO: close fragment
+        dismiss();
     }
 
     @Override

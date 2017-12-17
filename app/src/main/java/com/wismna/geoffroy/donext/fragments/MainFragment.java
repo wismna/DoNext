@@ -53,6 +53,7 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
      * @return A new instance of fragment MainFragment.
      */
     // TODO: Rename and change types and number of parameters
+    // TODO: History should get its own activity and this fragment
     public static MainFragment newInstance(boolean isHistory) {
         MainFragment fragment = new MainFragment();
         Bundle args = new Bundle();
