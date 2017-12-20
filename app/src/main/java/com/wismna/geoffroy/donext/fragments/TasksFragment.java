@@ -1,17 +1,19 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
@@ -26,6 +28,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.activities.HistoryActivity;
+import com.wismna.geoffroy.donext.activities.TodayActivity;
+import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
@@ -48,7 +53,7 @@ public class TasksFragment extends Fragment implements
         ConfirmDialogFragment.ConfirmDialogListener,
         TaskTouchHelper.TaskTouchHelperAdapter{
 
-    interface TaskChangedAdapter {
+    public interface TaskChangedAdapter {
         void onTaskListChanged(Task task, int tabPosition);
     }
 
@@ -69,15 +74,11 @@ public class TasksFragment extends Fragment implements
     public TasksFragment() {
     }
 
-    public static TasksFragment newTaskListInstance(long taskListId, boolean isHistory,
-                                                    TaskChangedAdapter taskChangedAdapter) {
+    public static TasksFragment newTaskListInstance(long taskListId) {
         TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
         args.putLong(TASK_LIST_ID, taskListId);
-        args.putBoolean("history", isHistory);
         fragment.setArguments(args);
-        fragment.mAdapter = taskChangedAdapter;
-        fragment.isTodayView = false;
         fragment.setRetainInstance(true);
         return fragment;
     }
@@ -88,19 +89,23 @@ public class TasksFragment extends Fragment implements
 
         if (getArguments() != null) {
             taskListId = getArguments().getLong(TASK_LIST_ID);
-            isHistory = getArguments().getBoolean("history");
+            Activity parentActivity = getActivity();
+            if (parentActivity instanceof HistoryActivity) isHistory = true;
+            if (parentActivity instanceof TodayActivity) isTodayView = true;
+            // TODO: check that this works!
+            mAdapter = (MainFragment)getParentFragment();
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_tasks, container, false);
         final Context context = view.getContext();
 
         // Set the Recycler view
         recyclerView = view.findViewById(R.id.task_list_view);
-        recyclerView.setLayoutManager(new NoScrollingLayoutManager(context));
+        recyclerView.setLayoutManager(isHistory ? new LinearLayoutManager(context) : new NoScrollingLayoutManager(context));
 
         // Set RecyclerView Adapter
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -113,14 +118,17 @@ public class TasksFragment extends Fragment implements
         }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
 
-        // Set ItemTouch helper in RecyclerView to handle swipe move on elements
-        final Resources resources = getResources();
-        ItemTouchHelper.Callback callback = new TaskTouchHelper(this,
-                ContextCompat.getColor(context, R.color.colorPrimary),
-                ContextCompat.getColor(context, R.color.colorAccent));
-        ItemTouchHelper helper = new ItemTouchHelper(callback);
-        helper.attachToRecyclerView(recyclerView);
+        if (!isHistory) {
+            // Set ItemTouch helper in RecyclerView to handle swipe move on elements
+            ItemTouchHelper.Callback callback = new TaskTouchHelper(this,
+                    ContextCompat.getColor(context, R.color.colorPrimary),
+                    ContextCompat.getColor(context, R.color.colorAccent));
 
+            ItemTouchHelper helper = new ItemTouchHelper(callback);
+            helper.attachToRecyclerView(recyclerView);
+        }
+
+        final Resources resources = getResources();
         // Implements touch listener to add click detection
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
@@ -131,9 +139,10 @@ public class TasksFragment extends Fragment implements
                         Bundle args = new Bundle();
                         args.putInt("position", position);
                         args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
-                        args.putBoolean("neutral", true);
+                        args.putInt("button_count", isHistory ? 1 : 3);
                         args.putString("button_positive", getString(R.string.new_task_save));
-                        args.putString("button_negative", getString(R.string.new_task_cancel));
+                        args.putString("button_negative",
+                                isHistory ? getString(R.string.task_list_ok) : getString(R.string.new_task_cancel));
                         args.putString("button_neutral", getString(R.string.new_task_delete));
 
                         // Set current tab value to new task dialog
@@ -141,7 +150,7 @@ public class TasksFragment extends Fragment implements
                         List<TaskList> taskLists;
                         Task task = taskRecyclerViewAdapter.getItem(position);
                         if (viewPager != null) {
-                            taskLists = ((MainFragment.SectionsPagerAdapter) viewPager.getAdapter()).getAllItems();
+                            taskLists = ((SectionsPagerAdapter) viewPager.getAdapter()).getAllItems();
                             args.putInt("list", viewPager.getCurrentItem());
                         }
                         else {
@@ -164,19 +173,8 @@ public class TasksFragment extends Fragment implements
 
                         // Open the fragment as a dialog or as full-screen depending on screen size
                         String title = getString(R.string.action_edit_task);
-                        if (isLargeLayout) {
-                            taskDialogFragment.show(manager, title);
-                        }
-                        else {
-                            // The device is smaller, so show the fragment fullscreen
-                            FragmentTransaction transaction = manager.beginTransaction();
-                            // For a little polish, specify a transition animation
-                            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                            // To make it fullscreen, use the 'content' root view as the container
-                            // for the fragment, which is always the root view for the activity
-                            transaction.add(android.R.id.content, taskDialogFragment, title)
-                                    .addToBackStack(null).commit();
-                        }
+                        assert manager != null;
+                        taskDialogFragment.showFragment(manager, title, isLargeLayout);
                     }
                 })
         );
@@ -235,6 +233,7 @@ public class TasksFragment extends Fragment implements
     @Override
     public void onConfirmDialogClick(DialogFragment dialog, ConfirmDialogFragment.ButtonEvent event) {
         Bundle args = dialog.getArguments();
+        assert args != null;
         int itemPosition = args.getInt("ItemPosition");
         int direction = args.getInt("Direction");
 
@@ -317,6 +316,7 @@ public class TasksFragment extends Fragment implements
             }
             // Update the task
             else {
+                assert args != null;
                 int position = args.getInt("position");
                 // Check if task list was changed
                 if ((isTodayView && !isToday) || (!isTodayView && task.getTaskListId() != taskList.getId()))
@@ -340,6 +340,7 @@ public class TasksFragment extends Fragment implements
         Bundle args = dialog.getArguments();
 
         // Delete task from Adapter
+        assert args != null;
         final int itemPosition = args.getInt("position");
 
         if (showDialog) {
@@ -418,6 +419,7 @@ public class TasksFragment extends Fragment implements
                 break;
             case -1:
                 FragmentManager manager = getFragmentManager();
+                assert manager != null;
                 DialogFragment dialog = (DialogFragment) manager.findFragmentByTag(getString(R.string.action_edit_task));
                 if (dialog != null) dialog.dismiss();
                 action = resources.getString(R.string.snackabar_action_deleted);

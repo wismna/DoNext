@@ -25,7 +25,7 @@ public class TodayActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_today);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Get a support ActionBar corresponding to this toolbar
@@ -79,16 +79,16 @@ public class TodayActivity extends AppCompatActivity
 
     @Override
     public void onTodayTaskDialogPositiveClick(View dialogView) {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setEnabled(false);
     }
 
     @Override
     public void onTodayTasksUpdated() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setEnabled(true);
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(this)) {
-            RecyclerView recyclerView = (RecyclerView) findViewById(R.id.task_list_view);
+            RecyclerView recyclerView = findViewById(R.id.task_list_view);
             ((TaskRecyclerViewAdapter)recyclerView.getAdapter()).setItems(taskDataAccess.getTodayTasks());
         }
     }

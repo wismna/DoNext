@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.fragments;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -63,10 +62,12 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Inflate and set the layout for the dialog
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        Activity activity = getActivity();
+        assert activity != null;
+        LayoutInflater inflater = activity.getLayoutInflater();
         // As it is a Dialog, the root ViewGroup can be null without issues
-        @SuppressLint("InflateParams") final View view = inflater.inflate(R.layout.fragment_dynamic_dialog, null);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final View view = inflater.inflate(R.layout.fragment_dynamic_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         Bundle args = getArguments();
         // Set the dialog buttons
         assert args != null;
@@ -102,7 +103,6 @@ public abstract class DynamicDialogFragment extends DialogFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
         getActivity().getMenuInflater().inflate(R.menu.menu_dynamic_fragment, menu);
     }
@@ -110,6 +110,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         Bundle args = getArguments();
+        assert args != null;
         // Show the neutral button if needed
         if (mButtonCount < 3) {
             menu.removeItem(R.id.menu_neutral_button);

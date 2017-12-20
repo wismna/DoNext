@@ -1,14 +1,15 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -21,7 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.adapters.SmartFragmentStatePagerAdapter;
+import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
@@ -38,72 +39,46 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private TabLayout tabLayout;
-    private List<TaskList> taskLists;
-    private boolean isHistory = false;
 
     public MainFragment() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param isHistory Will this fragment show the task history?
-     * @return A new instance of fragment MainFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    // TODO: History should get its own activity and this fragment
-    public static MainFragment newInstance(boolean isHistory) {
-        MainFragment fragment = new MainFragment();
-        Bundle args = new Bundle();
-        args.putBoolean("history", isHistory);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     public ViewPager getViewPager() {
         return mViewPager;
     }
 
-    public void toggleHistory() {
-        isHistory = !isHistory;
-        mSectionsPagerAdapter.notifyDataSetChanged();
-    }
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            isHistory = getArguments().getBoolean("history");
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_main, container, false);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         Toolbar toolbar = mView.findViewById(R.id.toolbar);
+        assert activity != null;
         activity.setSupportActionBar(toolbar);
-
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
 
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity);
 
         // Access database to retrieve Tabs
+        List<TaskList> taskLists;
         try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(activity)) {
             taskLists = taskListDataAccess.getAllTaskLists();
+
+            // Create the adapter that will return a fragment for each of the three
+            // primary sections of the activity.
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager(), taskLists);
             mSectionsPagerAdapter.notifyDataSetChanged();
         }
+        boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
+
+        // TODO: determine whether this is the first startup, and if so, show a tutorial of sorts
+        // No tasks, show the edit task lists fragment
         if (taskLists.size() == 0) {
             TaskListsDialogFragment taskListFragment = new TaskListsDialogFragment();
             String title = getString(R.string.task_list_no_lists);
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
 
             // Set the arguments
             Bundle args = new Bundle();
@@ -113,6 +88,7 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
 
             taskListFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
         }
+        // Otherwise, show the normal view
         else {
             int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
             // Set up the ViewPager with the sections adapter.
@@ -121,9 +97,11 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
             // Open last opened tab
             mViewPager.setCurrentItem(lastOpenedList);
 
-            if (!getResources().getBoolean(R.bool.large_layout)) {
+            if (!isLargeLayout) {
 
                 tabLayout = mView.findViewById(R.id.tabs);
+                // Hide the tabs if there is only one task list
+                if (taskLists.size() == 1) tabLayout.setVisibility(View.INVISIBLE);
                 tabLayout.setupWithViewPager(mViewPager);
 
                 // Handles scroll detection (only available for SDK version >=23)
@@ -140,6 +118,8 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
             }
             else {
                 ListView listView = mView.findViewById(R.id.list);
+                // Hide the list if there is only one task list
+                if (taskLists.size() == 1) listView.setVisibility(View.INVISIBLE);
                 //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
                 listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
                 //listView.setSelection(lastOpenedList);
@@ -196,48 +176,12 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
         View rightArrow = mView.findViewById(R.id.right_arrow);
         if (rightArrow != null) {
             Point size = new Point();
-            getActivity().getWindowManager().getDefaultDisplay().getSize(size);
+            Activity activity = getActivity();
+            assert activity != null;
+            activity.getWindowManager().getDefaultDisplay().getSize(size);
             if (scrollX == tabLayout.getChildAt(0).getMeasuredWidth() - tabLayout.getMeasuredWidth())
                 rightArrow.setVisibility(View.INVISIBLE);
             else rightArrow.setVisibility(View.VISIBLE);
-        }
-    }
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends SmartFragmentStatePagerAdapter {
-
-        SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            TaskList taskList = taskLists.get(position);
-            return TasksFragment.newTaskListInstance(taskList.getId(), isHistory, MainFragment.this);
-        }
-
-        @Override
-        public int getCount() {
-            if (taskLists != null) {
-                // Show the task lists
-                return taskLists.size();
-            }
-            return 3;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            if (taskLists == null) return "N/A";
-            return taskLists.get(position).getName();
-        }
-
-        public List<TaskList> getAllItems(){
-            return taskLists;
         }
     }
 }

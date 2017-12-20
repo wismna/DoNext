@@ -34,9 +34,9 @@ public class TodayArrayAdapter extends ArrayAdapter<Task> {
         if (convertView == null) {
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_task_item, parent, false);
         }
-        TextView titleView = (TextView) convertView.findViewById(R.id.task_list_item_title);
-        TextView taskView = (TextView) convertView.findViewById(R.id.task_list_item_tasklist);
-        LinearLayout layoutView = (LinearLayout) convertView.findViewById(R.id.task_list_item_layout);
+        TextView titleView = convertView.findViewById(R.id.task_list_item_title);
+        TextView taskView = convertView.findViewById(R.id.task_list_item_tasklist);
+        LinearLayout layoutView = convertView.findViewById(R.id.task_list_item_layout);
         Task item = this.getItem(position);
         if (item != null) {
             titleView.setText(item.getName());

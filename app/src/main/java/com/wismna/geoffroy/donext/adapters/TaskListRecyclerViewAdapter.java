@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.adapters;
 
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -54,12 +53,11 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         holder.mTaskCountView.setText(String.valueOf(mValues.get(position).getTaskCount()));
         holder.mTaskNameView.setText(mValues.get(position).getName());
 
-
+        // TODO: correct this...
         holder.handleView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEventCompat.getActionMasked(event) ==
-                        MotionEvent.ACTION_DOWN) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mListener.onStartDrag(holder);
                 }
                 return false;
@@ -147,10 +145,10 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         ViewHolder(View view) {
             super(view);
             mView = view;
-            handleView = (ImageView) itemView.findViewById(R.id.handle);
-            mTaskCountView = (TextView) view.findViewById(R.id.task_list_count);
-            mTaskNameView = (TextView) view.findViewById(R.id.task_list_name);
-            mTaskDeleteButton = (Button) view.findViewById(R.id.task_list_delete);
+            handleView = itemView.findViewById(R.id.handle);
+            mTaskCountView = view.findViewById(R.id.task_list_count);
+            mTaskNameView = view.findViewById(R.id.task_list_name);
+            mTaskDeleteButton = view.findViewById(R.id.task_list_delete);
         }
 
         @Override

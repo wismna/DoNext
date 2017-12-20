@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
 import com.wismna.geoffroy.donext.fragments.MainFragment;
 import com.wismna.geoffroy.donext.fragments.TaskFormDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TaskListsDialogFragment;
@@ -73,9 +74,8 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
 
         // Update the ViewPagerAdapter to refresh all tabs
-        MainFragment fragment = getMainFragment();
-        fragment.getViewPager().getAdapter().notifyDataSetChanged();
-        //mSectionsPagerAdapter.notifyDataSetChanged();
+        ViewPager viewPager = getMainFragmentViewPager();
+        viewPager.getAdapter().notifyDataSetChanged();
     }
 
     /** Called when the user clicks the Edit Lists button  */
@@ -96,8 +96,8 @@ public class MainActivity extends AppCompatActivity {
 
     /** Called when the user clicks the History button*/
     public void openHistory(MenuItem item) {
-        MainFragment fragment = getMainFragment();
-        fragment.toggleHistory();
+        Intent intent = new Intent(this, HistoryActivity.class);
+        startActivity(intent);
     }
 
     /** Called when the user clicks the Settings button  */
@@ -114,12 +114,11 @@ public class MainActivity extends AppCompatActivity {
 
     /** Called when user clicks on the New Task floating button */
     public void onNewTaskClick(View view) {
-
-        MainFragment fragment = getMainFragment();
-        ViewPager viewPager = fragment.getViewPager();
+        ViewPager viewPager = getMainFragmentViewPager();
         if (viewPager == null) return;
         int currentTabPosition = viewPager.getCurrentItem();
-        MainFragment.SectionsPagerAdapter pagerAdapter = (MainFragment.SectionsPagerAdapter) viewPager.getAdapter();
+        SectionsPagerAdapter pagerAdapter = (SectionsPagerAdapter) viewPager.getAdapter();
+        assert pagerAdapter != null;
         TaskFormDialogFragment taskDialogFragment = TaskFormDialogFragment.newInstance(null,
                 pagerAdapter.getAllItems(),
                 (TasksFragment) pagerAdapter.getRegisteredFragment(currentTabPosition));
@@ -141,8 +140,9 @@ public class MainActivity extends AppCompatActivity {
         taskDialogFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
     }
 
-    private MainFragment getMainFragment(){
+    private ViewPager getMainFragmentViewPager(){
         FragmentManager manager = getSupportFragmentManager();
-        return (MainFragment)manager.findFragmentById(R.id.fragment_main);
+        MainFragment fragment = (MainFragment)manager.findFragmentById(R.id.fragment_main);
+        return fragment.getViewPager();
     }
 }

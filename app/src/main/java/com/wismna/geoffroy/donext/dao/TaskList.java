@@ -8,8 +8,6 @@ public class TaskList {
     private long id;
     private String name;
     private long taskCount;
-    private int order;
-    private Boolean visible;
 
     public long getId() {
         return id;
@@ -35,20 +33,6 @@ public class TaskList {
         this.taskCount = taskCount;
     }
 
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    public void setVisible(int visible) {
-        this.visible = visible != 0;
-    }
-    public Boolean isVisible() {
-        return visible;
-    }
     @Override
     public String toString() {
         return name;

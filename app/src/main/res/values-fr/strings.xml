@@ -61,4 +61,5 @@
     <string name="incompatible_sdk_version">Sorry, your Android version is not supported.</string>
     <string name="action_history">Historique</string>
     <string name="task_list_ok">OK</string>
+    <string name="title_activity_history">Historique</string>
 </resources>

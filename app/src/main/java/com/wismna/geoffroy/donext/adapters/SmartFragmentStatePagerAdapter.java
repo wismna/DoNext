@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.adapters;
 
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -17,16 +18,17 @@ public abstract class SmartFragmentStatePagerAdapter extends FragmentStatePagerA
     // Sparse array to keep track of registered fragments in memory
     private final SparseArray<Fragment> registeredFragments = new SparseArray<>();
 
-    public SmartFragmentStatePagerAdapter(FragmentManager fragmentManager) {
+    SmartFragmentStatePagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
     }
 
     @Override
-    public int getItemPosition(Object object) {
+    public int getItemPosition(@NonNull Object object) {
         return POSITION_NONE;
     }
 
     // Register the fragment when the item is instantiated
+    @NonNull
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         Fragment fragment = (Fragment) super.instantiateItem(container, position);

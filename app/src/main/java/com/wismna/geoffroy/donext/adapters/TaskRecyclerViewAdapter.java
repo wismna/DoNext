@@ -98,10 +98,6 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         return viewType;
     }
 
-    public void setItemViewType(int viewType) {
-        this.viewType = viewType;
-    }
-
     public void add(Task item, int position) {
         mValues.add(position, item);
         notifyItemInserted(position);
@@ -146,10 +142,10 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
             super(view);
             mView = view;
 
-            mIdView = (TextView) view.findViewById(R.id.task_id);
-            mAlarmView = (ImageView) view.findViewById(R.id.task_alarm);
-            mCycleView = (TextView) view.findViewById(R.id.task_cycle);
-            mTitleView = (TextView) view.findViewById(R.id.task_name);
+            mIdView = view.findViewById(R.id.task_id);
+            mAlarmView = view.findViewById(R.id.task_alarm);
+            mCycleView = view.findViewById(R.id.task_cycle);
+            mTitleView = view.findViewById(R.id.task_name);
         }
 
         @Override
@@ -163,7 +159,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
         private DetailedViewHolder(View view) {
             super(view);
-            mDescriptionView = (TextView) view.findViewById(R.id.task_description);
+            mDescriptionView = view.findViewById(R.id.task_description);
         }
 
         @Override

@@ -133,8 +133,8 @@ public class TaskListDataAccess implements AutoCloseable {
         TaskList taskList = new TaskList();
         taskList.setId(cursor.getLong(0));
         taskList.setName(cursor.getString(1));
-        taskList.setOrder(cursor.getInt(2));
-        taskList.setVisible(cursor.getInt(3));
+        //taskList.setOrder(cursor.getInt(2));
+        //taskList.setVisible(cursor.getInt(3));
         // Get "false" count column if it exists
         if (cursor.getColumnCount() == 5)
             taskList.setTaskCount(cursor.getLong(4));

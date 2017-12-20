@@ -22,6 +22,7 @@ import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.helpers.TaskListTouchHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
@@ -53,37 +54,8 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
 
         mContentLayoutId = R.layout.content_tasklists;
         taskListDataAccess = new TaskListDataAccess(getContext(), TaskListDataAccess.MODE.WRITE);
-        new GetTaskListsTask().execute(taskListDataAccess);
+        new GetTaskListsTask(this).execute(taskListDataAccess);
     }
-
-    /*@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        mView = inflater.inflate(R.layout.content_tasklists, container, false);
-
-        Button createTaskListButton = mView.findViewById(R.id.new_task_list_button);
-        createTaskListButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText editText = mView.findViewById(R.id.new_task_list_name);
-                String text = editText.getText().toString();
-                if (text.matches("")) {
-                    editText.setError(getResources().getString(R.string.task_list_new_list_error));
-                    return;
-                }
-                int position = taskListRecyclerViewAdapter.getItemCount();
-
-                TaskList taskList = taskListDataAccess.createTaskList(text, position);
-                taskListRecyclerViewAdapter.add(taskList, position);
-
-                editText.setText("");
-                toggleVisibleCreateNewTaskListLayout(mView);
-            }
-        });
-
-        return mView;
-    }*/
 
     @Override
     public void onStart() {
@@ -223,7 +195,13 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
         }
     }
 
-    private class GetTaskListsTask extends AsyncTask<TaskListDataAccess, Void, List<TaskList>> {
+    private static class GetTaskListsTask extends AsyncTask<TaskListDataAccess, Void, List<TaskList>> {
+        private WeakReference<TaskListsDialogFragment> fragmentReference;
+
+        GetTaskListsTask(TaskListsDialogFragment context) {
+            fragmentReference = new WeakReference<>(context);
+        }
+
         @Override
         protected List<TaskList> doInBackground(TaskListDataAccess... params) {
             TaskListDataAccess taskListDataAccess = params[0];
@@ -233,21 +211,23 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
         @Override
         protected void onPostExecute(List<TaskList> taskLists) {
             super.onPostExecute(taskLists);
-            taskListRecyclerViewAdapter =
-                    new TaskListRecyclerViewAdapter(taskLists, TaskListsDialogFragment.this);
+            TaskListsDialogFragment fragment = fragmentReference.get();
+            if (fragment == null) return;
+            fragment.taskListRecyclerViewAdapter =
+                    new TaskListRecyclerViewAdapter(taskLists, fragment);
 
             // Set the adapter
-            Context context = getContext();
-            RecyclerView recyclerView = (RecyclerView) findViewById(R.id.task_lists_view);
+            Context context = fragment.getContext();
+            RecyclerView recyclerView = (RecyclerView) fragment.findViewById(R.id.task_lists_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(taskListRecyclerViewAdapter);
+            recyclerView.setAdapter(fragment.taskListRecyclerViewAdapter);
 
             // Set the Touch Helper
-            ItemTouchHelper.Callback callback = new TaskListTouchHelper(taskListRecyclerViewAdapter);
-            mItemTouchHelper = new ItemTouchHelper(callback);
-            mItemTouchHelper.attachToRecyclerView(recyclerView);
+            ItemTouchHelper.Callback callback = new TaskListTouchHelper(fragment.taskListRecyclerViewAdapter);
+            fragment.mItemTouchHelper = new ItemTouchHelper(callback);
+            fragment.mItemTouchHelper.attachToRecyclerView(recyclerView);
 
-            toggleVisibleCreateNewTaskListLayout();
+            fragment.toggleVisibleCreateNewTaskListLayout();
         }
     }
 }

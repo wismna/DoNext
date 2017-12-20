@@ -59,16 +59,8 @@ public class Task {
         this.cycle = cycle;
     }
 
-    public boolean isDone() {
-        return done != 0;
-    }
-
     public void setDone(int done) {
         this.done = done;
-    }
-
-    public boolean isDeleted() {
-        return deleted != 0;
     }
 
     public void setDeleted(int deleted) {

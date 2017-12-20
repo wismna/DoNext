@@ -28,6 +28,12 @@ public class NonSwipeableViewPager extends ViewPager {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // Never allow swiping to switch between pages
+        performClick();
         return false;
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 }

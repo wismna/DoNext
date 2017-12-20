@@ -18,6 +18,7 @@ import com.wismna.geoffroy.donext.database.TaskDataAccess;
 
 import org.joda.time.LocalDate;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         super.onCreate(savedInstanceState);
         mContentLayoutId = R.layout.content_today_form;
         // Load the tasks asynchronously
-        new LoadTasks().execute(getActivity());
+        new LoadTasks(this).execute(getActivity());
     }
 
     private void setLayoutValues(List<Task> tasks) {
@@ -94,7 +95,7 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     protected void onPositiveButtonClick(View view) {
         mListener.onTodayTaskDialogPositiveClick(view);
         // Only commit the updated tasks to DB
-        new UpdateTasks().execute(mUpdatedTasks.toArray(new Task[mUpdatedTasks.size()]));
+        new UpdateTasks(this).execute(mUpdatedTasks.toArray(new Task[mUpdatedTasks.size()]));
         dismiss();
     }
 
@@ -108,7 +109,13 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         dismiss();
     }
 
-    private class LoadTasks extends AsyncTask<Context, Void, List<Task>> {
+     static class LoadTasks extends AsyncTask<Context, Void, List<Task>> {
+        private WeakReference<TodayFormDialogFragment> fragmentReference;
+
+        LoadTasks(TodayFormDialogFragment context) {
+            fragmentReference = new WeakReference<>(context);
+        }
+
         @Override
         protected  List<Task> doInBackground(Context... params) {
             try(TaskDataAccess taskDataAccess = new TaskDataAccess(params[0])) {
@@ -119,15 +126,21 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         @Override
         protected void onPostExecute(List<Task> tasks) {
             super.onPostExecute(tasks);
-            setLayoutValues(tasks);
+            fragmentReference.get().setLayoutValues(tasks);
         }
     }
 
-    private class UpdateTasks extends AsyncTask<Task, Void, Integer> {
+    private static class UpdateTasks extends AsyncTask<Task, Void, Integer> {
+        private WeakReference<TodayFormDialogFragment> fragmentReference;
+
+        UpdateTasks(TodayFormDialogFragment context) {
+            fragmentReference = new WeakReference<>(context);
+        }
+
         @Override
         protected Integer doInBackground(Task... params) {
             int elementsUpdated = 0;
-            try (TaskDataAccess taskDataAccess = new TaskDataAccess(getActivity(), TaskDataAccess.MODE.WRITE)) {
+            try (TaskDataAccess taskDataAccess = new TaskDataAccess(fragmentReference.get().getActivity(), TaskDataAccess.MODE.WRITE)) {
                 for (Task task :
                         params) {
                     taskDataAccess.updateTodayTasks(task.getId(), task.isToday());
@@ -140,7 +153,7 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         @Override
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
-            mListener.onTodayTasksUpdated();
+            fragmentReference.get().mListener.onTodayTasksUpdated();
         }
     }
  }

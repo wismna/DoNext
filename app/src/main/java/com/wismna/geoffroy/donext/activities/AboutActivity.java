@@ -8,6 +8,9 @@ import android.widget.TextView;
 import com.wismna.geoffroy.donext.BuildConfig;
 import com.wismna.geoffroy.donext.R;
 
+/**
+ * About Activity class
+ */
 public class AboutActivity extends AppCompatActivity {
 
     @Override
@@ -15,10 +18,10 @@ public class AboutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
-        TextView versionDonext = (TextView) findViewById(R.id.version_donext);
+        TextView versionDonext = findViewById(R.id.version_donext);
         versionDonext.setText(getResources().getString(R.string.about_version_donext, BuildConfig.VERSION_NAME));
 
-        TextView versionAndroid = (TextView) findViewById(R.id.version_android);
+        TextView versionAndroid = findViewById(R.id.version_android);
         versionAndroid.setText(getResources().getString(R.string.about_version_android, Build.VERSION.SDK_INT));
 
     }

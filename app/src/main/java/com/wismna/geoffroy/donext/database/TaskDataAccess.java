@@ -133,25 +133,25 @@ public class TaskDataAccess implements AutoCloseable {
         return getTasksFromCursor(cursor);
     }
 
-    public int setDone(long id) {
-        return update(id, DatabaseHelper.TASKS_COLUMN_DONE, 1);
+    public void setDone(long id) {
+        update(id, DatabaseHelper.TASKS_COLUMN_DONE, 1);
     }
 
-    public int increaseCycle(int newCycle, long id) {
-        return update(id, DatabaseHelper.TASKS_COLUMN_CYCLE, newCycle);
+    public void increaseCycle(int newCycle, long id) {
+        update(id, DatabaseHelper.TASKS_COLUMN_CYCLE, newCycle);
     }
 
-    public int deleteTask(long id) {
+    public void deleteTask(long id) {
         /*database.delete(DatabaseHelper.TASKS_TABLE_NAME,
                 DatabaseHelper.COLUMN_ID + " = " + taskId, null);*/
-        return update(id, DatabaseHelper.TASKS_COLUMN_DELETED, 1);
+        update(id, DatabaseHelper.TASKS_COLUMN_DELETED, 1);
     }
 
-    private int update(long id, String column, Object value) {
+    private void update(long id, String column, Object value) {
         ContentValues contentValues = new ContentValues();
         if (value instanceof Integer)
             contentValues.put(column, (int) value);
-        return database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+        database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
     }
 
     private Task cursorToTask(Cursor cursor) {
