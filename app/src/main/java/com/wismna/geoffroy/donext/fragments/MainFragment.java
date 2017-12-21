@@ -101,7 +101,7 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
 
                 tabLayout = mView.findViewById(R.id.tabs);
                 // Hide the tabs if there is only one task list
-                if (taskLists.size() == 1) tabLayout.setVisibility(View.INVISIBLE);
+                if (taskLists.size() == 1) tabLayout.setVisibility(View.GONE);
                 tabLayout.setupWithViewPager(mViewPager);
 
                 // Handles scroll detection (only available for SDK version >=23)
@@ -119,7 +119,7 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
             else {
                 ListView listView = mView.findViewById(R.id.list);
                 // Hide the list if there is only one task list
-                if (taskLists.size() == 1) listView.setVisibility(View.INVISIBLE);
+                if (taskLists.size() == 1) listView.setVisibility(View.GONE);
                 //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
                 listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
                 //listView.setSelection(lastOpenedList);

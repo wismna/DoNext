@@ -92,7 +92,7 @@ public class TasksFragment extends Fragment implements
             Activity parentActivity = getActivity();
             if (parentActivity instanceof HistoryActivity) isHistory = true;
             if (parentActivity instanceof TodayActivity) isTodayView = true;
-            // TODO: check that this works!
+            // TODO: this does not work! No tasks are shown
             mAdapter = (MainFragment)getParentFragment();
         }
     }
@@ -118,6 +118,7 @@ public class TasksFragment extends Fragment implements
         }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
 
+        // TODO: check that this works
         if (!isHistory) {
             // Set ItemTouch helper in RecyclerView to handle swipe move on elements
             ItemTouchHelper.Callback callback = new TaskTouchHelper(this,
