@@ -209,10 +209,13 @@ public class TasksFragment extends Fragment implements
                     totalTasksView.setText(resources.getQuantityString(R.plurals.task_total, totalTasks, totalTasks));
                 }
 
-                // Update remaining tasks
+                RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+                if (layoutManager instanceof LinearLayoutManager) return true;
+
+                // Update remaining tasks - only when needed
                 TextView remainingTasksView = view.findViewById(R.id.remaining_task_count);
-                NoScrollingLayoutManager layoutManager = (NoScrollingLayoutManager) recyclerView.getLayoutManager();
-                int remainingTaskCount = totalTasks - layoutManager.findLastVisibleItemPosition() - 1;
+                NoScrollingLayoutManager noScrollingLayoutManager = (NoScrollingLayoutManager)layoutManager;
+                int remainingTaskCount = totalTasks - noScrollingLayoutManager.findLastVisibleItemPosition() - 1;
                 if (remainingTaskCount == 0) remainingTasksView.setText("");
                 else remainingTasksView.setText(resources.getQuantityString(R.plurals.task_remaining, remainingTaskCount, remainingTaskCount));
 
