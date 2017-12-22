@@ -59,7 +59,7 @@ public class TasksFragment extends Fragment implements
 
     private static final String TASK_LIST_ID = "task_list_id";
     private long taskListId = -1;
-    private boolean isTodayView = true;
+    private boolean isTodayView = false;
     private boolean isHistory = false;
     private TaskRecyclerViewAdapter taskRecyclerViewAdapter;
     private View view;

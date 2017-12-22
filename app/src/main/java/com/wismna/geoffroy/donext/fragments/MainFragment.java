@@ -60,6 +60,8 @@ public class MainFragment extends Fragment implements
         assert activity != null;
         activity.setSupportActionBar(toolbar);
 
+        // TODO: determine whether this is the first startup, and if so, show a tutorial of sorts
+
         // Load task lists
         updateTaskLists(activity);
         SharedPreferences sharedPref =
@@ -112,7 +114,6 @@ public class MainFragment extends Fragment implements
         }
         boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
 
-        // TODO: determine whether this is the first startup, and if so, show a tutorial of sorts
         // No tasks, show the edit task lists fragment
         if (taskLists.size() == 0) {
             TaskListsDialogFragment taskListFragment = TaskListsDialogFragment.newInstance(this);
