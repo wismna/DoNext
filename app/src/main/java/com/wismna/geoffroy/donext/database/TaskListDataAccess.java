@@ -61,12 +61,13 @@ public class TaskListDataAccess implements AutoCloseable {
     }
 
     public void deleteTaskList(long id) {
-        // Delete all related tasks
-        database.delete(DatabaseHelper.TASKS_TABLE_NAME, DatabaseHelper.TASKS_COLUMN_LIST
+        // Mark all tasks as deleted
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseHelper.TASKS_COLUMN_DELETED, 1);
+        database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.TASKS_COLUMN_LIST
                 + " = " + id, null);
-        // Delete list
-        database.delete(DatabaseHelper.TASKLIST_TABLE_NAME, DatabaseHelper.COLUMN_ID
-                + " = " + id, null);
+        // Hide list
+        update(id, DatabaseHelper.TASKLIST_COLUMN_VISIBLE, 0);
     }
 
     public void updateOrder(long id, int order) {
@@ -77,21 +78,10 @@ public class TaskListDataAccess implements AutoCloseable {
         update(id, DatabaseHelper.TASKLIST_COLUMN_NAME, name);
     }
 
-    public TaskList getTaskListByName(String name) {
-        Cursor cursor = getTaskListByNameCursor(name);
-        TaskList taskList = null;
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            taskList = cursorToTaskList(cursor);
-            cursor.close();
-        }
-        return taskList;
-    }
-
-    public List<TaskList> getAllTaskLists() {
+    public List<TaskList> getTaskLists(boolean showInvisible) {
         List<TaskList> taskLists = new ArrayList<>();
 
-        Cursor cursor = getAllTaskListsCursor();
+        Cursor cursor = showInvisible ? getInvisibleTaskListsCursor() : getVisibleTaskListsCursor();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             TaskList taskList = cursorToTaskList(cursor);
@@ -113,18 +103,30 @@ public class TaskListDataAccess implements AutoCloseable {
         database.update(DatabaseHelper.TASKLIST_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
     }
 
-    private Cursor getTaskListByNameCursor(String name) {
-        return database.query(true, DatabaseHelper.TASKLIST_TABLE_NAME, taskListColumns,
-                DatabaseHelper.TASKLIST_COLUMN_NAME + " = '" + name.replace("'", "''") + "'", null, null, null, null, null);
-    }
-    private Cursor getAllTaskListsCursor() {
+    private Cursor getVisibleTaskListsCursor() {
         return database.rawQuery("SELECT *," +
                 " (SELECT COUNT(*) " +
                     " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
                     " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
                       DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID + ") AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
                 " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME +
-                " WHERE " + DatabaseHelper.TASKLIST_COLUMN_VISIBLE + " = " + 1 +
+                " WHERE " + DatabaseHelper.TASKLIST_COLUMN_VISIBLE + " = 1" +
+                " ORDER BY " + DatabaseHelper.COLUMN_ORDER + " ASC ",
+                null);
+    }
+
+    private Cursor getInvisibleTaskListsCursor() {
+        return database.rawQuery("SELECT *," +
+                " (SELECT COUNT(*) " +
+                    " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
+                    " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
+                        DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID +
+                        " AND (" + DatabaseHelper.TASKS_COLUMN_DELETED + " = 1" +
+                        " OR " + DatabaseHelper.TASKS_COLUMN_DONE + " = 1)" +
+                ") AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
+                " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME +
+                " WHERE " + DatabaseHelper.TASKLIST_COLUMN_VISIBLE + " = 0" +
+                    " OR " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT + " > 0" +
                 " ORDER BY " + DatabaseHelper.COLUMN_ORDER + " ASC ",
                 null);
     }
@@ -133,8 +135,6 @@ public class TaskListDataAccess implements AutoCloseable {
         TaskList taskList = new TaskList();
         taskList.setId(cursor.getLong(0));
         taskList.setName(cursor.getString(1));
-        //taskList.setOrder(cursor.getInt(2));
-        //taskList.setVisible(cursor.getInt(3));
         // Get "false" count column if it exists
         if (cursor.getColumnCount() == 5)
             taskList.setTaskCount(cursor.getLong(4));

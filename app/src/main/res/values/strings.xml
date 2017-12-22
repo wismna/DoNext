@@ -83,5 +83,6 @@
 
     <!-- String related to History -->
     <string name="title_activity_history">History</string>
+    <string name="action_view_task">Task</string>
 
 </resources>

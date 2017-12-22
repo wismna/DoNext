@@ -77,7 +77,6 @@ public abstract class DynamicDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         // Send the negative button event back to the host activity
                         // Canceled creation, nothing to do
-                        //dialog.cancel();
                         onNegativeButtonClick();
                     }
                 });
@@ -188,7 +187,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     }
 
     /** Helper function to get a View, without having to worry about the fact that is a Dialog or not*/
-    protected View findViewById(int id) {
+    protected <T extends View> T findViewById(int id) {
         if (getShowsDialog()) return getDialog().findViewById(id);
         return getView().findViewById(id);
     }

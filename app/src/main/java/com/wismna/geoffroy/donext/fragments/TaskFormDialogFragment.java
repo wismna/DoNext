@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -14,8 +15,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.activities.HistoryActivity;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.dao.TaskList;
+import com.wismna.geoffroy.donext.widgets.InterceptTouchRelativeLayout;
 
 import org.joda.time.LocalDate;
 
@@ -67,7 +70,14 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         super.onStart();
         // Set Task Form specific information at that point because we are sure that the view is
         // entirely inflated (with the content fragment)
-        setTaskValues();
+        Activity activity = getActivity();
+        assert activity != null;
+        if (activity instanceof HistoryActivity) {
+            InterceptTouchRelativeLayout layout = findViewById(R.id.new_task_layout);
+            layout.setInterceptTouchEvents(true);
+        }
+
+        setTaskValues(activity);
     }
 
     @Override
@@ -94,12 +104,12 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         dismiss();
     }
 
-    private void setTaskValues() {
+    private void setTaskValues(Activity activity) {
         // Populate spinner with task lists
-        Spinner spinner = (Spinner) findViewById(R.id.new_task_list);
+        Spinner spinner = findViewById(R.id.new_task_list);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<TaskList> adapter = new ArrayAdapter<>(
-                getActivity(), android.R.layout.simple_spinner_item, taskLists);
+                activity, android.R.layout.simple_spinner_item, taskLists);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -110,16 +120,16 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         int id = args.getInt("list");
         spinner.setSelection(id);
 
-        CheckBox checkBox = (CheckBox) findViewById(R.id.new_task_today);
-        TextView todayLabel = (TextView) findViewById(R.id.new_task_today_label);
+        CheckBox checkBox = findViewById(R.id.new_task_today);
+        TextView todayLabel = findViewById(R.id.new_task_today_label);
         boolean isTodayActive = args.getBoolean("today");
         checkBox.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
         todayLabel.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
 
         // Get date picker
-        final DatePicker dueDatePicker = (DatePicker) findViewById(R.id.new_task_due_date);
+        final DatePicker dueDatePicker = findViewById(R.id.new_task_due_date);
         // Handle due date spinner depending on check box
-        CheckBox setDueDate = (CheckBox) findViewById(R.id.new_task_due_date_set);
+        CheckBox setDueDate = findViewById(R.id.new_task_due_date_set);
         setDueDate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -128,8 +138,8 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         });
 
         // Handle priority changes
-        final TextView tooltip = (TextView) findViewById(R.id.new_task_priority_tooltip);
-        SeekBar seekBar = (SeekBar) findViewById(R.id.new_task_priority);
+        final TextView tooltip = findViewById(R.id.new_task_priority_tooltip);
+        SeekBar seekBar = findViewById(R.id.new_task_priority);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -150,9 +160,9 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         // Set other properties if they exist
         if (task != null) {
 
-            EditText titleText = (EditText) findViewById(R.id.new_task_name);
+            EditText titleText = findViewById(R.id.new_task_name);
             titleText.setText(task.getName());
-            EditText descText = (EditText) findViewById(R.id.new_task_description);
+            EditText descText = findViewById(R.id.new_task_description);
             descText.setText(task.getDescription());
 
             seekBar.setProgress(task.getPriority());

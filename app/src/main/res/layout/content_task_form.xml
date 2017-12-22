@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/background_light">
-    <RelativeLayout
+    <com.wismna.geoffroy.donext.widgets.InterceptTouchRelativeLayout
         android:id="@+id/new_task_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -116,5 +116,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/new_task_due_date_label" />
-    </RelativeLayout>
+    </com.wismna.geoffroy.donext.widgets.InterceptTouchRelativeLayout>
 </ScrollView>

@@ -55,8 +55,8 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     }
 
     private void setLayoutValues(List<Task> tasks) {
-        EditText editText = (EditText) findViewById(R.id.today_search);
-        final ListView listView = (ListView) findViewById(R.id.today_tasks);
+        EditText editText = findViewById(R.id.today_search);
+        final ListView listView = findViewById(R.id.today_tasks);
         final TodayArrayAdapter adapter = new TodayArrayAdapter(getActivity(), tasks);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -62,4 +62,5 @@
     <string name="action_history">Historique</string>
     <string name="task_list_ok">OK</string>
     <string name="title_activity_history">Historique</string>
+    <string name="action_view_task">Tâche</string>
 </resources>

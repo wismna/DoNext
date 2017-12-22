@@ -89,12 +89,11 @@ public class TasksFragment extends Fragment implements
 
         if (getArguments() != null) {
             taskListId = getArguments().getLong(TASK_LIST_ID);
-            Activity parentActivity = getActivity();
-            if (parentActivity instanceof HistoryActivity) isHistory = true;
-            if (parentActivity instanceof TodayActivity) isTodayView = true;
-            // TODO: this does not work! No tasks are shown
-            mAdapter = (MainFragment)getParentFragment();
         }
+        Activity parentActivity = getActivity();
+        if (parentActivity instanceof HistoryActivity) isHistory = true;
+        if (parentActivity instanceof TodayActivity) isTodayView = true;
+        mAdapter = (MainFragment)getParentFragment();
     }
 
     @Override
@@ -118,7 +117,6 @@ public class TasksFragment extends Fragment implements
         }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
 
-        // TODO: check that this works
         if (!isHistory) {
             // Set ItemTouch helper in RecyclerView to handle swipe move on elements
             ItemTouchHelper.Callback callback = new TaskTouchHelper(this,
@@ -156,7 +154,7 @@ public class TasksFragment extends Fragment implements
                         }
                         else {
                             try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(getActivity())) {
-                                taskLists = taskListDataAccess.getAllTaskLists();
+                                taskLists = taskListDataAccess.getTaskLists(isHistory);
                             }
                             for (TaskList taskList :
                                     taskLists) {
@@ -173,7 +171,7 @@ public class TasksFragment extends Fragment implements
                         taskDialogFragment.setArguments(args);
 
                         // Open the fragment as a dialog or as full-screen depending on screen size
-                        String title = getString(R.string.action_edit_task);
+                        String title = getString(isHistory ? R.string.action_view_task : R.string.action_edit_task);
                         assert manager != null;
                         taskDialogFragment.showFragment(manager, title, isLargeLayout);
                     }
@@ -219,7 +217,6 @@ public class TasksFragment extends Fragment implements
                 if (remainingTaskCount == 0) remainingTasksView.setText("");
                 else remainingTasksView.setText(resources.getQuantityString(R.plurals.task_remaining, remainingTaskCount, remainingTaskCount));
 
-                //recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 return true;
             }
         });

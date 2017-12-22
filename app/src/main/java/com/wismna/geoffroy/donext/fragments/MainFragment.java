@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.wismna.geoffroy.donext.R;
+import com.wismna.geoffroy.donext.activities.HistoryActivity;
 import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
@@ -100,12 +101,12 @@ public class MainFragment extends Fragment implements
         updateTaskLists(activity);
     }
 
-    private void updateTaskLists(AppCompatActivity activity)
-    {
+    private void updateTaskLists(AppCompatActivity activity) {
+        boolean isHistoryActivity = activity instanceof HistoryActivity;
         // Access database to retrieve Tabs
         List<TaskList> taskLists;
         try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(activity)) {
-            taskLists = taskListDataAccess.getAllTaskLists();
+            taskLists = taskListDataAccess.getTaskLists(isHistoryActivity);
 
             // Create the adapter that will return a fragment for each of the three
             // primary sections of the activity.
@@ -138,7 +139,7 @@ public class MainFragment extends Fragment implements
 
                 tabLayout = mView.findViewById(R.id.tabs);
                 // Hide the tabs if there is only one task list
-                tabLayout.setVisibility(taskLists.size() == 1 ? View.GONE : View.VISIBLE);
+                tabLayout.setVisibility(taskLists.size() == 1 && !isHistoryActivity ? View.GONE : View.VISIBLE);
                 tabLayout.setupWithViewPager(mViewPager);
 
                 // Handles scroll detection (only available for SDK version >=23)
@@ -156,7 +157,7 @@ public class MainFragment extends Fragment implements
             else {
                 ListView listView = mView.findViewById(R.id.list);
                 // Hide the list if there is only one task list
-                listView.setVisibility(taskLists.size() == 1 ? View.GONE : View.VISIBLE);
+                listView.setVisibility(taskLists.size() == 1 && !isHistoryActivity ? View.GONE : View.VISIBLE);
                 //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
                 listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
                 //listView.setSelection(lastOpenedList);

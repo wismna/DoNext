@@ -92,8 +92,8 @@ public class TaskDataAccess implements AutoCloseable {
                 " LEFT JOIN " + DatabaseHelper.TASKLIST_TABLE_NAME +
                 " ON " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST +
                     " = " + DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID +
-                " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
-                     " AND " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0
+                " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DONE + " = 0" +
+                     " AND " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_DELETED + " = 0"
                 , null);
         List<Task> tasks = new ArrayList<>();
 
@@ -126,8 +126,8 @@ public class TaskDataAccess implements AutoCloseable {
 
     public List<Task> getTodayTasks() {
         Cursor cursor = database.query(DatabaseHelper.TASKS_VIEW_TODAY_NAME, taskColumns,
-                DatabaseHelper.TASKS_COLUMN_DONE + " = " + 0 +
-                        " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + 0,
+                DatabaseHelper.TASKS_COLUMN_DONE + " = 0" +
+                        " AND " + DatabaseHelper.TASKS_COLUMN_DELETED + " = 0",
                 null, null, null,
                 DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " DESC");
         return getTasksFromCursor(cursor);
@@ -142,8 +142,6 @@ public class TaskDataAccess implements AutoCloseable {
     }
 
     public void deleteTask(long id) {
-        /*database.delete(DatabaseHelper.TASKS_TABLE_NAME,
-                DatabaseHelper.COLUMN_ID + " = " + taskId, null);*/
         update(id, DatabaseHelper.TASKS_COLUMN_DELETED, 1);
     }
 

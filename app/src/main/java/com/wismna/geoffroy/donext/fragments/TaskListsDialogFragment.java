@@ -73,11 +73,11 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
     @Override
     public void onStart() {
         super.onStart();
-        Button createTaskListButton = (Button) findViewById(R.id.new_task_list_button);
+        Button createTaskListButton = findViewById(R.id.new_task_list_button);
         createTaskListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText editText = (EditText) findViewById(R.id.new_task_list_name);
+                EditText editText = findViewById(R.id.new_task_list_name);
                 String text = editText.getText().toString();
                 if (text.matches("")) {
                     editText.setError(getResources().getString(R.string.task_list_new_list_error));
@@ -126,7 +126,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
     }
 
     private void toggleVisibleCreateNewTaskListLayout() {
-        LinearLayout layout = (LinearLayout) findViewById(R.id.new_task_list_layout);
+        LinearLayout layout = findViewById(R.id.new_task_list_layout);
         int taskListCount = taskListRecyclerViewAdapter.getItemCount();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String maxTaskListsString = sharedPref.getString("pref_conf_max_lists", "5");
@@ -220,7 +220,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
         @Override
         protected List<TaskList> doInBackground(TaskListDataAccess... params) {
             TaskListDataAccess taskListDataAccess = params[0];
-            return taskListDataAccess.getAllTaskLists();
+            return taskListDataAccess.getTaskLists(false);
         }
 
         @Override
@@ -233,7 +233,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
 
             // Set the adapter
             Context context = fragment.getContext();
-            RecyclerView recyclerView = (RecyclerView) fragment.findViewById(R.id.task_lists_view);
+            RecyclerView recyclerView = fragment.findViewById(R.id.task_lists_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(fragment.taskListRecyclerViewAdapter);
 
