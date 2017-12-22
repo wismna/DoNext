@@ -107,6 +107,12 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
     private void setTaskValues(Activity activity) {
         // Populate spinner with task lists
         Spinner spinner = findViewById(R.id.new_task_list);
+        // Hide spinner if only one task list
+        if (taskLists.size() <= 1) {
+            spinner.setVisibility(View.GONE);
+            TextView taskListLabel = findViewById(R.id.new_task_list_label);
+            taskListLabel.setVisibility(View.GONE);
+        }
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<TaskList> adapter = new ArrayAdapter<>(
                 activity, android.R.layout.simple_spinner_item, taskLists);

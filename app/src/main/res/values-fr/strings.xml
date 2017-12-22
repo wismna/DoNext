@@ -63,4 +63,6 @@
     <string name="task_list_ok">OK</string>
     <string name="title_activity_history">Historique</string>
     <string name="action_view_task">Tâche</string>
+    <string name="donext_description">DoNext est un nouveau genre de gestionnaire de tâches, basé sur le principe que créer trop de tâches est contre-productif. Faites plutôt glisser vos tâches vers la gauche ou la droite pour les mettre à la fin de votre liste et travailler dessus plus tard !</string>
+    <string name="default_task_list_name">Mes tâches</string>
 </resources>

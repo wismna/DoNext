@@ -65,8 +65,10 @@
     <string name="settings_today_enable">Enable Today view?</string>
     <string name="settings_today_desc">The Today view is a special way of showing your tasks. Select which tasks you want to do during the day and they will show up in this view. At the end of the day, the view is reset.</string>
     <string name="settings_max_lists_label">Maximum number of lists</string>
+    <string name="default_task_list_name">My tasks</string>
 
     <!-- Strings related to About -->
+    <string name="donext_description">DoNext is a new kind of task manager, based on the premise that creating too many tasks is counterproductive. Instead, swipe tasks left and right to push them back to the bottom of your backlog to work on them at a later time!</string>
     <string name="about_version_donext">DoNext version %s</string>
     <string name="about_version_android">Android version %d</string>
     <string name="about_link" translatable="false">https://github.com/wismna</string>

@@ -9,7 +9,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -57,20 +56,35 @@ public class MainFragment extends Fragment implements
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_main, container, false);
         Toolbar toolbar = mView.findViewById(R.id.toolbar);
+
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         assert activity != null;
         activity.setSupportActionBar(toolbar);
 
-        // TODO: determine whether this is the first startup, and if so, show a tutorial of sorts
+        // Get preferences
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity);
+
+        // Check if this is the first time loading this app
+        boolean first_time = sharedPref.getBoolean("first_time", true);
+        // If it is, create a default task list
+        if (first_time) {
+            try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(activity)) {
+                taskListDataAccess.createTaskList(getString(R.string.default_task_list_name), 0);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("first_time", false);
+                editor.apply();
+            }
+        }
 
         // Load task lists
         updateTaskLists(activity);
-        SharedPreferences sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(activity);
-        int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
-        // Open last opened tab
-        mViewPager.setCurrentItem(lastOpenedList);
 
+        if (!first_time) {
+            // Open last opened tab
+            int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
+            mViewPager.setCurrentItem(lastOpenedList);
+        }
         return mView;
     }
 
@@ -113,61 +127,43 @@ public class MainFragment extends Fragment implements
             mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager(), taskLists);
             mSectionsPagerAdapter.notifyDataSetChanged();
         }
-        boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
 
-        // No tasks, show the edit task lists fragment
-        if (taskLists.size() == 0) {
-            TaskListsDialogFragment taskListFragment = TaskListsDialogFragment.newInstance(this);
-            String title = getString(R.string.task_list_no_lists);
-            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = mView.findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
 
-            // Set the arguments
-            Bundle args = new Bundle();
-            args.putInt("button_count", 1);
-            args.putString("button_negative", getString(R.string.task_list_ok));
-            taskListFragment.setArguments(args);
+        if (!getResources().getBoolean(R.bool.large_layout)) {
 
-            taskListFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
-        }
-        // Otherwise, show the normal view
-        else {
-            // Set up the ViewPager with the sections adapter.
-            mViewPager = mView.findViewById(R.id.container);
-            mViewPager.setAdapter(mSectionsPagerAdapter);
+            tabLayout = mView.findViewById(R.id.tabs);
+            // Hide the tabs if there is only one task list
+            tabLayout.setVisibility(taskLists.size() == 1 && !isHistoryActivity ? View.GONE : View.VISIBLE);
+            tabLayout.setupWithViewPager(mViewPager);
 
-            if (!isLargeLayout) {
-
-                tabLayout = mView.findViewById(R.id.tabs);
-                // Hide the tabs if there is only one task list
-                tabLayout.setVisibility(taskLists.size() == 1 && !isHistoryActivity ? View.GONE : View.VISIBLE);
-                tabLayout.setupWithViewPager(mViewPager);
-
-                // Handles scroll detection (only available for SDK version >=23)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    toggleTabLayoutArrows(tabLayout.getScrollX());
-                    //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
-                    tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                        @Override
-                        public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                            toggleTabLayoutArrows(scrollX);
-                        }
-                    });
-                }
-            }
-            else {
-                ListView listView = mView.findViewById(R.id.list);
-                // Hide the list if there is only one task list
-                listView.setVisibility(taskLists.size() == 1 && !isHistoryActivity ? View.GONE : View.VISIBLE);
-                //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
-                listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
-                //listView.setSelection(lastOpenedList);
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            // Handles scroll detection (only available for SDK version >=23)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                toggleTabLayoutArrows(tabLayout.getScrollX());
+                //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
+                tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        mViewPager.setCurrentItem(position);
+                    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                        toggleTabLayoutArrows(scrollX);
                     }
                 });
             }
+        }
+        else {
+            ListView listView = mView.findViewById(R.id.list);
+            // Hide the list if there is only one task list
+            listView.setVisibility(taskLists.size() == 1 && !isHistoryActivity ? View.GONE : View.VISIBLE);
+            //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
+            listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
+            //listView.setSelection(lastOpenedList);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    mViewPager.setCurrentItem(position);
+                }
+            });
         }
     }
 
