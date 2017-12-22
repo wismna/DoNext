@@ -39,7 +39,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         void onNewTaskDialogNeutralClick(DialogFragment dialog);
     }
 
-    private TaskFormDialogFragment.NewTaskListener mListener;
+    private NewTaskListener mListener;
     private Task task;
     private List<TaskList> taskLists;
 

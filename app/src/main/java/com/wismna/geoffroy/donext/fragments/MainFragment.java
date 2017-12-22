@@ -33,7 +33,9 @@ import java.util.List;
 /**
  * Fragment that will handle the main display
  */
-public class MainFragment extends Fragment implements TasksFragment.TaskChangedAdapter {
+public class MainFragment extends Fragment implements
+        TasksFragment.TaskChangedAdapter,
+        TaskListsDialogFragment.TaskListsListener {
 
     private View mView;
     private ViewPager mViewPager;
@@ -53,84 +55,19 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_main, container, false);
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
         Toolbar toolbar = mView.findViewById(R.id.toolbar);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
         assert activity != null;
         activity.setSupportActionBar(toolbar);
 
+        // Load task lists
+        updateTaskLists(activity);
         SharedPreferences sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity);
+        int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
+        // Open last opened tab
+        mViewPager.setCurrentItem(lastOpenedList);
 
-        // Access database to retrieve Tabs
-        List<TaskList> taskLists;
-        try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(activity)) {
-            taskLists = taskListDataAccess.getAllTaskLists();
-
-            // Create the adapter that will return a fragment for each of the three
-            // primary sections of the activity.
-            mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager(), taskLists);
-            mSectionsPagerAdapter.notifyDataSetChanged();
-        }
-        boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
-
-        // TODO: determine whether this is the first startup, and if so, show a tutorial of sorts
-        // No tasks, show the edit task lists fragment
-        if (taskLists.size() == 0) {
-            TaskListsDialogFragment taskListFragment = new TaskListsDialogFragment();
-            String title = getString(R.string.task_list_no_lists);
-            FragmentManager fragmentManager = activity.getSupportFragmentManager();
-
-            // Set the arguments
-            Bundle args = new Bundle();
-            args.putInt("button_count", 1);
-            args.putString("button_negative", getString(R.string.task_list_ok));
-            taskListFragment.setArguments(args);
-
-            taskListFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
-        }
-        // Otherwise, show the normal view
-        else {
-            int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
-            // Set up the ViewPager with the sections adapter.
-            mViewPager = mView.findViewById(R.id.container);
-            mViewPager.setAdapter(mSectionsPagerAdapter);
-            // Open last opened tab
-            mViewPager.setCurrentItem(lastOpenedList);
-
-            if (!isLargeLayout) {
-
-                tabLayout = mView.findViewById(R.id.tabs);
-                // Hide the tabs if there is only one task list
-                if (taskLists.size() == 1) tabLayout.setVisibility(View.GONE);
-                tabLayout.setupWithViewPager(mViewPager);
-
-                // Handles scroll detection (only available for SDK version >=23)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    toggleTabLayoutArrows(tabLayout.getScrollX());
-                    //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
-                    tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                        @Override
-                        public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                            toggleTabLayoutArrows(scrollX);
-                        }
-                    });
-                }
-            }
-            else {
-                ListView listView = mView.findViewById(R.id.list);
-                // Hide the list if there is only one task list
-                if (taskLists.size() == 1) listView.setVisibility(View.GONE);
-                //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
-                listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
-                //listView.setSelection(lastOpenedList);
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        mViewPager.setCurrentItem(position);
-                    }
-                });
-            }
-        }
         return mView;
     }
 
@@ -152,6 +89,84 @@ public class MainFragment extends Fragment implements TasksFragment.TaskChangedA
     public void onTaskListChanged(Task task, int tabPosition) {
         TaskRecyclerViewAdapter destinationTaskAdapter = getSpecificTabAdapter(tabPosition);
         if (destinationTaskAdapter != null) destinationTaskAdapter.add(task, destinationTaskAdapter.getItemCount());
+    }
+
+    @Override
+    public void onTaskListsDialogNegativeClick() {
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        assert activity != null;
+        updateTaskLists(activity);
+    }
+
+    private void updateTaskLists(AppCompatActivity activity)
+    {
+        // Access database to retrieve Tabs
+        List<TaskList> taskLists;
+        try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(activity)) {
+            taskLists = taskListDataAccess.getAllTaskLists();
+
+            // Create the adapter that will return a fragment for each of the three
+            // primary sections of the activity.
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager(), taskLists);
+            mSectionsPagerAdapter.notifyDataSetChanged();
+        }
+        boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
+
+        // TODO: determine whether this is the first startup, and if so, show a tutorial of sorts
+        // No tasks, show the edit task lists fragment
+        if (taskLists.size() == 0) {
+            TaskListsDialogFragment taskListFragment = TaskListsDialogFragment.newInstance(this);
+            String title = getString(R.string.task_list_no_lists);
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+            // Set the arguments
+            Bundle args = new Bundle();
+            args.putInt("button_count", 1);
+            args.putString("button_negative", getString(R.string.task_list_ok));
+            taskListFragment.setArguments(args);
+
+            taskListFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
+        }
+        // Otherwise, show the normal view
+        else {
+            // Set up the ViewPager with the sections adapter.
+            mViewPager = mView.findViewById(R.id.container);
+            mViewPager.setAdapter(mSectionsPagerAdapter);
+
+            if (!isLargeLayout) {
+
+                tabLayout = mView.findViewById(R.id.tabs);
+                // Hide the tabs if there is only one task list
+                tabLayout.setVisibility(taskLists.size() == 1 ? View.GONE : View.VISIBLE);
+                tabLayout.setupWithViewPager(mViewPager);
+
+                // Handles scroll detection (only available for SDK version >=23)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    toggleTabLayoutArrows(tabLayout.getScrollX());
+                    //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
+                    tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                        @Override
+                        public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                            toggleTabLayoutArrows(scrollX);
+                        }
+                    });
+                }
+            }
+            else {
+                ListView listView = mView.findViewById(R.id.list);
+                // Hide the list if there is only one task list
+                listView.setVisibility(taskLists.size() == 1 ? View.GONE : View.VISIBLE);
+                //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
+                listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
+                //listView.setSelection(lastOpenedList);
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        mViewPager.setCurrentItem(position);
+                    }
+                });
+            }
+        }
     }
 
     private TaskRecyclerViewAdapter getSpecificTabAdapter(int position) {

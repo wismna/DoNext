@@ -80,10 +80,12 @@ public class MainActivity extends AppCompatActivity {
 
     /** Called when the user clicks the Edit Lists button  */
     public void openTaskLists(MenuItem menuItem) {
-        // Create the fragment
-        TaskListsDialogFragment taskListFragment = new TaskListsDialogFragment();
-        String title = getString(R.string.action_edit_task);
         FragmentManager fragmentManager = getSupportFragmentManager();
+
+        // Create the fragment
+        TaskListsDialogFragment taskListFragment = TaskListsDialogFragment.newInstance(
+                (MainFragment)fragmentManager.findFragmentById(R.id.fragment_main));
+        String title = getString(R.string.action_edit_task);
 
         // Set the arguments
         Bundle args = new Bundle();

@@ -33,8 +33,21 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
         ConfirmDialogFragment.ConfirmDialogListener {
     private TaskListRecyclerViewAdapter taskListRecyclerViewAdapter;
     private TaskListDataAccess taskListDataAccess;
-    //private View mView;
     private ItemTouchHelper mItemTouchHelper;
+    private TaskListsListener mListener;
+
+    /** The activity that creates an instance of this dialog fragment must
+     * implement this interface in order to receive event callbacks.
+     * Each method passes the DialogFragment in case the host needs to query it. */
+    interface TaskListsListener {
+        void onTaskListsDialogNegativeClick();
+    }
+
+    public static TaskListsDialogFragment newInstance(TaskListsListener taskListListener) {
+        TaskListsDialogFragment fragment = new TaskListsDialogFragment();
+        fragment.mListener = taskListListener;
+        return fragment;
+    }
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -94,6 +107,8 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
     @Override
     protected void onNegativeButtonClick() {
         dismiss();
+        // TODO: add an argument to refresh only if something changed
+        mListener.onTaskListsDialogNegativeClick();
     }
 
     @Override
