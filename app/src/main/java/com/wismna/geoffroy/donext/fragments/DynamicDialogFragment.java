@@ -3,6 +3,7 @@ package com.wismna.geoffroy.donext.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -80,7 +81,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
                         onNegativeButtonClick();
                     }
                 });
-        if (mButtonCount == 2) {
+        if (mButtonCount >= 2) {
             builder.setPositiveButton(args.getString("button_positive"), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     onPositiveButtonClick(view);
@@ -111,7 +112,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
         Bundle args = getArguments();
         assert args != null;
         // Show the neutral button if needed
-        if (mButtonCount < 3) {
+        if (mButtonCount == 2) {
             menu.removeItem(R.id.menu_neutral_button);
         }
         else {
@@ -119,7 +120,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
         }
 
         // Show the positive button if needed
-        if (mButtonCount < 2) {
+        if (mButtonCount == 1) {
             menu.removeItem(R.id.menu_positive_button);
         }
         else {
@@ -190,6 +191,19 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     protected <T extends View> T findViewById(int id) {
         if (getShowsDialog()) return getDialog().findViewById(id);
         return getView().findViewById(id);
+    }
+
+
+    /** Helper method to clear focus by giving it to the parent layout */
+    protected void clearFocus() {
+        View view = getView();
+        if (view != null) {
+            view.requestFocus();
+
+            // Hide keyboard
+            InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     /** Sets the title of the Fragment from the Tag */

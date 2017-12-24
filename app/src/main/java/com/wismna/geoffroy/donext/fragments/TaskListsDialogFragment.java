@@ -198,18 +198,6 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
         toggleVisibleCreateNewTaskListLayout();
     }
 
-    /** Helper method to clear focus by giving it to the parent layout */
-    private void clearFocus() {
-        View view = getView();
-        if (view != null) {
-            view.requestFocus();
-
-            // Hide keyboard
-            InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
-    }
-
     private static class GetTaskListsTask extends AsyncTask<TaskListDataAccess, Void, List<TaskList>> {
         private WeakReference<TaskListsDialogFragment> fragmentReference;
 

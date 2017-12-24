@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         // Create the fragment
         TaskListsDialogFragment taskListFragment = TaskListsDialogFragment.newInstance(
                 (MainFragment)fragmentManager.findFragmentById(R.id.fragment_main));
-        String title = getString(R.string.action_edit_task);
+        String title = getString(R.string.task_list_edit);
 
         // Set the arguments
         Bundle args = new Bundle();

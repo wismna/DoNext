@@ -7,6 +7,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.Guideline;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -152,10 +154,14 @@ public class MainFragment extends Fragment implements
             }
         }
         else {
+            // Move guideline to hide task list
+            Guideline guideline = mView.findViewById(R.id.center_guideline);
+            ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) guideline.getLayoutParams();
+            lp.guidePercent = taskLists.size() == 1 && !isHistoryActivity ? 0 : (float) 0.2;
+            guideline.setLayoutParams(lp);
+
             ListView listView = mView.findViewById(R.id.list);
             // Hide the list if there is only one task list
-            listView.setVisibility(taskLists.size() == 1 && !isHistoryActivity ? View.GONE : View.VISIBLE);
-            //listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, taskLists));
             listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
             //listView.setSelection(lastOpenedList);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

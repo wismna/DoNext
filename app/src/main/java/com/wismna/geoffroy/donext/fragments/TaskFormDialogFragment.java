@@ -78,6 +78,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         }
 
         setTaskValues(activity);
+        clearFocus();
     }
 
     @Override
