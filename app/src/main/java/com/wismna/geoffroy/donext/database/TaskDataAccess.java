@@ -104,6 +104,8 @@ public class TaskDataAccess implements AutoCloseable {
             task.setName(cursor.getString(1));
             task.setTodayDate(cursor.getString(2));
             task.setTaskListName(cursor.getString(3));
+            task.setDone(cursor.getInt(5));
+            task.setDeleted(cursor.getInt(6));
             tasks.add(task);
             cursor.moveToNext();
         }

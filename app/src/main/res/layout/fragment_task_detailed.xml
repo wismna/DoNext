@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
     <ImageView
-        android:id="@+id/task_alarm"
+        android:id="@+id/task_icon"
         android:layout_width="24dp"
         android:layout_height="wrap_content"
         android:paddingTop="10dp"

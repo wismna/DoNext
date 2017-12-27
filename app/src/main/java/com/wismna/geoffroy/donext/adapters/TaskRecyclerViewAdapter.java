@@ -67,8 +67,12 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         if (mIsToday) return;
         // Set alarm if past due date
         LocalDate dueDate = holder.mItem.getDueDate();
-        if(dueDate != null && dueDate.isBefore(LocalDate.now()))
-            holder.mAlarmView.setImageResource(R.drawable.ic_access_alarm);
+        if (holder.mItem.getDone() == 1)
+            holder.mIconView.setImageResource(R.drawable.ic_check_ligth);
+        else if (holder.mItem.getDeleted() == 1)
+            holder.mIconView.setImageResource(R.drawable.ic_close_light);
+        else if(dueDate != null && dueDate.isBefore(LocalDate.now()))
+            holder.mIconView.setImageResource(R.drawable.ic_access_alarm);
         int priority = holder.mItem.getPriority();
 
         // Set priority
@@ -133,7 +137,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
     class SimpleViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView mIdView;
-        final ImageView mAlarmView;
+        final ImageView mIconView;
         final TextView mCycleView;
         final TextView mTitleView;
         Task mItem;
@@ -143,7 +147,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
             mView = view;
 
             mIdView = view.findViewById(R.id.task_id);
-            mAlarmView = view.findViewById(R.id.task_alarm);
+            mIconView = view.findViewById(R.id.task_icon);
             mCycleView = view.findViewById(R.id.task_cycle);
             mTitleView = view.findViewById(R.id.task_name);
         }

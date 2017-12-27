@@ -96,6 +96,14 @@ public class Task {
         return dueDate;
     }
 
+    public int getDeleted() {
+        return deleted;
+    }
+
+    public int getDone() {
+        return done;
+    }
+
     public void setTodayDate(String todayDate) {
         try {
             this.todayDate = LocalDate.parse(todayDate);
@@ -114,4 +122,5 @@ public class Task {
     public String toString() {
         return name;
     }
+
 }
