@@ -111,20 +111,31 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     public void onPrepareOptionsMenu(Menu menu) {
         Bundle args = getArguments();
         assert args != null;
-        // Show the neutral button if needed
-        if (mButtonCount == 2) {
-            menu.removeItem(R.id.menu_neutral_button);
-        }
-        else {
-            menu.findItem(R.id.menu_neutral_button).setTitle(args.getString("button_neutral"));
+        /*switch (mButtonCount) {
+            case 1:
+                menu.removeItem(R.id.menu_positive_button);
+                menu.removeItem(R.id.menu_neutral_button);
+                break;
+            case 2:
+                menu.removeItem(R.id.menu_neutral_button);
+                menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
+                break;
+            case 3:
+                menu.findItem(R.id.menu_neutral_button).setTitle(args.getString("button_neutral"));
+                menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
+                break;
+        }*/
+
+        // Hide buttons depending on count
+        switch (mButtonCount) {
+            case 1: menu.removeItem(R.id.menu_positive_button);
+            case 2: menu.removeItem(R.id.menu_neutral_button);
         }
 
-        // Show the positive button if needed
-        if (mButtonCount == 1) {
-            menu.removeItem(R.id.menu_positive_button);
-        }
-        else {
-            menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
+        // Set titles on existing buttons
+        switch (mButtonCount) {
+            case 3: menu.findItem(R.id.menu_neutral_button).setTitle(args.getString("button_neutral"));
+            case 2: menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
         }
         super.onPrepareOptionsMenu(menu);
     }
