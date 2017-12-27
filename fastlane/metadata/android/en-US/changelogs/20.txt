@@ -1,0 +1,1 @@
+History now lets you see if the task was done or deleted

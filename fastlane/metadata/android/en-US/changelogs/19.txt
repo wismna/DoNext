@@ -1,6 +1,0 @@
-New history feature: see your deleted and done tasks
-App now creates a default task list on first launch
-Tabs are hidden where there is only one task list
-Design improvements
-Code refactor
-
