@@ -12,7 +12,7 @@
     <string name="new_task_cancel">Annuler</string>
     <string name="new_task_delete">Supprimer</string>
     <string name="new_task_description_hint">Description de la tâche (optionnel)</string>
-    <string name="new_task_list">Liste</string>
+    <string name="new_task_list">Ajouter à la liste</string>
     <string name="new_task_name_error">Le nom de la tâche ne peut pas être vide</string>
     <string name="new_task_name_hint">Nom de la tâche</string>
     <string name="new_task_priority">Priorité</string>
@@ -46,7 +46,7 @@
     <string name="task_list_new_list_error">Le nom de la liste ne peut pas être vide</string>
     <string name="task_list_new_list_hint">Nom de la liste</string>
     <string name="task_list_no_lists">Créer une nouvelle liste de tâches</string>
-    <string name="task_no_tasks">Super! Aucune tâche en cours!</string>
+    <string name="task_no_tasks">Aucune tâche !</string>
     <string name="settings_today_title">Vue Aujourd\'hui</string>
     <string name="settings_today_enable">Activer la vue Aujourd\'hui?</string>
     <string name="settings_today_desc">La vue Aujourd\'hui est une façon particulière d\'organiser vos tâches. Choisissez quelles tâches vous voulez faire dans la journée et elles apparaîtront dans cette vue. À la fin de la journée, cette vue est réinitialisée.</string>
@@ -66,4 +66,7 @@
     <string name="donext_description">DoNext est un nouveau genre de gestionnaire de tâches, basé sur le principe que créer trop de tâches est contre-productif. Faites plutôt glisser vos tâches vers la gauche ou la droite pour les mettre à la fin de votre liste et travailler dessus plus tard !</string>
     <string name="default_task_list_name">Mes tâches</string>
     <string name="task_list_edit">Editer les listes de tâches</string>
+    <string name="today_no_tasks">Rien à faire aujourd\'hui</string>
+    <string name="create_tasks">Créez-en une là</string>
+    <string name="today_create_tasks">Ajoutez des tâches là</string>
 </resources>

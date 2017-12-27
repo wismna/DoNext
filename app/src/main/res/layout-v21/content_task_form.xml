@@ -14,20 +14,6 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         tools:context=".activities.MainActivity">
-        <TextView
-            android:id="@+id/new_task_list_label"
-            android:text="@string/new_task_list"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:layout_marginTop="3dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Spinner
-            android:id="@+id/new_task_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_toEndOf="@id/new_task_list_label">
-        </Spinner>
         <EditText
             android:id="@+id/new_task_name"
             android:hint="@string/new_task_name_hint"
@@ -36,7 +22,6 @@
             android:textSize="30sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/new_task_list"
             android:imeOptions="flagNoFullscreen"/>
         <EditText
             android:id="@+id/new_task_description"
@@ -116,5 +101,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/new_task_due_date_label" />
+        <TextView
+            android:id="@+id/new_task_list_label"
+            android:text="@string/new_task_list"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_marginTop="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/new_task_due_date" />
+        <Spinner
+            android:id="@+id/new_task_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/new_task_due_date"
+            android:layout_alignParentEnd="true">
+        </Spinner>
     </com.wismna.geoffroy.donext.widgets.InterceptTouchRelativeLayout>
 </ScrollView>

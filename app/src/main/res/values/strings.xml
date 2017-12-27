@@ -7,6 +7,7 @@
     <string name="action_new_task">New task</string>
     <string name="action_edit_task">Edit</string>
     <string name="action_changeLayout">Change layout</string>
+    <string name="action_history">History</string>
 
     <!-- Strings related to tabs -->
     <string name="tab_left_arrow">Left scroll arrow</string>
@@ -24,7 +25,7 @@
     <string name="task_list_ok">OK</string>
 
     <!-- Strings related to new task dialog -->
-    <string name="new_task_list">List</string>
+    <string name="new_task_list">Add to list</string>
     <string name="new_task_name_hint">New task name</string>
     <string name="new_task_name_error">Task name cannot be blank</string>
     <string name="new_task_description_hint">Optional task description</string>
@@ -35,8 +36,9 @@
     <string name="new_task_delete">Delete</string>
 
     <!-- Strings related to task details activity -->
-    <string name="task_no_tasks">Yay! No more tasks!</string>
+    <string name="task_no_tasks">No tasks here!</string>
     <string name="task_alarm">Task is past due date</string>
+    <string name="create_tasks">Create one there</string>
 
     <!-- String related to the SnackBar -->
     <string name="snackabar_label">Task %s</string>
@@ -82,7 +84,8 @@
     <string name="action_today_select">Select tasks</string>
     <string name="task_list_edit_list_hint">List name</string>
     <string name="incompatible_sdk_version">Sorry, your Android version is not supported.</string>
-    <string name="action_history">History</string>
+    <string name="today_no_tasks">Noting to do today</string>
+    <string name="today_create_tasks">Add some tasks there</string>
 
     <!-- String related to History -->
     <string name="title_activity_history">History</string>

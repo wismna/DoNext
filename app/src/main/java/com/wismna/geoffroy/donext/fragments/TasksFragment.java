@@ -197,12 +197,15 @@ public class TasksFragment extends Fragment implements
                 int totalTasks = taskRecyclerViewAdapter.getItemCount();
                 TextView totalTasksView = view.findViewById(R.id.total_task_count);
                 View noMoreTasks = view.findViewById(R.id.no_more_tasks);
+                View createTasks = view.findViewById(R.id.create_tasks);
                 if (totalTasks == 0) {
                     noMoreTasks.setVisibility(View.VISIBLE);
+                    createTasks.setVisibility(View.VISIBLE);
                     totalTasksView.setVisibility(View.GONE);
                 }
                 else {
                     noMoreTasks.setVisibility(View.GONE);
+                    createTasks.setVisibility(View.GONE);
                     totalTasksView.setVisibility(View.VISIBLE);
                     totalTasksView.setText(resources.getQuantityString(R.plurals.task_total, totalTasks, totalTasks));
                 }

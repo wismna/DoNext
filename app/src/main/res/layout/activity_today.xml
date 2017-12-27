@@ -12,7 +12,13 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
         <include layout="@layout/toolbar" android:id="@+id/toolbar" />
-
+        <TextView
+            android:id="@+id/today_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:textAlignment="center"
+            android:textSize="24sp"/>
     </android.support.design.widget.AppBarLayout>
 
     <fragment
