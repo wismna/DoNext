@@ -10,7 +10,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -59,13 +58,10 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Bundle args = getArguments();
-        if (args != null) {
-            mButtonCount = args.getInt("button_count");
-        }
-
+        mButtonCount = 1;
+        mNegativeButtonString = getString(R.string.task_list_ok);
         mContentLayoutId = R.layout.content_tasklists;
+
         taskListDataAccess = new TaskListDataAccess(getContext(), TaskListDataAccess.MODE.WRITE);
         new GetTaskListsTask(this).execute(taskListDataAccess);
     }

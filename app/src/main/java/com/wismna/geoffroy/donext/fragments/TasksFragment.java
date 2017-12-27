@@ -136,7 +136,6 @@ public class TasksFragment extends Fragment implements
                         boolean isLargeLayout = resources.getBoolean(R.bool.large_layout);
                         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
                         Bundle args = new Bundle();
-                        args.putInt("position", position);
                         args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
                         args.putInt("button_count", isHistory ? 1 : 3);
                         args.putString("button_positive", getString(R.string.new_task_save));
@@ -171,9 +170,9 @@ public class TasksFragment extends Fragment implements
                         taskDialogFragment.setArguments(args);
 
                         // Open the fragment as a dialog or as full-screen depending on screen size
-                        String title = getString(isHistory ? R.string.action_view_task : R.string.action_edit_task);
                         assert manager != null;
-                        taskDialogFragment.showFragment(manager, title, isLargeLayout);
+                        taskDialogFragment.showFragment(manager,
+                                getString(isHistory ? R.string.action_view_task : R.string.action_edit_task), isLargeLayout);
                     }
                 })
         );

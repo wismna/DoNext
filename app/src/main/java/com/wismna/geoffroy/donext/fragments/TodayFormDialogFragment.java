@@ -49,6 +49,9 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mPositiveButtonString = getString(R.string.new_task_save);
+        mNegativeButtonString = getString(R.string.new_task_cancel);
         mContentLayoutId = R.layout.content_today_form;
         // Load the tasks asynchronously
         new LoadTasks(this).execute(getActivity());

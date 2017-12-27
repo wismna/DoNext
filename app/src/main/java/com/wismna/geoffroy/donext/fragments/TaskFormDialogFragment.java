@@ -31,7 +31,7 @@ import java.util.List;
 
 public class TaskFormDialogFragment extends DynamicDialogFragment {
     public Task getTask() {
-        return task;
+        return mTask;
     }
 
     /** The activity that creates an instance of this dialog fragment must
@@ -43,12 +43,14 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
     }
 
     private NewTaskListener mListener;
-    private Task task;
+    private Task mTask;
     private List<TaskList> taskLists;
+    private int listId;
+    private boolean isToday;
 
     public static TaskFormDialogFragment newInstance(Task task, List<TaskList> taskLists, NewTaskListener newTaskListener) {
         TaskFormDialogFragment fragment = new TaskFormDialogFragment();
-        fragment.task = task;
+        fragment.mTask = task;
         fragment.taskLists = taskLists;
         fragment.mListener = newTaskListener;
         fragment.setRetainInstance(true);
@@ -62,6 +64,11 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         Bundle args = getArguments();
         if (args != null) {
             mButtonCount = args.getInt("button_count");
+            mPositiveButtonString = getString(R.string.new_task_save);
+            mNegativeButtonString = getString(R.string.new_task_cancel);
+            mNeutralButtonString = getString(R.string.new_task_delete);
+            listId = args.getInt("list");
+            isToday = args.getBoolean("today");
         }
     }
 
@@ -85,7 +92,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
     protected void onPositiveButtonClick(View view) {
         if (view == null) return;
         EditText titleText = view.findViewById(R.id.new_task_name);
-        // handle confirmation button click hereEditText titleText = (EditText) d.findViewById(R.id.new_task_name);
+        // handle confirmation button click here
         if (titleText.getText().toString().matches(""))
             titleText.setError(getResources().getString(R.string.new_task_name_error));
         else {
@@ -106,9 +113,9 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
     }
 
     private void setTaskValues(Activity activity) {
-        // Populate spinner with task lists
+        // Populate spinner with mTask lists
         Spinner spinner = findViewById(R.id.new_task_list);
-        // Hide spinner if only one task list
+        // Hide spinner if only one mTask list
         if (taskLists.size() <= 1) {
             spinner.setVisibility(View.GONE);
             TextView taskListLabel = findViewById(R.id.new_task_list_label);
@@ -122,14 +129,11 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         spinner.setAdapter(adapter);
 
         // Auto set list value to current tab
-        Bundle args = getArguments();
-        assert args != null;
-        int id = args.getInt("list");
-        spinner.setSelection(id);
+        spinner.setSelection(listId);
 
         CheckBox checkBox = findViewById(R.id.new_task_today);
         TextView todayLabel = findViewById(R.id.new_task_today_label);
-        boolean isTodayActive = args.getBoolean("today");
+        boolean isTodayActive = isToday;
         checkBox.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
         todayLabel.setVisibility(isTodayActive ? View.VISIBLE : View.GONE);
 
@@ -165,23 +169,23 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         });
         tooltip.setText(getResources().getStringArray(R.array.task_priority)[seekBar.getProgress()]);
         // Set other properties if they exist
-        if (task != null) {
+        if (mTask != null) {
 
             EditText titleText = findViewById(R.id.new_task_name);
-            titleText.setText(task.getName());
+            titleText.setText(mTask.getName());
             EditText descText = findViewById(R.id.new_task_description);
-            descText.setText(task.getDescription());
+            descText.setText(mTask.getDescription());
 
-            seekBar.setProgress(task.getPriority());
+            seekBar.setProgress(mTask.getPriority());
 
             // Set Due Date
-            LocalDate dueDate = task.getDueDate();
+            LocalDate dueDate = mTask.getDueDate();
             if (dueDate != null) {
                 setDueDate.setChecked(true);
                 dueDatePicker.updateDate(dueDate.getYear(), dueDate.getMonthOfYear() - 1, dueDate.getDayOfMonth());
             }
 
-            checkBox.setChecked(task.isToday());
+            checkBox.setChecked(mTask.isToday());
         }
         else {
             // Disallow past dates on new tasks

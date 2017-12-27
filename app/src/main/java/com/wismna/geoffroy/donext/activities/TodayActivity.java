@@ -88,18 +88,9 @@ public class TodayActivity extends ToolBarActivityBase
         TodayFormDialogFragment taskDialogFragment =
                 TodayFormDialogFragment.newInstance(TodayActivity.this);
 
-        boolean isLargeLayout = getResources().getBoolean(R.bool.large_layout);
-        // Set some configuration values for the dialog
-        Bundle args = new Bundle();
-        args.putBoolean("layout", isLargeLayout);
-        args.putString("button_positive", getString(R.string.new_task_save));
-        args.putString("button_negative", getString(R.string.new_task_cancel));
-        taskDialogFragment.setArguments(args);
-
-        String title = getString(R.string.action_today_select);
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        taskDialogFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
+        taskDialogFragment.showFragment(fragmentManager, getString(R.string.action_today_select), getResources().getBoolean(R.bool.large_layout));
     }
 
 

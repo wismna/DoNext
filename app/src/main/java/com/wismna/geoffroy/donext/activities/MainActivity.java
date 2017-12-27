@@ -13,6 +13,7 @@ import android.view.View;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
+import com.wismna.geoffroy.donext.fragments.AboutDialogFragment;
 import com.wismna.geoffroy.donext.fragments.MainFragment;
 import com.wismna.geoffroy.donext.fragments.TaskFormDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TaskListsDialogFragment;
@@ -85,15 +86,9 @@ public class MainActivity extends AppCompatActivity {
         // Create the fragment
         TaskListsDialogFragment taskListFragment = TaskListsDialogFragment.newInstance(
                 (MainFragment)fragmentManager.findFragmentById(R.id.fragment_main));
-        String title = getString(R.string.task_list_edit);
 
-        // Set the arguments
-        Bundle args = new Bundle();
-        args.putInt("button_count", 1);
-        args.putString("button_negative", getString(R.string.task_list_ok));
-        taskListFragment.setArguments(args);
-
-        taskListFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
+        taskListFragment.showFragment(fragmentManager,
+                getString(R.string.task_list_edit), getResources().getBoolean(R.bool.large_layout));
     }
 
     /** Called when the user clicks the History button*/
@@ -110,8 +105,12 @@ public class MainActivity extends AppCompatActivity {
 
     /** Called when the user clicks the About button  */
     public void openAbout(MenuItem menuItem) {
-        Intent intent = new Intent(this, AboutActivity.class);
-        startActivity(intent);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        // Create the fragment
+        AboutDialogFragment taskListFragment = new AboutDialogFragment();
+        taskListFragment.showFragment(fragmentManager,
+                getString(R.string.action_about), getResources().getBoolean(R.bool.large_layout));
     }
 
     /** Called when user clicks on the New Task floating button */
@@ -136,10 +135,10 @@ public class MainActivity extends AppCompatActivity {
         args.putString("button_neutral", getString(R.string.new_task_delete));
         taskDialogFragment.setArguments(args);
 
-        String title = getString(R.string.action_new_task);
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        taskDialogFragment.showFragment(fragmentManager, title, getResources().getBoolean(R.bool.large_layout));
+        taskDialogFragment.showFragment(fragmentManager,
+                getString(R.string.action_new_task), getResources().getBoolean(R.bool.large_layout));
     }
 
     private ViewPager getMainFragmentViewPager(){

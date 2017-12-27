@@ -33,6 +33,9 @@ import com.wismna.geoffroy.donext.R;
 
 public abstract class DynamicDialogFragment extends DialogFragment {
     int mButtonCount = 2;
+    String mPositiveButtonString = "";
+    String mNeutralButtonString = "";
+    String mNegativeButtonString = "";
     int mContentLayoutId = 0;
 
     @Nullable
@@ -69,12 +72,9 @@ public abstract class DynamicDialogFragment extends DialogFragment {
         // As it is a Dialog, the root ViewGroup can be null without issues
         final View view = inflater.inflate(R.layout.fragment_dynamic_dialog, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        Bundle args = getArguments();
-        // Set the dialog buttons
-        assert args != null;
         // Add action buttons
         builder.setView(view)
-                .setNegativeButton(args.getString("button_negative"), new DialogInterface.OnClickListener() {
+                .setNegativeButton(mNegativeButtonString, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // Send the negative button event back to the host activity
                         // Canceled creation, nothing to do
@@ -82,14 +82,14 @@ public abstract class DynamicDialogFragment extends DialogFragment {
                     }
                 });
         if (mButtonCount >= 2) {
-            builder.setPositiveButton(args.getString("button_positive"), new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(mPositiveButtonString, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     onPositiveButtonClick(view);
                 }
             });
         }
         if (mButtonCount == 3) {
-            builder.setNeutralButton(args.getString("button_neutral"), new DialogInterface.OnClickListener() {
+            builder.setNeutralButton(mNeutralButtonString, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     onNeutralButtonClick(view);
@@ -109,8 +109,6 @@ public abstract class DynamicDialogFragment extends DialogFragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        Bundle args = getArguments();
-        assert args != null;
         /*switch (mButtonCount) {
             case 1:
                 menu.removeItem(R.id.menu_positive_button);
@@ -134,8 +132,8 @@ public abstract class DynamicDialogFragment extends DialogFragment {
 
         // Set titles on existing buttons
         switch (mButtonCount) {
-            case 3: menu.findItem(R.id.menu_neutral_button).setTitle(args.getString("button_neutral"));
-            case 2: menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
+            case 3: menu.findItem(R.id.menu_neutral_button).setTitle(mNeutralButtonString);
+            case 2: menu.findItem(R.id.menu_positive_button).setTitle(mPositiveButtonString);
         }
         super.onPrepareOptionsMenu(menu);
     }
