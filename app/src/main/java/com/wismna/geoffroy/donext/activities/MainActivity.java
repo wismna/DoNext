@@ -11,6 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.microsoft.appcenter.AppCenter;
+import com.microsoft.appcenter.analytics.Analytics;
+import com.microsoft.appcenter.crashes.Crashes;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
 import com.wismna.geoffroy.donext.fragments.AboutDialogFragment;
@@ -27,6 +30,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // App center integration
+        AppCenter.start(getApplication(), "a5aeb8b9-0730-419f-b30b-f23b972f82f3",
+                Analytics.class, Crashes.class);
+
         setContentView(R.layout.activity_main);
     }
 
