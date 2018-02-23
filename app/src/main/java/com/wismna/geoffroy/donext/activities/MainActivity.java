@@ -14,6 +14,7 @@ import android.view.View;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.crashes.Crashes;
+import com.microsoft.appcenter.push.Push;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
 import com.wismna.geoffroy.donext.fragments.AboutDialogFragment;
@@ -32,8 +33,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // App center integration
+        Push.setSenderId("772857942300");
         AppCenter.start(getApplication(), "a5aeb8b9-0730-419f-b30b-f23b972f82f3",
-                Analytics.class, Crashes.class);
+                Analytics.class, Crashes.class, Push.class);
 
         setContentView(R.layout.activity_main);
     }
