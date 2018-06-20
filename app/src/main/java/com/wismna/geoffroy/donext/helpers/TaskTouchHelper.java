@@ -85,7 +85,7 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
         textPaint.setColor(Color.WHITE);
 
         int heightOffset = itemView.getHeight() / 2 - (int)textPaint.getTextSize() / 2;
-        int widthOffset = 30;
+        float widthOffset = 30f;
 
         Paint background = new Paint();
         // Set your color for negative displacement
@@ -95,12 +95,12 @@ public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
 
         // Draw text in the rectangle
         String text = itemView.getResources().getString(textId).toUpperCase();
-        int width = (int) textPaint.measureText(text);
+        float width = textPaint.measureText(text);
         float textXCoordinate;
         if (dX > 0) textXCoordinate = rect.left + widthOffset;
         else textXCoordinate = rect.right - width - widthOffset;
         c.translate(textXCoordinate, dY + heightOffset);
-        StaticLayout staticLayout = new StaticLayout(text, textPaint, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
+        StaticLayout staticLayout = new StaticLayout(text, textPaint, (int)width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
         staticLayout.draw(c);
     }
 }
