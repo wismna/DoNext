@@ -22,11 +22,9 @@ public class ConfirmDialogFragment extends DialogFragment {
         NO
     }
     private ConfirmDialogListener confirmDialogListener;
-    //private String message;
 
-    public static ConfirmDialogFragment newInstance(/*String message, */ConfirmDialogListener confirmDialogListener) {
+    public static ConfirmDialogFragment newInstance(ConfirmDialogListener confirmDialogListener) {
         ConfirmDialogFragment fragment = new ConfirmDialogFragment();
-        //fragment.message = message;
         fragment.confirmDialogListener = confirmDialogListener;
         fragment.setRetainInstance(true);
         return fragment;

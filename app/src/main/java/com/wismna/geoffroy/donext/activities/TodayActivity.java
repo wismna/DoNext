@@ -75,7 +75,7 @@ public class TodayActivity extends ToolBarActivityBase
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPref.edit();
         String layoutTypeString = sharedPref.getString("pref_conf_task_layout", "1");
-        int layoutType = Integer.valueOf(layoutTypeString);
+        int layoutType = Integer.parseInt(layoutTypeString);
         editor.putString("pref_conf_task_layout", String.valueOf(layoutType % 2 + 1));
         editor.apply();
 

@@ -21,7 +21,7 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link TaskList}.
  */
 
-public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRecyclerViewAdapter.ViewHolder>
+public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRecyclerViewAdapter.TaskViewHolder>
     implements TaskListTouchHelper.TaskListTouchHelperAdapter {
 
     public interface TaskListRecyclerViewAdapterListener {
@@ -41,14 +41,14 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_tasklist, parent, false);
-        return new ViewHolder(view);
+        return new TaskViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final TaskViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mTaskCountView.setText(String.valueOf(mValues.get(position).getTaskCount()));
         holder.mTaskNameView.setText(mValues.get(position).getName());
@@ -134,7 +134,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         return true;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class TaskViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final ImageView handleView;
         final TextView mTaskCountView;
@@ -142,7 +142,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         final Button mTaskDeleteButton;
         TaskList mItem;
 
-        ViewHolder(View view) {
+        TaskViewHolder(View view) {
             super(view);
             mView = view;
             handleView = itemView.findViewById(R.id.handle);

@@ -23,6 +23,8 @@ import com.wismna.geoffroy.donext.fragments.TaskFormDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TaskListsDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
 
+import java.util.Objects;
+
 /**
  * Main Activity class
  */
@@ -80,13 +82,13 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPref.edit();
         String layoutTypeString = sharedPref.getString("pref_conf_task_layout", "1");
-        int layoutType = Integer.valueOf(layoutTypeString);
+        int layoutType = Integer.parseInt(layoutTypeString);
         editor.putString("pref_conf_task_layout", String.valueOf(layoutType % 2 + 1));
         editor.apply();
 
         // Update the ViewPagerAdapter to refresh all tabs
         ViewPager viewPager = getMainFragmentViewPager();
-        viewPager.getAdapter().notifyDataSetChanged();
+        Objects.requireNonNull(viewPager.getAdapter()).notifyDataSetChanged();
     }
 
     /** Called when the user clicks the Edit Lists button  */

@@ -2,6 +2,7 @@ package com.wismna.geoffroy.donext.adapters;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,25 +33,25 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         this.viewType = viewType;
     }
 
+    @NonNull
     @Override
-    public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SimpleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
         switch (viewType)
         {
-            case 1:
-                view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.fragment_task_simple, parent, false);
-                return new SimpleViewHolder(view);
             case 2:
                 view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.fragment_task_detailed, parent, false);
                 return new DetailedViewHolder(view);
+            default:
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.fragment_task_simple, parent, false);
+                return new SimpleViewHolder(view);
         }
-        return null;
     }
 
     @Override
-    public void onBindViewHolder(final SimpleViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final SimpleViewHolder holder, int position) {
         // Set basic information
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(String.valueOf(holder.mItem.getId()));
@@ -83,6 +84,9 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
                 break;
             case 2:
                 holder.mTitleView.setTypeface(holder.mTitleView.getTypeface(), Typeface.BOLD);
+                break;
+            default:
+                // No special styles to apply
                 break;
         }
     }

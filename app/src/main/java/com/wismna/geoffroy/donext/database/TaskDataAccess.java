@@ -25,7 +25,7 @@ public class TaskDataAccess implements AutoCloseable {
 
     private SQLiteDatabase database;
     private final DatabaseHelper dbHelper;
-    private final String[] taskColumns = {
+    private final static String[] taskColumns = {
             DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKS_COLUMN_NAME,
             DatabaseHelper.TASKS_COLUMN_DESC, DatabaseHelper.TASKS_COLUMN_PRIORITY,
             DatabaseHelper.TASKS_COLUMN_CYCLE, DatabaseHelper.TASKS_COLUMN_DONE,
@@ -40,7 +40,7 @@ public class TaskDataAccess implements AutoCloseable {
         open(writeMode);
     }
 
-    private void open(MODE writeMode) throws SQLException {
+    private void open(MODE writeMode) {
         if (writeMode == MODE.WRITE) database = dbHelper.getWritableDatabase();
         else database = dbHelper.getReadableDatabase();
     }
