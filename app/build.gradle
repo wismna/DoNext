@@ -20,6 +20,13 @@ android {
         }
     }
 }
+sonarqube {
+    properties {
+        property 'sonar.host.url', '#{sonar.host.url}'
+        property 'sonar.login', '#{sonar.login}'
+        property 'sonar.organization', '#{sonar.organization}'
+    }
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
