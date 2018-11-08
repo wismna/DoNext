@@ -25,6 +25,7 @@ sonarqube {
         property 'sonar.host.url', '#{sonar.host.url}'
         property 'sonar.login', '#{sonar.login}'
         property 'sonar.organization', '#{sonar.organization}'
+        property 'sonar.projectKey', '#{sonar.projectkey}'
     }
 }
 
