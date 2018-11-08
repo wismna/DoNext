@@ -14,7 +14,6 @@ import android.view.View;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.crashes.Crashes;
-import com.microsoft.appcenter.push.Push;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
 import com.wismna.geoffroy.donext.fragments.AboutDialogFragment;
@@ -35,9 +34,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // App center integration
-        Push.setSenderId("772857942300");
         AppCenter.start(getApplication(), "a5aeb8b9-0730-419f-b30b-f23b972f82f3",
-                Analytics.class, Crashes.class, Push.class);
+                Analytics.class, Crashes.class);
 
         setContentView(R.layout.activity_main);
     }
@@ -88,7 +86,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Update the ViewPagerAdapter to refresh all tabs
         ViewPager viewPager = getMainFragmentViewPager();
-        Objects.requireNonNull(viewPager.getAdapter()).notifyDataSetChanged();
+        if (viewPager != null) {
+            Objects.requireNonNull(viewPager.getAdapter()).notifyDataSetChanged();
+        }
     }
 
     /** Called when the user clicks the Edit Lists button  */
@@ -156,6 +156,6 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager getMainFragmentViewPager(){
         FragmentManager manager = getSupportFragmentManager();
         MainFragment fragment = (MainFragment)manager.findFragmentById(R.id.fragment_main);
-        return fragment.getViewPager();
+        return fragment != null ? fragment.getViewPager() : null;
     }
 }
