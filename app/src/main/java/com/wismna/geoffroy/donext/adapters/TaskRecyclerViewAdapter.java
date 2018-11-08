@@ -21,48 +21,53 @@ import java.util.List;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Task}.
  */
-public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.SimpleViewHolder> {
+public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.StandardViewHolder> {
 
     private List<Task> mValues;
-    private int viewType;
     private boolean mIsToday;
+    private boolean mIsHistory;
 
-    public TaskRecyclerViewAdapter(List<Task> items, int viewType, boolean isToday) {
+    public TaskRecyclerViewAdapter(List<Task> items, boolean isToday, boolean isHistory) {
         mValues = items;
         mIsToday = isToday;
-        this.viewType = viewType;
+        mIsHistory = isHistory;
     }
 
     @NonNull
     @Override
-    public SimpleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view;
-        switch (viewType)
-        {
-            case 2:
-                view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.fragment_task_detailed, parent, false);
-                return new DetailedViewHolder(view);
-            default:
-                view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.fragment_task_simple, parent, false);
-                return new SimpleViewHolder(view);
-        }
+    public StandardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(viewType, parent, false);
+        return new StandardViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final SimpleViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final StandardViewHolder holder, int position) {
         // Set basic information
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(String.valueOf(holder.mItem.getId()));
         holder.mCycleView.setText(String.valueOf(holder.mItem.getCycle()));
         holder.mTitleView.setText(holder.mItem.getName());
-        // Set optional description
-        if (holder instanceof DetailedViewHolder)
-            ((DetailedViewHolder)holder).mDescriptionView.setText(holder.mItem.getDescription());
+        holder.mDescriptionView.setText(holder.mItem.getDescription());
         // Set task rendering
-        holder.mTitleView.setTypeface(Typeface.DEFAULT);
-        holder.mTitleView.setTextColor(Color.BLACK);
+        if (position > 0) {
+            holder.mTitleView.setTypeface(Typeface.DEFAULT);
+            holder.mTitleView.setTextColor(Color.BLACK);
+        }
+
+        // Set priority
+        switch (holder.mItem.getPriority())
+        {
+            case 0:
+                holder.mIconView.setImageResource(R.drawable.ic_low_priority_lightgray_24dp);
+                break;
+            case 2:
+                holder.mIconView.setImageResource(R.drawable.ic_priority_high_red_24dp);
+                break;
+            default:
+                holder.mIconView.setImageDrawable(null);
+                break;
+        }
 
         // Additional information will not be displayed in Today view
         if (mIsToday) return;
@@ -74,21 +79,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
             holder.mIconView.setImageResource(R.drawable.ic_close_light);
         else if(dueDate != null && dueDate.isBefore(LocalDate.now()))
             holder.mIconView.setImageResource(R.drawable.ic_access_alarm);
-        int priority = holder.mItem.getPriority();
 
-        // Set priority
-        switch (priority)
-        {
-            case 0:
-                holder.mTitleView.setTextColor(Color.LTGRAY);
-                break;
-            case 2:
-                holder.mTitleView.setTypeface(holder.mTitleView.getTypeface(), Typeface.BOLD);
-                break;
-            default:
-                // No special styles to apply
-                break;
-        }
     }
 
     @Override
@@ -103,7 +94,8 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public int getItemViewType(int position) {
-        return viewType;
+        if (position == 0 && !mIsHistory) return R.layout.fragment_task_first;
+        return R.layout.fragment_task_detailed;
     }
 
     public void add(Task item, int position) {
@@ -138,15 +130,16 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         return mValues.get(position);
     }
 
-    class SimpleViewHolder extends RecyclerView.ViewHolder {
+    class StandardViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView mIdView;
         final ImageView mIconView;
         final TextView mCycleView;
         final TextView mTitleView;
+        final TextView mDescriptionView;
         Task mItem;
 
-        SimpleViewHolder(View view) {
+        StandardViewHolder(View view) {
             super(view);
             mView = view;
 
@@ -154,22 +147,10 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
             mIconView = view.findViewById(R.id.task_icon);
             mCycleView = view.findViewById(R.id.task_cycle);
             mTitleView = view.findViewById(R.id.task_name);
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mTitleView.getText() + "'";
-        }
-    }
-
-    private class DetailedViewHolder extends SimpleViewHolder {
-        private final TextView mDescriptionView;
-
-        private DetailedViewHolder(View view) {
-            super(view);
             mDescriptionView = view.findViewById(R.id.task_description);
         }
 
+        @NonNull
         @Override
         public String toString() {
             return super.toString() + " '" + mTitleView.getText() + "'";

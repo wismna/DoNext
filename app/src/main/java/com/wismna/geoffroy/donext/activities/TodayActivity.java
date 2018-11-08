@@ -1,15 +1,12 @@
 package com.wismna.geoffroy.donext.activities;
 
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,6 +18,7 @@ import com.wismna.geoffroy.donext.fragments.TodayFormDialogFragment;
 import org.joda.time.LocalDate;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class TodayActivity extends ToolBarActivityBase
     implements TodayFormDialogFragment.TodayTaskListener {
@@ -66,22 +64,8 @@ public class TodayActivity extends ToolBarActivityBase
         fab.setEnabled(true);
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(this)) {
             RecyclerView recyclerView = findViewById(R.id.task_list_view);
-            ((TaskRecyclerViewAdapter)recyclerView.getAdapter()).setItems(taskDataAccess.getTodayTasks());
+            ((TaskRecyclerViewAdapter)Objects.requireNonNull(recyclerView.getAdapter())).setItems(taskDataAccess.getTodayTasks());
         }
-    }
-
-    /** Called when the user clicks on the Change Layout button */
-    public void changeLayout(MenuItem item) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        String layoutTypeString = sharedPref.getString("pref_conf_task_layout", "1");
-        int layoutType = Integer.parseInt(layoutTypeString);
-        editor.putString("pref_conf_task_layout", String.valueOf(layoutType % 2 + 1));
-        editor.apply();
-
-        // TODO: find a less ugly way to refresh the list
-        // Update the ViewPagerAdapter to refresh all tabs
-        this.recreate();
     }
 
     public void onNewTaskClick(View view) {

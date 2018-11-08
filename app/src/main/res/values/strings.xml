@@ -74,7 +74,7 @@
     <string name="donext_description">DoNext is a new kind of task manager, based on the premise that creating too many tasks is counterproductive. Instead, swipe tasks left and right to push them back to the bottom of your backlog to work on them at a later time!</string>
     <string name="about_version_donext">DoNext version %s</string>
     <string name="about_version_android">Android version %d</string>
-    <string name="about_link" translatable="false">https://github.com/wismna</string>
+    <string name="about_link" translatable="false">https://wismna.github.io/DoNext/</string>
 
     <!-- Strings related to Today -->
     <string name="title_activity_today">Today</string>
@@ -84,7 +84,7 @@
     <string name="action_today_select">Select tasks</string>
     <string name="task_list_edit_list_hint">List name</string>
     <string name="incompatible_sdk_version">Sorry, your Android version is not supported.</string>
-    <string name="today_no_tasks">Noting to do today</string>
+    <string name="today_no_tasks">Nothing to do today</string>
     <string name="today_create_tasks">Add some tasks there</string>
 
     <!-- String related to History -->

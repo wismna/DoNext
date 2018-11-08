@@ -7,15 +7,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/task_select" >
     <TextView
-        android:id="@+id/total_task_cycles"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:id="@+id/total_task_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center"/>
-    <TextView
         android:id="@+id/no_more_tasks"
         android:text="@string/task_no_tasks"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -42,10 +33,7 @@
         android:id="@+id/task_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="70dp"
         android:name="com.wismna.geoffroy.donext.activities.TaskFragment"
         app:layoutManager="LinearLayoutManager"
         tools:context=".fragments.TasksFragment"
@@ -81,9 +69,40 @@
             android:textColor="@android:color/white"
             android:visibility="gone"/>
     </RelativeLayout>
-    <TextView
-        android:id="@+id/remaining_task_count"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="70dp"
+        android:layout_gravity="bottom"
+        android:background="@color/colorPrimaryLight"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="5dp"
+        android:paddingTop="15dp"
+        android:orientation="horizontal"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackground" >
+        <TextView
+            android:id="@+id/total_task_cycles"
+            android:layout_width="100dp"
+            android:layout_marginStart="10dp"
+            android:layout_height="wrap_content"/>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground" >
+            <TextView
+                android:id="@+id/total_task_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/remaining_task_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>

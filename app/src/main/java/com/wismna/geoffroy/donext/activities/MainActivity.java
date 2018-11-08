@@ -75,22 +75,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    /** Called when the user clicks on the Change Layout button */
-    public void changeLayout(MenuItem item) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        String layoutTypeString = sharedPref.getString("pref_conf_task_layout", "1");
-        int layoutType = Integer.parseInt(layoutTypeString);
-        editor.putString("pref_conf_task_layout", String.valueOf(layoutType % 2 + 1));
-        editor.apply();
-
-        // Update the ViewPagerAdapter to refresh all tabs
-        ViewPager viewPager = getMainFragmentViewPager();
-        if (viewPager != null) {
-            Objects.requireNonNull(viewPager.getAdapter()).notifyDataSetChanged();
-        }
-    }
-
     /** Called when the user clicks the Edit Lists button  */
     public void openTaskLists(MenuItem menuItem) {
         FragmentManager fragmentManager = getSupportFragmentManager();

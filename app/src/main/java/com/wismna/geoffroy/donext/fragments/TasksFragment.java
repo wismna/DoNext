@@ -38,12 +38,12 @@ import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.helpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
-import com.wismna.geoffroy.donext.widgets.DividerItemDecoration;
 import com.wismna.geoffroy.donext.widgets.NoScrollingLayoutManager;
 
 import org.joda.time.LocalDate;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A fragment representing a list of Items.
@@ -106,14 +106,10 @@ public class TasksFragment extends Fragment implements
         recyclerView = view.findViewById(R.id.task_list_view);
         recyclerView.setLayoutManager(isHistory ? new LinearLayoutManager(context) : new NoScrollingLayoutManager(context));
 
-        // Set RecyclerView Adapter
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-
         // Get all tasks
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext())) {
             taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(
-                    isTodayView? taskDataAccess.getTodayTasks() : taskDataAccess.getAllTasksFromList(taskListId, isHistory),
-                    Integer.valueOf(sharedPref.getString("pref_conf_task_layout", "1")), isTodayView);
+                    isTodayView? taskDataAccess.getTodayTasks() : taskDataAccess.getAllTasksFromList(taskListId, isHistory), isTodayView, isHistory);
         }
         recyclerView.setAdapter(taskRecyclerViewAdapter);
 
@@ -142,13 +138,14 @@ public class TasksFragment extends Fragment implements
                         args.putString("button_negative",
                                 isHistory ? getString(R.string.task_list_ok) : getString(R.string.new_task_cancel));
                         args.putString("button_neutral", getString(R.string.new_task_delete));
+                        args.putInt("position", position);
 
                         // Set current tab value to new task dialog
-                        ViewPager viewPager = getActivity().findViewById(R.id.container);
+                        ViewPager viewPager = Objects.requireNonNull(getActivity()).findViewById(R.id.container);
                         List<TaskList> taskLists;
                         Task task = taskRecyclerViewAdapter.getItem(position);
                         if (viewPager != null) {
-                            taskLists = ((SectionsPagerAdapter) viewPager.getAdapter()).getAllItems();
+                            taskLists = ((SectionsPagerAdapter) Objects.requireNonNull(viewPager.getAdapter())).getAllItems();
                             args.putInt("list", viewPager.getCurrentItem());
                         }
                         else {
@@ -215,7 +212,7 @@ public class TasksFragment extends Fragment implements
                 // Update remaining tasks - only when needed
                 TextView remainingTasksView = view.findViewById(R.id.remaining_task_count);
                 NoScrollingLayoutManager noScrollingLayoutManager = (NoScrollingLayoutManager)layoutManager;
-                int remainingTaskCount = totalTasks - noScrollingLayoutManager.findLastVisibleItemPosition() - 1;
+                int remainingTaskCount = totalTasks - (noScrollingLayoutManager != null ? noScrollingLayoutManager.findLastVisibleItemPosition() : 1) - 1;
                 if (remainingTaskCount == 0) remainingTasksView.setText("");
                 else remainingTasksView.setText(resources.getQuantityString(R.plurals.task_remaining, remainingTaskCount, remainingTaskCount));
 
@@ -223,7 +220,7 @@ public class TasksFragment extends Fragment implements
             }
         });
 
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity()));
+        //recyclerView.addItemDecoration(new DividerItemDecoration(getActivity()));
         return view;
     }
 
@@ -319,8 +316,7 @@ public class TasksFragment extends Fragment implements
             }
             // Update the task
             else {
-                assert args != null;
-                int position = args.getInt("position");
+                int position = args != null ? args.getInt("position") : 0;
                 // Check if task list was changed
                 if ((isTodayView && !isToday) || (!isTodayView && task.getTaskListId() != taskList.getId()))
                 {
@@ -356,7 +352,10 @@ public class TasksFragment extends Fragment implements
             confirmArgs.putInt("ItemPosition", itemPosition);
             confirmArgs.putInt("Direction", -1);
             confirmDialogFragment.setArguments(confirmArgs);
-            confirmDialogFragment.show(getFragmentManager(), title);
+            FragmentManager fragmentManager = getFragmentManager();
+            if (fragmentManager != null) {
+                confirmDialogFragment.show(fragmentManager, title);
+            }
         }
         else {
             PerformTaskAction(itemPosition, -1);
@@ -394,7 +393,10 @@ public class TasksFragment extends Fragment implements
             args.putInt("ItemPosition", itemPosition);
             args.putInt("Direction", direction);
             confirmDialogFragment.setArguments(args);
-            confirmDialogFragment.show(getFragmentManager(), title);
+            FragmentManager fragmentManager = getFragmentManager();
+            if (fragmentManager != null) {
+                confirmDialogFragment.show(fragmentManager, title);
+            }
         }
         else PerformTaskAction(itemPosition, direction);
     }
@@ -430,6 +432,7 @@ public class TasksFragment extends Fragment implements
         }
 
         // Setup the snack bar
+        // TODO: use the main activity view instead
         snackbar = Snackbar.make(view, resources.getString(R.string.snackabar_label, action), Snackbar.LENGTH_LONG)
                 .setAction(resources.getString(R.string.snackabar_button), new View.OnClickListener() {
                     @Override
