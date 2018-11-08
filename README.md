@@ -1,7 +1,7 @@
 # DoNext
 
 [![Build status](https://geogeob.visualstudio.com/DoNext/_apis/build/status/DoNext-Android)](https://geogeob.visualstudio.com/DoNext/_build/latest?definitionId=3)
-[Code Analysis](https://sonarcloud.io/api/project_badges/measure?project=wismna_DoNext&metric=alert_status)
+[![Code Analysis](https://sonarcloud.io/api/project_badges/measure?project=wismna_DoNext&metric=alert_status)](https://sonarcloud.io/dashboard?id=wismna_DoNext)
 
 DoNext is an innovative task application.
 You can create and arrange task lists, create, edit and delete tasks...
