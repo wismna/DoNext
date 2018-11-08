@@ -1,4 +1,0 @@
-History now lets you see if the task was done or deleted
-Today now shows current date
-Some labels are more explicit
-Design improvements

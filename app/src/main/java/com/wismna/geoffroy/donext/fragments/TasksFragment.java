@@ -432,8 +432,8 @@ public class TasksFragment extends Fragment implements
         }
 
         // Setup the snack bar
-        // TODO: use the main activity view instead
-        snackbar = Snackbar.make(view, resources.getString(R.string.snackabar_label, action), Snackbar.LENGTH_LONG)
+        View parentView = Objects.requireNonNull(getActivity()).findViewById(R.id.main_content);
+        snackbar = Snackbar.make(parentView, resources.getString(R.string.snackabar_label, action), Snackbar.LENGTH_LONG)
                 .setAction(resources.getString(R.string.snackabar_button), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
