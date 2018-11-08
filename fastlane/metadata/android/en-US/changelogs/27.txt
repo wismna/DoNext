@@ -1,0 +1,3 @@
+Emphasis is made on the first task
+Bug corrections
+Design improvements
