@@ -120,7 +120,7 @@ public class TaskDataAccess implements AutoCloseable {
                         " AND (" + DatabaseHelper.TASKS_COLUMN_DONE + " = " + history +
                         (isHistory ? " OR " : " AND ") + DatabaseHelper.TASKS_COLUMN_DELETED + " = " + history + ")",
                 null, null, null,
-                DatabaseHelper.TASKS_COLUMN_CYCLE + ", " + DatabaseHelper.COLUMN_ID + " DESC");
+                DatabaseHelper.TASKS_COLUMN_PRIORITY + " DESC");
         return getTasksFromCursor(cursor);
     }
 

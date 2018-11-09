@@ -38,7 +38,6 @@ import com.wismna.geoffroy.donext.database.TaskDataAccess;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.helpers.TaskTouchHelper;
 import com.wismna.geoffroy.donext.listeners.RecyclerItemClickListener;
-import com.wismna.geoffroy.donext.widgets.NoScrollingLayoutManager;
 
 import org.joda.time.LocalDate;
 
@@ -104,7 +103,7 @@ public class TasksFragment extends Fragment implements
 
         // Set the Recycler view
         recyclerView = view.findViewById(R.id.task_list_view);
-        recyclerView.setLayoutManager(isHistory ? new LinearLayoutManager(context) : new NoScrollingLayoutManager(context));
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         // Get all tasks
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext())) {
@@ -206,16 +205,6 @@ public class TasksFragment extends Fragment implements
                     totalTasksView.setText(resources.getQuantityString(R.plurals.task_total, totalTasks, totalTasks));
                 }
 
-                RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                if (layoutManager instanceof LinearLayoutManager) return true;
-
-                // Update remaining tasks - only when needed
-                TextView remainingTasksView = view.findViewById(R.id.remaining_task_count);
-                NoScrollingLayoutManager noScrollingLayoutManager = (NoScrollingLayoutManager)layoutManager;
-                int remainingTaskCount = totalTasks - (noScrollingLayoutManager != null ? noScrollingLayoutManager.findLastVisibleItemPosition() : 1) - 1;
-                if (remainingTaskCount == 0) remainingTasksView.setText("");
-                else remainingTasksView.setText(resources.getQuantityString(R.plurals.task_remaining, remainingTaskCount, remainingTaskCount));
-
                 return true;
             }
         });
@@ -302,6 +291,7 @@ public class TasksFragment extends Fragment implements
             // Should never happen because we will have to be on this tab to open the dialog
             if (taskRecyclerViewAdapter == null) return;
 
+            int position = 0;
             // Add the task
             if (task == null) {
                 // If the new task is added to another task list, update the tab
@@ -310,13 +300,14 @@ public class TasksFragment extends Fragment implements
                 }
                 // Otherwise add it to the current one
                 else {
-                    taskRecyclerViewAdapter.add(newTask, 0);
-                    recyclerView.scrollToPosition(0);
+                    position = taskRecyclerViewAdapter.getItemCount();
+                    taskRecyclerViewAdapter.add(newTask, position);
+                    recyclerView.scrollToPosition(position);
                 }
             }
             // Update the task
             else {
-                int position = args != null ? args.getInt("position") : 0;
+                position = args != null ? args.getInt("position") : 0;
                 // Check if task list was changed
                 if ((isTodayView && !isToday) || (!isTodayView && task.getTaskListId() != taskList.getId()))
                 {
@@ -329,6 +320,7 @@ public class TasksFragment extends Fragment implements
                     taskRecyclerViewAdapter.update(newTask, position);
                 }
             }
+            taskRecyclerViewAdapter.notifyItemChanged(position);
         }
     }
 
