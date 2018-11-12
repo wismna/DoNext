@@ -1,5 +1,7 @@
 package com.wismna.geoffroy.donext.dao;
 
+import android.support.annotation.NonNull;
+
 import org.joda.time.LocalDate;
 
 /**
@@ -14,6 +16,8 @@ public class Task {
     private int cycle;
     private int done;
     private int deleted;
+    private int order;
+    private int todayOrder;
     private long taskList;
     private String taskListName;
     private LocalDate dueDate;
@@ -113,11 +117,26 @@ public class Task {
         }
     }
 
+    public int getOrder() {
+        return order;
+    }
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public int getTodayOrder() {
+        return todayOrder;
+    }
+    public void setTodayOrder(int todayOrder) {
+        this.todayOrder = todayOrder;
+    }
+
     public boolean isToday() {
         return todayDate != null && todayDate.isEqual(LocalDate.now());
     }
 
     // Will be used by the ArrayAdapter in the ListView
+    @NonNull
     @Override
     public String toString() {
         return name;

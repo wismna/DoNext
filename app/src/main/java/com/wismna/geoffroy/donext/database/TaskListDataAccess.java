@@ -3,7 +3,6 @@ package com.wismna.geoffroy.donext.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.wismna.geoffroy.donext.dao.TaskList;

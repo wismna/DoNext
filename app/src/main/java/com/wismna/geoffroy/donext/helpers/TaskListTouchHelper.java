@@ -1,6 +1,7 @@
 package com.wismna.geoffroy.donext.helpers;
 
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
@@ -22,12 +23,12 @@ public class TaskListTouchHelper extends ItemTouchHelper.SimpleCallback  {
     }
 
     @Override
-    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
         return mAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
     }
 
     @Override
-    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         // No swipe moves
     }
 
@@ -47,7 +48,7 @@ public class TaskListTouchHelper extends ItemTouchHelper.SimpleCallback  {
     }
 
     @Override
-    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         super.clearView(recyclerView, viewHolder);
 
         viewHolder.itemView.setAlpha(1.0f);

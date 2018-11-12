@@ -416,8 +416,7 @@ public class TasksFragment extends Fragment implements
                 break;
             case -1:
                 FragmentManager manager = getFragmentManager();
-                assert manager != null;
-                DialogFragment dialog = (DialogFragment) manager.findFragmentByTag(getString(R.string.action_edit_task));
+                DialogFragment dialog = (DialogFragment) Objects.requireNonNull(manager).findFragmentByTag(getString(R.string.action_edit_task));
                 if (dialog != null) dialog.dismiss();
                 action = resources.getString(R.string.snackabar_action_deleted);
                 break;
@@ -460,15 +459,16 @@ public class TasksFragment extends Fragment implements
                     switch (direction) {
                         // Mark item as Done
                         case ItemTouchHelper.LEFT:
-                            taskDataAccess.setDone(itemId);
+                            taskDataAccess.setDone(itemId, isTodayView);
                             break;
                         // Increase task cycle count
                         case ItemTouchHelper.RIGHT:
-                            taskDataAccess.increaseCycle(task.getCycle(), itemId);
+                            taskDataAccess.increaseCycle(task, isTodayView);
+                            taskRecyclerViewAdapter.notifyItemChanged(taskRecyclerViewAdapter.getItemCount() - 1);
                             break;
                         case -1:
                             // Delete the task
-                            taskDataAccess.deleteTask(itemId);
+                            taskDataAccess.deleteTask(itemId, isTodayView);
                     }
                 }
             }

@@ -21,6 +21,7 @@ import org.joda.time.LocalDate;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by bg45 on 2017-03-21.
@@ -60,7 +61,7 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     private void setLayoutValues(List<Task> tasks) {
         EditText editText = findViewById(R.id.today_search);
         final ListView listView = findViewById(R.id.today_tasks);
-        final TodayArrayAdapter adapter = new TodayArrayAdapter(getActivity(), tasks);
+        final TodayArrayAdapter adapter = new TodayArrayAdapter(Objects.requireNonNull(getActivity()), tasks);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -98,7 +99,7 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     protected void onPositiveButtonClick(View view) {
         mListener.onTodayTaskDialogPositiveClick(view);
         // Only commit the updated tasks to DB
-        new UpdateTasks(this).execute(mUpdatedTasks.toArray(new Task[mUpdatedTasks.size()]));
+        new UpdateTasks(this).execute(mUpdatedTasks.toArray(new Task[0]));
         dismiss();
     }
 
@@ -142,15 +143,14 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
 
         @Override
         protected Integer doInBackground(Task... params) {
-            int elementsUpdated = 0;
+            int position;
             try (TaskDataAccess taskDataAccess = new TaskDataAccess(fragmentReference.get().getActivity(), TaskDataAccess.MODE.WRITE)) {
-                for (Task task :
-                        params) {
-                    taskDataAccess.updateTodayTasks(task.getId(), task.isToday());
-                    elementsUpdated++;
+                for (position = 0; position < params.length; position ++) {
+                    Task task = params[position];
+                    taskDataAccess.updateTodayTasks(task.getId(), task.isToday(), position);
                 }
             }
-            return elementsUpdated;
+            return position;
         }
 
         @Override

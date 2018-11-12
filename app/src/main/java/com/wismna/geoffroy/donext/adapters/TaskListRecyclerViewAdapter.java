@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.adapters;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -40,15 +41,16 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         mListener = listener;
     }
 
+    @NonNull
     @Override
-    public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_tasklist, parent, false);
         return new TaskViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final TaskViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final TaskViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mTaskCountView.setText(String.valueOf(mValues.get(position).getTaskCount()));
         holder.mTaskNameView.setText(mValues.get(position).getName());
@@ -151,6 +153,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
             mTaskDeleteButton = view.findViewById(R.id.task_list_delete);
         }
 
+        @NonNull
         @Override
         public String toString() {
             return super.toString() + " '" + mTaskNameView.getText() + "'";

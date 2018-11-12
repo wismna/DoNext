@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="130dp"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
     android:paddingTop="5dp"
-    android:orientation="horizontal"
+    android:paddingBottom="5dp"
     android:focusable="true"
-    android:background="@color/colorPrimaryLight" >
-    <TextView
-        android:id="@+id/task_cycle"
-        android:layout_width="30dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_gravity="center"
-        android:textAppearance="?attr/textAppearanceListItem" />
+    android:background="@color/colorPrimaryLight">
     <TextView
         android:id="@+id/task_id"
         android:layout_width="wrap_content"
@@ -22,29 +15,43 @@
         android:id="@+id/task_icon"
         android:layout_width="24dp"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
         android:layout_marginEnd="5dp"
         android:layout_gravity="center"
-        android:contentDescription="@string/task_alarm"/>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:contentDescription="@string/task_alarm" />
+    <TextView
+        android:id="@+id/task_name"
         android:layout_width="wrap_content"
-        android:layout_height="120dp"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/task_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/colorAccent"
-            android:textAppearance="?attr/textAppearanceListItem" />
-        <TextView
-            android:id="@+id/task_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:maxLines="4"
-            android:textSize="16sp"
-            android:textAppearance="?attr/textAppearanceListItemSmall" />
-    </LinearLayout>
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/task_icon"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorAccent"
+        android:textAppearance="?attr/textAppearanceListItem" />
+    <ImageView
+        android:id="@+id/task_cycle_icon"
+        android:layout_width="24dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="5dp"
+        android:src="@drawable/ic_refresh_black_24dp"
+        android:contentDescription="@string/task_alarm" />
+    <TextView
+        android:id="@+id/task_cycle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_toStartOf="@id/task_cycle_icon"
+        android:textColor="#FFA6A5A5"
+        android:textAppearance="?attr/textAppearanceListItem" />
+    <TextView
+        android:id="@+id/task_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="30dp"
+        android:layout_below="@id/task_name"
+        android:maxLines="4"
+        android:textSize="16sp"
+        android:textAppearance="?attr/textAppearanceListItemSmall" />
+</RelativeLayout>
+

@@ -25,6 +25,8 @@ import android.widget.FrameLayout;
 
 import com.wismna.geoffroy.donext.R;
 
+import java.util.Objects;
+
 /**
  * Created by wismna on 2017-03-21.
  * Sub-class this class to create a dynamic fragment that will act as a Dialog in large layouts and
@@ -104,7 +106,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        getActivity().getMenuInflater().inflate(R.menu.menu_dynamic_fragment, menu);
+        Objects.requireNonNull(getActivity()).getMenuInflater().inflate(R.menu.menu_dynamic_fragment, menu);
     }
 
     @Override
@@ -146,7 +148,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
 
         // Hide the keyboard if present
         if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity()).getSystemService(Activity.INPUT_METHOD_SERVICE);
             assert imm != null;
             imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
         }
@@ -199,7 +201,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     /** Helper function to get a View, without having to worry about the fact that is a Dialog or not*/
     protected <T extends View> T findViewById(int id) {
         if (getShowsDialog()) return getDialog().findViewById(id);
-        return getView().findViewById(id);
+        return Objects.requireNonNull(getView()).findViewById(id);
     }
 
 
@@ -210,8 +212,8 @@ public abstract class DynamicDialogFragment extends DialogFragment {
             view.requestFocus();
 
             // Hide keyboard
-            InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            InputMethodManager inputMethodManager = (InputMethodManager) Objects.requireNonNull(getContext()).getSystemService(Context.INPUT_METHOD_SERVICE);
+            Objects.requireNonNull(inputMethodManager).hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 

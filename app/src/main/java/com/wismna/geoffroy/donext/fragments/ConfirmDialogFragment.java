@@ -12,6 +12,8 @@ import android.view.View;
 
 import com.wismna.geoffroy.donext.R;
 
+import java.util.Objects;
+
 public class ConfirmDialogFragment extends DialogFragment {
     interface ConfirmDialogListener {
         void onConfirmDialogClick(DialogFragment dialog, ButtonEvent event);
@@ -41,7 +43,7 @@ public class ConfirmDialogFragment extends DialogFragment {
     @Override
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
 
         Bundle args = getArguments();
         LayoutInflater inflater = getActivity().getLayoutInflater();

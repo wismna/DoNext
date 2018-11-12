@@ -23,6 +23,7 @@ import com.wismna.geoffroy.donext.helpers.TaskListTouchHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A fragment representing a list of Items.
@@ -151,7 +152,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
             args.putInt("ItemPosition", position);
             args.putLong("ItemId", id);
             confirmDialogFragment.setArguments(args);
-            confirmDialogFragment.show(getFragmentManager(), title);
+            confirmDialogFragment.show(Objects.requireNonNull(getFragmentManager()), title);
         }
         else deleteTaskList(position, id);
     }

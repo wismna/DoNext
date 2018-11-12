@@ -1,5 +1,7 @@
 package com.wismna.geoffroy.donext.dao;
 
+import android.support.annotation.NonNull;
+
 /**
  * Created by geoffroy on 15-11-25.
  * Data access object class that represents a Task List
@@ -33,6 +35,7 @@ public class TaskList {
         this.taskCount = taskCount;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return name;

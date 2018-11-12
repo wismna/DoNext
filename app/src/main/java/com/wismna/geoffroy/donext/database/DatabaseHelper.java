@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Database helper class that contains table and column names as well as handles database creation
  */
 class DatabaseHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
     private static final String DATABASE_NAME = "donext.db";
     static final String COLUMN_ID = "_id";
     static final String COLUMN_ORDER = "displayorder";
@@ -36,6 +36,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
     static final String TASKS_COLUMN_LIST = "list";
     static final String TASKS_COLUMN_DUEDATE = "duedate";
     static final String TASKS_COLUMN_TODAYDATE = "todaydate";
+    static final String TASKS_COLUMN_TODAYORDER = "todayorder";
     private static final String TASKS_TABLE_CREATE =
         "CREATE TABLE " + TASKS_TABLE_NAME + " (" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -46,6 +47,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
             TASKS_COLUMN_DONE + " INTEGER DEFAULT 0, " +
             TASKS_COLUMN_DELETED + " INTEGER DEFAULT 0, " +
             COLUMN_ORDER + " INTEGER, " +
+            TASKS_COLUMN_TODAYORDER + " INTEGER, " +
             TASKS_COLUMN_LIST + " INTEGER NOT NULL " +
                 "REFERENCES " + TASKLIST_TABLE_NAME + "(" + COLUMN_ID + "), " +
             TASKS_COLUMN_DUEDATE + " DATE, " +
@@ -73,7 +75,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         // Fall-through is intended
         switch (oldVersion) {
             case 1:
-                // Add new Order column
+                // Add new Task List Order column
                 db.execSQL("ALTER TABLE " + TASKLIST_TABLE_NAME + " ADD COLUMN " + COLUMN_ORDER + " INTEGER");
             case 2:
                 // Add new Visible column
@@ -88,6 +90,10 @@ class DatabaseHelper extends SQLiteOpenHelper {
             case 4:
                 db.execSQL("DROP VIEW " + TASKS_VIEW_TODAY_NAME);
                 db.execSQL(TASKS_VIEW_TODAY_CREATE);
+            case 5:
+                // Add new Task Order column
+                //db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + COLUMN_ORDER + " INTEGER");
+                db.execSQL("ALTER TABLE " + TASKS_TABLE_NAME + " ADD COLUMN " + TASKS_COLUMN_TODAYORDER + " INTEGER");
         }
     }
 }
