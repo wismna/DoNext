@@ -135,6 +135,10 @@ public class Task {
         return todayDate != null && todayDate.isEqual(LocalDate.now());
     }
 
+    public boolean isHistory () {
+        return getDone() == 1 || getDeleted() == 1;
+    }
+
     // Will be used by the ArrayAdapter in the ListView
     @NonNull
     @Override

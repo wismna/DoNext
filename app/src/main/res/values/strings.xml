@@ -34,6 +34,7 @@
     <string name="new_task_save">Save</string>
     <string name="new_task_cancel">Cancel</string>
     <string name="new_task_delete">Delete</string>
+    <string name="new_task_restore">Restore</string>
 
     <!-- Strings related to task details activity -->
     <string name="task_no_tasks">No tasks here!</string>

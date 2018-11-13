@@ -69,4 +69,5 @@
     <string name="today_no_tasks">Rien à faire aujourd\'hui</string>
     <string name="create_tasks">Créez-en une là</string>
     <string name="today_create_tasks">Ajoutez des tâches là</string>
+    <string name="new_task_restore">Restaurer</string>
 </resources>
