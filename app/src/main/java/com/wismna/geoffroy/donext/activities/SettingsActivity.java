@@ -3,7 +3,7 @@ package com.wismna.geoffroy.donext.activities;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.wismna.geoffroy.donext.R;
 

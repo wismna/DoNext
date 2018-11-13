@@ -1,6 +1,6 @@
 package com.wismna.geoffroy.donext.dao;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Created by geoffroy on 15-11-25.

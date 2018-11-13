@@ -1,7 +1,7 @@
 package com.wismna.geoffroy.donext.activities;
 
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Created by GBE on 27/12/2017.

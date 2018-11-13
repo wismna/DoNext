@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,8 +21,6 @@ import com.wismna.geoffroy.donext.fragments.MainFragment;
 import com.wismna.geoffroy.donext.fragments.TaskFormDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TaskListsDialogFragment;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
-
-import java.util.Objects;
 
 /**
  * Main Activity class
