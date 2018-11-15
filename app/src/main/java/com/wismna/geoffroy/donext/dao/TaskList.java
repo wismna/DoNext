@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
  * Created by geoffroy on 15-11-25.
  * Data access object class that represents a Task List
  */
+
+@Deprecated
 public class TaskList {
     private long id;
     private String name;

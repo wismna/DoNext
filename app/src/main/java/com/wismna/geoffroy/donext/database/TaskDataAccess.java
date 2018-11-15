@@ -16,6 +16,7 @@ import java.util.List;
  * Created by geoffroy on 15-11-27.
  * Data access class that handles Tasks
  */
+@Deprecated
 public class TaskDataAccess implements AutoCloseable {
     public enum MODE {
         READ,

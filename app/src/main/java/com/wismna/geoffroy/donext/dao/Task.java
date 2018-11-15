@@ -8,6 +8,8 @@ import org.joda.time.LocalDate;
  * Created by geoffroy on 15-11-25.
  * Data access object class that represents a Task
  */
+
+@Deprecated
 public class Task {
     private long id;
     private String name;
