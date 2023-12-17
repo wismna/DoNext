@@ -1,25 +1,28 @@
-package com.wismna.geoffroy.donext.data;
+package com.wismna.geoffroy.donext.data
 
-import androidx.annotation.NonNull;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "tasklist")
-public class TaskList {
-
+class TaskList {
+    @JvmField
     @PrimaryKey(autoGenerate = true)
-    public long _id;
+    var _id: Long = 0
 
+    @JvmField
     @ColumnInfo(name = "name")
-    public String name;
+    var name: String? = null
 
+    @JvmField
     @ColumnInfo(name = "visible")
-    public boolean visible = true;
+    var visible = true
 
+    @JvmField
     @ColumnInfo(name = "displayorder")
-    public int order;
+    var order = 0
 
     //@ColumnInfo(name = "taskcount")
-    public int taskCount;
+    @JvmField
+    var taskCount = 0
 }

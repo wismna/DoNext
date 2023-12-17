@@ -1,46 +1,17 @@
-package com.wismna.geoffroy.donext.dao;
-
-import androidx.annotation.NonNull;
+package com.wismna.geoffroy.donext.dao
 
 /**
  * Created by geoffroy on 15-11-25.
  * Data access object class that represents a Task List
  */
-
-@Deprecated
-public class TaskList {
-    private long id;
-    private String name;
-    private long taskCount;
-
-    public long getId() {
-        return id;
+class TaskList {
+    @JvmField
+    var id: Long = 0
+    @JvmField
+    var name: String? = null
+    @JvmField
+    var taskCount: Long = 0
+    override fun toString(): String {
+        return name!!
     }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String comment) {
-        this.name = comment;
-    }
-
-    public long getTaskCount() {
-        return taskCount;
-    }
-
-    public void setTaskCount(long taskCount) {
-        this.taskCount = taskCount;
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return name;
-    }
-
 }

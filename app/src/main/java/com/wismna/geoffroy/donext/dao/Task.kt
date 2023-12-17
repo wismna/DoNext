@@ -1,151 +1,64 @@
-package com.wismna.geoffroy.donext.dao;
+package com.wismna.geoffroy.donext.dao
 
-import androidx.annotation.NonNull;
-
-import org.joda.time.LocalDate;
+import org.joda.time.LocalDate
 
 /**
  * Created by geoffroy on 15-11-25.
  * Data access object class that represents a Task
  */
-
-@Deprecated
-public class Task {
-    private long id;
-    private String name;
-    private String description;
-    private int priority;
-    private int cycle;
-    private int done;
-    private int deleted;
-    private int order;
-    private int todayOrder;
-    private long taskList;
-    private String taskListName;
-    private LocalDate dueDate;
-    private LocalDate todayDate;
-
-    public long getId() {
-        return id;
+class Task {
+    @JvmField
+    var id: Long = 0
+    @JvmField
+    var name: String? = null
+    @JvmField
+    var description: String? = null
+    @JvmField
+    var priority = 0
+    @JvmField
+    var cycle = 0
+    @JvmField
+    var done = 0
+    @JvmField
+    var deleted = 0
+    @JvmField
+    var order = 0
+    @JvmField
+    var todayOrder = 0
+    var taskListId: Long = 0
+        private set
+    @JvmField
+    var taskListName: String? = null
+    var dueDate: LocalDate? = null
+        private set
+    private var todayDate: LocalDate? = null
+    fun setTaskList(taskList: Long) {
+        taskListId = taskList
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String comment) {
-        this.name = comment;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-
-    public int getCycle() {
-        return cycle;
-    }
-
-    public void setCycle(int cycle) {
-        this.cycle = cycle;
-    }
-
-    public void setDone(int done) {
-        this.done = done;
-    }
-
-    public void setDeleted(int deleted) {
-        this.deleted = deleted;
-    }
-
-    public long getTaskListId() {
-        return taskList;
-    }
-
-    public void setTaskList(long taskList) {
-        this.taskList = taskList;
-    }
-
-    public String getTaskListName() {
-        return taskListName;
-    }
-
-    public void setTaskListName(String taskListName) {
-        this.taskListName = taskListName;
-    }
-
-    public void setDueDate(String dueDate) {
+    fun setDueDate(dueDate: String?) {
         try {
-            this.dueDate = LocalDate.parse(dueDate);
+            this.dueDate = LocalDate.parse(dueDate)
+        } catch (e: Exception) {
+            this.dueDate = null
         }
-        catch (Exception e){
-            this.dueDate = null;
-        }
     }
 
-    public LocalDate getDueDate() {
-        return dueDate;
-    }
-
-    public int getDeleted() {
-        return deleted;
-    }
-
-    public int getDone() {
-        return done;
-    }
-
-    public void setTodayDate(String todayDate) {
+    fun setTodayDate(todayDate: String?) {
         try {
-            this.todayDate = LocalDate.parse(todayDate);
+            this.todayDate = LocalDate.parse(todayDate)
+        } catch (e: Exception) {
+            this.todayDate = null
         }
-        catch (Exception e){
-            this.todayDate = null;
-        }
     }
 
-    public int getOrder() {
-        return order;
-    }
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    public int getTodayOrder() {
-        return todayOrder;
-    }
-    public void setTodayOrder(int todayOrder) {
-        this.todayOrder = todayOrder;
-    }
-
-    public boolean isToday() {
-        return todayDate != null && todayDate.isEqual(LocalDate.now());
-    }
-
-    public boolean isHistory () {
-        return getDone() == 1 || getDeleted() == 1;
-    }
+    val isToday: Boolean
+        get() = todayDate != null && todayDate!!.isEqual(LocalDate.now())
+    val isHistory: Boolean
+        get() = done == 1 || deleted == 1
 
     // Will be used by the ArrayAdapter in the ListView
-    @NonNull
-    @Override
-    public String toString() {
-        return name;
+    override fun toString(): String {
+        return name!!
     }
-
 }

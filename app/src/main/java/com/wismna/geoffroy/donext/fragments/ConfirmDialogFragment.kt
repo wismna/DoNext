@@ -1,73 +1,66 @@
-package com.wismna.geoffroy.donext.fragments;
+package com.wismna.geoffroy.donext.fragments
 
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.app.Dialog
+import android.content.DialogInterface
+import android.os.Bundle
+import android.view.KeyEvent
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
+import com.wismna.geoffroy.donext.R
 
-import com.wismna.geoffroy.donext.R;
-
-public class ConfirmDialogFragment extends DialogFragment {
+class ConfirmDialogFragment : DialogFragment() {
     interface ConfirmDialogListener {
-        void onConfirmDialogClick(DialogFragment dialog, ButtonEvent event);
+        fun onConfirmDialogClick(dialog: DialogFragment, event: ButtonEvent)
     }
 
-    enum ButtonEvent{
+    enum class ButtonEvent {
         YES,
         NO
     }
-    private ConfirmDialogListener confirmDialogListener;
 
-    public static ConfirmDialogFragment newInstance(ConfirmDialogListener confirmDialogListener) {
-        ConfirmDialogFragment fragment = new ConfirmDialogFragment();
-        fragment.confirmDialogListener = confirmDialogListener;
-        fragment.setRetainInstance(true);
-        return fragment;
-    }
-
-    @Override
-    public void onCancel(@NonNull DialogInterface dialog) {
-        super.onCancel(dialog);
+    private var confirmDialogListener: ConfirmDialogListener? = null
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
 
         // Allows refreshing the first item of the adapter
-        confirmDialogListener.onConfirmDialogClick(this, ButtonEvent.NO);
+        confirmDialogListener!!.onConfirmDialogClick(this, ButtonEvent.NO)
     }
 
-    @Override
-    @NonNull
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-
-        Bundle args = requireArguments();
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val builder = AlertDialog.Builder(requireActivity())
+        val args = requireArguments()
+        val inflater = requireActivity().layoutInflater
         // No need for a parent in a Dialog Fragment
-        View view = inflater.inflate(R.layout.fragment_task_confirmation, null);
+        val view = inflater.inflate(R.layout.fragment_task_confirmation, null)
         builder.setView(view).setMessage(args.getString("message"))
-            .setPositiveButton(args.getInt("button"), (dialog, id) -> confirmDialogListener.onConfirmDialogClick(ConfirmDialogFragment.this, ButtonEvent.YES))
-            .setNegativeButton(R.string.task_confirmation_no_button, (dialog, id) -> {
-                // User cancelled the dialog
-                ConfirmDialogFragment.this.requireDialog().cancel();
-            })
-            .setOnKeyListener((dialog, keyCode, event) -> keyCode != KeyEvent.KEYCODE_BACK);
+                .setPositiveButton(args.getInt("button")) { dialog: DialogInterface?, id: Int -> confirmDialogListener!!.onConfirmDialogClick(this@ConfirmDialogFragment, ButtonEvent.YES) }
+                .setNegativeButton(R.string.task_confirmation_no_button) { dialog: DialogInterface?, id: Int ->
+                    // User cancelled the dialog
+                    requireDialog().cancel()
+                }
+                .setOnKeyListener { dialog: DialogInterface?, keyCode: Int, event: KeyEvent? -> keyCode != KeyEvent.KEYCODE_BACK }
         // Create the AlertDialog object and return it
-        Dialog dialog = builder.create();
-        dialog.setCanceledOnTouchOutside(true);
-        return dialog;
+        val dialog: Dialog = builder.create()
+        dialog.setCanceledOnTouchOutside(true)
+        return dialog
     }
 
-    @Override
-    public void onDestroyView() {
-        Dialog dialog = getDialog();
+    override fun onDestroyView() {
+        val dialog = dialog
         // Stop the dialog from being dismissed on rotation, due to a bug with the compatibility library
         // https://code.google.com/p/android/issues/detail?id=17423
-        if (dialog != null && getRetainInstance()) {
-            dialog.setDismissMessage(null);
+        if (dialog != null && retainInstance) {
+            dialog.setDismissMessage(null)
         }
-        super.onDestroyView();
+        super.onDestroyView()
+    }
+
+    companion object {
+        fun newInstance(confirmDialogListener: ConfirmDialogListener?): ConfirmDialogFragment {
+            val fragment = ConfirmDialogFragment()
+            fragment.confirmDialogListener = confirmDialogListener
+            fragment.retainInstance = true
+            return fragment
+        }
     }
 }

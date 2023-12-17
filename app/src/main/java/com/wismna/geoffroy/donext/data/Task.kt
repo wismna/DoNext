@@ -1,53 +1,59 @@
-package com.wismna.geoffroy.donext.data;
+package com.wismna.geoffroy.donext.data
 
-import org.joda.time.LocalDate;
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
+import org.joda.time.LocalDate
 
-import androidx.annotation.NonNull;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.ForeignKey;
-import androidx.room.Index;
-import androidx.room.PrimaryKey;
-
-@Entity(tableName = "tasks",
-        indices = {@Index("list")},
-        foreignKeys = @ForeignKey(entity = TaskList.class,
-            parentColumns = "_id",
-            childColumns = "list"))
-public class Task {
+@Entity(tableName = "tasks", indices = [Index("list")], foreignKeys = [ForeignKey(entity = TaskList::class, parentColumns = ["_id"], childColumns = ["list"])])
+open class Task {
+    @JvmField
     @PrimaryKey(autoGenerate = true)
-    public long _id;
+    var _id: Long = 0
 
+    @JvmField
     @ColumnInfo(name = "name")
-    public String name;
+    var name: String? = null
 
+    @JvmField
     @ColumnInfo(name = "description")
-    public String description;
+    var description: String? = null
 
+    @JvmField
     @ColumnInfo(name = "cycle")
-    public int cycle = 0;
+    var cycle = 0
 
+    @JvmField
     @ColumnInfo(name = "priority")
-    public int priority = 1;
+    var priority = 1
 
+    @JvmField
     @ColumnInfo(name = "done")
-    public boolean done = false;
+    var done = false
 
+    @JvmField
     @ColumnInfo(name = "deleted")
-    public boolean deleted = false;
+    var deleted = false
 
+    @JvmField
     @ColumnInfo(name = "displayorder")
-    public int order;
+    var order = 0
 
+    @JvmField
     @ColumnInfo(name = "todayorder")
-    public int todayOrder;
+    var todayOrder = 0
 
+    @JvmField
     @ColumnInfo(name = "list")
-    public long taskList;
+    var taskList: Long = 0
 
+    @JvmField
     @ColumnInfo(name = "duedate")
-    public LocalDate dueDate;
+    var dueDate: LocalDate? = null
 
+    @JvmField
     @ColumnInfo(name = "todaydate")
-    public LocalDate todayDate;
+    var todayDate: LocalDate? = null
 }

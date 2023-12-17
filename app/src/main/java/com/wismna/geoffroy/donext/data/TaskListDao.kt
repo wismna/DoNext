@@ -1,27 +1,24 @@
-package com.wismna.geoffroy.donext.data;
+package com.wismna.geoffroy.donext.data
 
-import java.util.List;
-
-import androidx.lifecycle.LiveData;
-import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.Query;
-import androidx.room.Update;
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 
 @Dao
-public interface TaskListDao {
+interface TaskListDao {
+    @Insert
+    fun createTaskList(taskList: TaskList?)
 
-    @Insert()
-    void createTaskList(TaskList taskList);
+    @Update
+    fun updateTaskList(taskList: TaskList?)
 
-    @Update()
-    void updateTaskList(TaskList taskList);
-
-    @Query("SELECT *,(SELECT COUNT(*) FROM tasks WHERE tasks.list = tasklist._id) AS taskcount"  +
+    @get:Query("SELECT *,(SELECT COUNT(*) FROM tasks WHERE tasks.list = tasklist._id) AS taskcount" +
             " FROM tasklist WHERE visible = 1 ORDER BY displayorder ASC ")
-    LiveData<List<TaskList>> getVisibleTaskLists();
+    val visibleTaskLists: LiveData<List<TaskList?>?>?
 
-    @Query("SELECT *, (SELECT COUNT(*) FROM tasks WHERE tasks.list = tasklist._id AND (tasks.deleted = 1 OR tasks.done = 1)) AS taskcount" +
+    @get:Query("SELECT *, (SELECT COUNT(*) FROM tasks WHERE tasks.list = tasklist._id AND (tasks.deleted = 1 OR tasks.done = 1)) AS taskcount" +
             " FROM tasklist WHERE visible = 0 OR taskcount > 0 ORDER BY displayorder ASC ")
-    LiveData<List<TaskList>> getInvisibleTaskLists();
+    val invisibleTaskLists: LiveData<List<TaskList?>?>?
 }

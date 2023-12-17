@@ -1,39 +1,30 @@
-package com.wismna.geoffroy.donext.widgets;
+package com.wismna.geoffroy.donext.widgets
 
-import android.content.Context;
-import androidx.viewpager.widget.ViewPager;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
+import android.content.Context
+import android.util.AttributeSet
+import android.view.MotionEvent
+import androidx.viewpager.widget.ViewPager
 
 /**
  * Created by geoffroy on 15-12-04.
  * Custom ViewPager to forbid vertical swiping between tabs
  */
-public class NonSwipeableViewPager extends ViewPager {
+class NonSwipeableViewPager : ViewPager {
+    constructor(context: Context?) : super(context!!)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
 
-    public NonSwipeableViewPager(Context context) {
-        super(context);
-    }
-
-    public NonSwipeableViewPager(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
+    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         // Never allow swiping to switch between pages
-        return false;
+        return false
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    override fun onTouchEvent(event: MotionEvent): Boolean {
         // Never allow swiping to switch between pages
-        performClick();
-        return false;
+        performClick()
+        return false
     }
 
-    @Override
-    public boolean performClick() {
-        return super.performClick();
+    override fun performClick(): Boolean {
+        return super.performClick()
     }
 }

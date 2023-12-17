@@ -1,20 +1,23 @@
-package com.wismna.geoffroy.donext.data;
+package com.wismna.geoffroy.donext.data
 
-import org.joda.time.LocalDate;
+import androidx.room.ColumnInfo
+import androidx.room.PrimaryKey
+import org.joda.time.LocalDate
 
-import androidx.room.ColumnInfo;
-import androidx.room.PrimaryKey;
+class TodayTask {
+    @JvmField
+    @PrimaryKey
+    var _id: Long = 0
 
-public class TodayTask {
-    @PrimaryKey()
-    public long _id;
-
+    @JvmField
     @ColumnInfo(name = "name")
-    public String name;
+    var name: String? = null
 
+    @JvmField
     @ColumnInfo(name = "todaydate")
-    public LocalDate todayDate;
+    var todayDate: LocalDate? = null
 
+    @JvmField
     @ColumnInfo(name = "tasklistname")
-    public String taskListName;
+    var taskListName: String? = null
 }

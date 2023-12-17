@@ -1,17 +1,18 @@
-package com.wismna.geoffroy.donext.data;
+package com.wismna.geoffroy.donext.data
 
-import org.joda.time.LocalDate;
+import androidx.room.TypeConverter
+import org.joda.time.LocalDate
 
-import androidx.room.TypeConverter;
-
-public class Converters {
+object Converters {
+    @JvmStatic
     @TypeConverter
-    public static LocalDate fromDateString(String value) {
-        return LocalDate.parse(value);
+    fun fromDateString(value: String?): LocalDate {
+        return LocalDate.parse(value)
     }
 
+    @JvmStatic
     @TypeConverter
-    public static String toLocalDate(LocalDate value) {
-        return value.toString();
+    fun toLocalDate(value: LocalDate): String {
+        return value.toString()
     }
 }

@@ -1,68 +1,49 @@
-package com.wismna.geoffroy.donext.repositories;
+package com.wismna.geoffroy.donext.repositories
 
-import android.app.Application;
-import android.os.AsyncTask;
+import android.app.Application
+import android.os.AsyncTask
+import androidx.lifecycle.LiveData
+import com.wismna.geoffroy.donext.data.AppDatabase.Companion.getDatabase
+import com.wismna.geoffroy.donext.data.Task
+import com.wismna.geoffroy.donext.data.TaskDao
 
-import com.wismna.geoffroy.donext.data.AppDatabase;
-import com.wismna.geoffroy.donext.data.Task;
-import com.wismna.geoffroy.donext.data.TaskDao;
+class TaskRepository internal constructor(application: Application?) {
+    private val mTaskDao: TaskDao?
 
-import java.util.List;
-
-import androidx.lifecycle.LiveData;
-
-public class TaskRepository {
-    private TaskDao mTaskDao;
-
-    TaskRepository(Application application) {
-        AppDatabase db = AppDatabase.getDatabase(application);
-        mTaskDao = db.taskDao();
+    init {
+        val db = getDatabase(application!!)
+        mTaskDao = db!!.taskDao()
     }
 
-    public void insert(Task task) {
-        new insertAsyncTask(mTaskDao).execute(task);
+    fun insert(task: Task?) {
+        InsertAsyncTask(mTaskDao).execute(task)
     }
 
-    public void update(Task task) {
-        new updateAsyncTask(mTaskDao).execute(task);
+    fun update(task: Task?) {
+        UpdateAsyncTask(mTaskDao).execute(task)
     }
 
-    public LiveData<List<Task>> getTasksInList(long taskId) {
-        return mTaskDao.getAllTasksFromList(taskId);
+    fun getTasksInList(taskId: Long): LiveData<List<Task?>?>? {
+        return mTaskDao!!.getAllTasksFromList(taskId)
     }
 
-    public LiveData<List<Task>> getTodayTasks() {
-        return mTaskDao.getTodayTasks();
-    }
+    val todayTasks: LiveData<List<Task?>?>?
+        get() = mTaskDao!!.todayTasks
 
     // Async tasks
-    private static class insertAsyncTask extends AsyncTask<Task, Void, Void> {
-
-        private TaskDao mAsyncTaskDao;
-
-        insertAsyncTask(TaskDao dao) {
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final Task... params) {
-            mAsyncTaskDao.createTask(params[0]);
-            return null;
+    private class InsertAsyncTask internal constructor(private val mAsyncTaskDao: TaskDao?) : AsyncTask<Task?, Void?, Void?>() {
+        @Deprecated("Deprecated in Java")
+        protected override fun doInBackground(vararg params: Task?): Void? {
+            mAsyncTaskDao!!.createTask(params[0])
+            return null
         }
     }
 
-    private static class updateAsyncTask extends AsyncTask<Task, Void, Void> {
-
-        private TaskDao mAsyncTaskDao;
-
-        updateAsyncTask(TaskDao dao) {
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final Task... params) {
-            mAsyncTaskDao.updateTask(params[0]);
-            return null;
+    private class UpdateAsyncTask internal constructor(private val mAsyncTaskDao: TaskDao?) : AsyncTask<Task?, Void?, Void?>() {
+        @Deprecated("Deprecated in Java")
+        protected override fun doInBackground(vararg params: Task?): Void? {
+            mAsyncTaskDao!!.updateTask(params[0])
+            return null
         }
     }
 }

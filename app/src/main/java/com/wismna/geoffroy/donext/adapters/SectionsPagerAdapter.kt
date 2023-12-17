@@ -1,52 +1,31 @@
-package com.wismna.geoffroy.donext.adapters;
+package com.wismna.geoffroy.donext.adapters
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-
-import com.wismna.geoffroy.donext.dao.TaskList;
-import com.wismna.geoffroy.donext.fragments.TasksFragment;
-
-import java.util.List;
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.wismna.geoffroy.donext.dao.TaskList
+import com.wismna.geoffroy.donext.fragments.TasksFragment
 
 /**
- * A {@link FragmentStateAdapter} that returns a fragment corresponding to
+ * A [FragmentStateAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class SectionsPagerAdapter extends FragmentStateAdapter {
-
-    private final List<TaskList> taskLists;
-
-    public SectionsPagerAdapter(Fragment fragment, List<TaskList> taskLists) {
-        super(fragment);
-        this.taskLists = taskLists;
-    }
-
-    /*@Override
+class SectionsPagerAdapter(fragment: Fragment?, /*@Override
     public CharSequence getPageTitle(int position) {
         if (taskLists == null) return "N/A";
         return taskLists.get(position).getName();
-    }*/
+    }*/val allItems: List<TaskList>?) : FragmentStateAdapter(fragment!!) {
 
-    public List<TaskList> getAllItems(){
-        return taskLists;
-    }
-
-    @NonNull
-    @Override
-    public Fragment createFragment(int position) {
+    override fun createFragment(position: Int): Fragment {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        TaskList taskList = taskLists.get(position);
-        return TasksFragment.newTaskListInstance(taskList.getId());
+        val taskList = allItems!![position]
+        return TasksFragment.newTaskListInstance(taskList.id)
     }
 
-    @Override
-    public int getItemCount() {
-        if (taskLists != null) {
+    override fun getItemCount(): Int {
+        return if (allItems != null) {
             // Show the task lists
-            return taskLists.size();
-        }
-        return 0;
+            allItems.size
+        } else 0
     }
 }

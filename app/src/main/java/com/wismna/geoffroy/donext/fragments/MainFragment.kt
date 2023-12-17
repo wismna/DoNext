@@ -1,175 +1,148 @@
-package com.wismna.geoffroy.donext.fragments;
+package com.wismna.geoffroy.donext.fragments
 
-import android.content.SharedPreferences;
-import android.os.Build;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.Guideline;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager2.widget.ViewPager2;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
-import com.google.android.material.tabs.TabLayoutMediator;
-import com.wismna.geoffroy.donext.R;
-import com.wismna.geoffroy.donext.activities.HistoryActivity;
-import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
-import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
-import com.wismna.geoffroy.donext.dao.Task;
-import com.wismna.geoffroy.donext.dao.TaskList;
-import com.wismna.geoffroy.donext.database.TaskListDataAccess;
-
-import java.util.List;
+import android.os.Build
+import android.os.Bundle
+import android.preference.PreferenceManager
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.ListView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.Guideline
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.tabs.TabLayoutMediator.TabConfigurationStrategy
+import com.wismna.geoffroy.donext.R
+import com.wismna.geoffroy.donext.activities.HistoryActivity
+import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter
+import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter
+import com.wismna.geoffroy.donext.dao.Task
+import com.wismna.geoffroy.donext.dao.TaskList
+import com.wismna.geoffroy.donext.database.TaskListDataAccess
+import com.wismna.geoffroy.donext.fragments.TaskListsDialogFragment.TaskListsListener
+import com.wismna.geoffroy.donext.fragments.TasksFragment.TaskChangedAdapter
 
 /**
  * Fragment that will handle the main display
  */
-public class MainFragment extends Fragment implements
-        TasksFragment.TaskChangedAdapter,
-        TaskListsDialogFragment.TaskListsListener {
-
-    private View mView;
-    private ViewPager2 mViewPager;
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    public MainFragment() {
-        // Required empty public constructor
-    }
-
-    public ViewPager2 getViewPager() {
-        return mViewPager;
-    }
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+class MainFragment : Fragment(), TaskChangedAdapter, TaskListsListener {
+    private var mView: View? = null
+    var viewPager: ViewPager2? = null
+        private set
+    private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        mView = inflater.inflate(R.layout.fragment_main, container, false);
-
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        if (activity instanceof HistoryActivity) {
-            ActionBar actionBar = activity.getSupportActionBar();
-
-            // Show back button on toolbar
-            assert actionBar != null;
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
+        mView = inflater.inflate(R.layout.fragment_main, container, false)
+        val activity = requireActivity() as AppCompatActivity
+        if (activity is HistoryActivity) {
+            val actionBar = activity.getSupportActionBar()!!
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.setDisplayShowHomeEnabled(true)
         }
 
         // Get preferences
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
 
         // Check if this is the first time loading this app
-        boolean first_time = sharedPref.getBoolean("first_time", true);
+        val firstTime = sharedPref.getBoolean("first_time", true)
         // If it is, create a default task list
-        if (first_time) {
-            try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(activity)) {
-                taskListDataAccess.createTaskList(getString(R.string.default_task_list_name), 0);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putBoolean("first_time", false);
-                editor.apply();
+        if (firstTime) {
+            TaskListDataAccess(activity).use { taskListDataAccess ->
+                taskListDataAccess.createTaskList(getString(R.string.default_task_list_name), 0)
+                val editor = sharedPref.edit()
+                editor.putBoolean("first_time", false)
+                editor.apply()
             }
         }
 
         // Load task lists
-        updateTaskLists(activity);
-
-        if (!first_time) {
+        updateTaskLists(activity)
+        if (!firstTime) {
             // Open last opened tab
-            int lastOpenedList = sharedPref.getInt("last_opened_tab", 0);
-            mViewPager.setCurrentItem(lastOpenedList);
+            val lastOpenedList = sharedPref.getInt("last_opened_tab", 0)
+            viewPager!!.currentItem = lastOpenedList
         }
-        return mView;
+        return mView
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
+    override fun onPause() {
+        super.onPause()
 
         // No tabs exist yet, nothing to save
-        if (mViewPager == null) return;
+        if (viewPager == null) return
         // Otherwise, save currently opened tab
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("last_opened_tab", mViewPager.getCurrentItem());
-        editor.apply();
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val editor = sharedPref.edit()
+        editor.putInt("last_opened_tab", viewPager!!.currentItem)
+        editor.apply()
     }
 
-    @Override
-    public void onTaskListChanged(Task task, int tabPosition) {
-        TaskRecyclerViewAdapter destinationTaskAdapter = getSpecificTabAdapter(tabPosition);
-        if (destinationTaskAdapter != null) destinationTaskAdapter.add(task, destinationTaskAdapter.getItemCount());
+    override fun onTaskListChanged(task: Task?, tabPosition: Int) {
+        val destinationTaskAdapter = getSpecificTabAdapter(tabPosition)
+        destinationTaskAdapter?.add(task!!, destinationTaskAdapter.itemCount)
     }
 
-    @Override
-    public void onTaskListsDialogNegativeClick() {
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        updateTaskLists(activity);
+    override fun onTaskListsDialogNegativeClick() {
+        val activity = requireActivity() as AppCompatActivity
+        updateTaskLists(activity)
     }
 
-    private void updateTaskLists(AppCompatActivity activity) {
-        boolean isHistoryActivity = activity instanceof HistoryActivity;
+    private fun updateTaskLists(activity: AppCompatActivity) {
+        val isHistoryActivity = activity is HistoryActivity
         // Access database to retrieve Tabs
-        List<TaskList> taskLists;
-        try (TaskListDataAccess taskListDataAccess = new TaskListDataAccess(activity)) {
-            taskLists = taskListDataAccess.getTaskLists(isHistoryActivity);
+        var taskLists: List<TaskList>
+        TaskListDataAccess(activity).use { taskListDataAccess ->
+            taskLists = taskListDataAccess.getTaskLists(isHistoryActivity)
 
             // Create the adapter that will return a fragment for each of the three
             // primary sections of the activity.
-            mSectionsPagerAdapter = new SectionsPagerAdapter(this, taskLists);
+            mSectionsPagerAdapter = SectionsPagerAdapter(this, taskLists)
         }
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = mView.findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        if (!getResources().getBoolean(R.bool.large_layout)) {
-
-            TabLayout tabLayout = mView.findViewById(R.id.tabs);
+        viewPager = mView?.findViewById(R.id.container)
+        viewPager?.adapter = mSectionsPagerAdapter
+        if (!resources.getBoolean(R.bool.large_layout)) {
+            val tabLayout = mView!!.findViewById<TabLayout>(R.id.tabs)
             // Hide the tabs if there is only one task list
-            tabLayout.setVisibility(taskLists.size() == 1 && !isHistoryActivity ? View.GONE : View.VISIBLE);
+            tabLayout.visibility = if (taskLists.size == 1 && !isHistoryActivity) View.GONE else View.VISIBLE
             //tabLayout.setupWithViewPager(mViewPager);
-            new TabLayoutMediator(tabLayout, mViewPager,
-                    (tab, position) -> tab.setText(mSectionsPagerAdapter.getAllItems().get(position).getName())
-            ).attach();
+            viewPager?.let {
+                TabLayoutMediator(tabLayout, it
+                ) { tab: TabLayout.Tab, position: Int -> tab.setText(mSectionsPagerAdapter!!.allItems!![position].name) }.attach()
+            }
 
             // Handles scroll detection (only available for SDK version >=23)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
+                tabLayout.scrollIndicators = TabLayout.SCROLL_INDICATOR_LEFT or TabLayout.SCROLL_INDICATOR_RIGHT
             }
-        }
-        else {
+        } else {
             // Move guideline to hide task list
-            Guideline guideline = mView.findViewById(R.id.center_guideline);
-            ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) guideline.getLayoutParams();
-            lp.guidePercent = taskLists.size() == 1 && !isHistoryActivity ? 0 : (float) 0.2;
-            guideline.setLayoutParams(lp);
-
-            ListView listView = mView.findViewById(R.id.list);
+            val guideline = mView!!.findViewById<Guideline>(R.id.center_guideline)
+            val lp = guideline.layoutParams as ConstraintLayout.LayoutParams
+            lp.guidePercent = if (taskLists.size == 1 && !isHistoryActivity) 0F else 0.2.toFloat()
+            guideline.layoutParams = lp
+            val listView = mView!!.findViewById<ListView>(R.id.list)
             // Hide the list if there is only one task list
-            listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
+            listView.adapter = ArrayAdapter(activity, R.layout.list_tasklist_item, taskLists)
             //listView.setSelection(lastOpenedList);
-            listView.setOnItemClickListener((parent, view, position, id) -> mViewPager.setCurrentItem(position));
+            listView.onItemClickListener = AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long -> viewPager?.currentItem = position }
         }
     }
 
-    private TaskRecyclerViewAdapter getSpecificTabAdapter(int position) {
+    private fun getSpecificTabAdapter(position: Int): TaskRecyclerViewAdapter? {
         //TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.getRegisteredFragment(position);
-        TasksFragment taskFragment = (TasksFragment) mSectionsPagerAdapter.createFragment(position);
+        val taskFragment = mSectionsPagerAdapter!!.createFragment(position) as TasksFragment
         //if (taskFragment == null) return null;
-        View view = taskFragment.getView();
-        if (view == null) return null;
-        RecyclerView recyclerView = view.findViewById(R.id.task_list_view);
-        if (recyclerView == null) return null;
-        return (TaskRecyclerViewAdapter) recyclerView.getAdapter();
+        val view = taskFragment.view ?: return null
+        val recyclerView = view.findViewById<RecyclerView>(R.id.task_list_view) ?: return null
+        return recyclerView.adapter as TaskRecyclerViewAdapter?
     }
 }

@@ -1,57 +1,40 @@
-package com.wismna.geoffroy.donext.helpers;
+package com.wismna.geoffroy.donext.helpers
 
-import android.graphics.Color;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
+import android.graphics.Color
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Created by geoffroy on 15-12-30.
  * Helper class that handles all drags events on a TaskList
  */
-public class TaskListTouchHelper extends ItemTouchHelper.SimpleCallback  {
-
-    public interface TaskListTouchHelperAdapter {
-        boolean onItemMove(int fromPosition, int toPosition);
+class TaskListTouchHelper(private val mAdapter: TaskListTouchHelperAdapter) : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+    interface TaskListTouchHelperAdapter {
+        fun onItemMove(fromPosition: Int, toPosition: Int): Boolean
     }
 
-    private final TaskListTouchHelperAdapter mAdapter;
-
-    public TaskListTouchHelper(TaskListTouchHelperAdapter adapter) {
-        super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0);
-        mAdapter = adapter;
+    override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+        return mAdapter.onItemMove(viewHolder.absoluteAdapterPosition, target.absoluteAdapterPosition)
     }
 
-    @Override
-    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-        return mAdapter.onItemMove(viewHolder.getAbsoluteAdapterPosition(), target.getAbsoluteAdapterPosition());
-    }
-
-    @Override
-    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         // No swipe moves
     }
 
-    @Override
-    public boolean isLongPressDragEnabled() {
-        return false;
+    override fun isLongPressDragEnabled(): Boolean {
+        return false
     }
 
-    @Override
-    public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
-        if (actionState != ItemTouchHelper.ACTION_STATE_IDLE)
-        {
-            viewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
+            viewHolder!!.itemView.setBackgroundColor(Color.LTGRAY)
         }
-
-        super.onSelectedChanged(viewHolder, actionState);
+        super.onSelectedChanged(viewHolder, actionState)
     }
 
-    @Override
-    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        super.clearView(recyclerView, viewHolder);
-
-        viewHolder.itemView.setAlpha(1.0f);
-        viewHolder.itemView.setBackgroundColor(0);
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        viewHolder.itemView.alpha = 1.0f
+        viewHolder.itemView.setBackgroundColor(0)
     }
 }

@@ -1,102 +1,89 @@
-package com.wismna.geoffroy.donext.fragments;
+package com.wismna.geoffroy.donext.fragments
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.FrameLayout;
-
-import com.wismna.geoffroy.donext.R;
-
-import java.util.Objects;
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.Context
+import android.content.DialogInterface
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import com.wismna.geoffroy.donext.R
+import java.util.Objects
 
 /**
  * Created by wismna on 2017-03-21.
  * Sub-class this class to create a dynamic fragment that will act as a Dialog in large layouts and
- *  a full screen fragment in smaller layouts.
+ * a full screen fragment in smaller layouts.
  */
-
-public abstract class DynamicDialogFragment extends DialogFragment {
-    int mButtonCount = 2;
-    String mPositiveButtonString = "";
-    String mNeutralButtonString = "";
-    String mNegativeButtonString = "";
-    int mContentLayoutId = 0;
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+abstract class DynamicDialogFragment : DialogFragment() {
+    var mButtonCount = 2
+    var mPositiveButtonString = ""
+    var mNeutralButtonString = ""
+    var mNegativeButtonString = ""
+    var mContentLayoutId = 0
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // This part is only needed on small layouts (large layouts use onCreateDialog)
-        if (!getShowsDialog()) {
-            View view = inflater.inflate(R.layout.fragment_dynamic_dialog, container, false);
-            AppCompatActivity activity = (AppCompatActivity) requireActivity();
-            activity.setSupportActionBar(setToolbarTitle(view));
-
-            ActionBar actionBar = activity.getSupportActionBar();
+        if (!showsDialog) {
+            val view = inflater.inflate(R.layout.fragment_dynamic_dialog, container, false)
+            val activity = requireActivity() as AppCompatActivity
+            //activity.setSupportActionBar(setToolbarTitle(view));
+            val actionBar = activity.supportActionBar
             if (actionBar != null) {
-                actionBar.setDisplayHomeAsUpEnabled(true);
-                actionBar.setHomeButtonEnabled(true);
-                actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel);
+                actionBar.setDisplayHomeAsUpEnabled(true)
+                actionBar.setHomeButtonEnabled(true)
+                actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
             }
-            setHasOptionsMenu(true);
-            insertContentView(view, inflater);
-            return view;
+            setHasOptionsMenu(true)
+            insertContentView(view, inflater)
+            return view
         }
         // This basically returns null
-        return super.onCreateView(inflater, container, savedInstanceState);
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
-    @Override
-    @NonNull
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Inflate and set the layout for the dialog
-        Activity activity = requireActivity();
-        LayoutInflater inflater = activity.getLayoutInflater();
+        val activity: Activity = requireActivity()
+        val inflater = activity.layoutInflater
         // As it is a Dialog, the root ViewGroup can be null without issues
-        final View view = inflater.inflate(R.layout.fragment_dynamic_dialog, null);
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        val view = inflater.inflate(R.layout.fragment_dynamic_dialog, null)
+        val builder = AlertDialog.Builder(activity)
         // Add action buttons
         builder.setView(view)
-                .setNegativeButton(mNegativeButtonString, (dialog, id) -> {
+                .setNegativeButton(mNegativeButtonString) { dialog: DialogInterface?, id: Int ->
                     // Send the negative button event back to the host activity
                     // Canceled creation, nothing to do
-                    onNegativeButtonClick();
-                });
+                    onNegativeButtonClick()
+                }
         if (mButtonCount >= 2) {
-            builder.setPositiveButton(mPositiveButtonString, (dialog, id) -> onPositiveButtonClick(view));
+            builder.setPositiveButton(mPositiveButtonString) { dialog: DialogInterface?, id: Int -> onPositiveButtonClick(view) }
         }
         if (mButtonCount == 3) {
-            builder.setNeutralButton(mNeutralButtonString, (dialog, which) -> onNeutralButtonClick(view));
+            builder.setNeutralButton(mNeutralButtonString) { dialog: DialogInterface?, which: Int -> onNeutralButtonClick(view) }
         }
-        setToolbarTitle(view);
-        insertContentView(view, inflater);
-        return builder.create();
+        setToolbarTitle(view)
+        insertContentView(view, inflater)
+        return builder.create()
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, @NonNull MenuInflater inflater) {
-        menu.clear();
-        requireActivity().getMenuInflater().inflate(R.menu.menu_dynamic_fragment, menu);
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        menu.clear()
+        requireActivity().menuInflater.inflate(R.menu.menu_dynamic_fragment, menu)
     }
 
-    @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+    override fun onPrepareOptionsMenu(menu: Menu) {
         /*switch (mButtonCount) {
             case 1:
                 menu.removeItem(R.id.menu_positive_button);
@@ -113,114 +100,112 @@ public abstract class DynamicDialogFragment extends DialogFragment {
         }*/
 
         // Hide buttons depending on count
-        switch (mButtonCount) {
-            case 1: menu.removeItem(R.id.menu_positive_button);
-            case 2: menu.removeItem(R.id.menu_neutral_button);
-        }
+        when (mButtonCount) {
+            1 -> {
+                menu.removeItem(R.id.menu_positive_button)
+                menu.removeItem(R.id.menu_neutral_button)
+            }
 
-        // Set titles on existing buttons
-        switch (mButtonCount) {
-            case 3: menu.findItem(R.id.menu_neutral_button).setTitle(mNeutralButtonString);
-            case 2: menu.findItem(R.id.menu_positive_button).setTitle(mPositiveButtonString);
+            2 -> menu.removeItem(R.id.menu_neutral_button)
         }
-        super.onPrepareOptionsMenu(menu);
+        when (mButtonCount) {
+            3 -> {
+                menu.findItem(R.id.menu_neutral_button).setTitle(mNeutralButtonString)
+                menu.findItem(R.id.menu_positive_button).setTitle(mPositiveButtonString)
+            }
+
+            2 -> menu.findItem(R.id.menu_positive_button).setTitle(mPositiveButtonString)
+        }
+        super.onPrepareOptionsMenu(menu)
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Determine which menu item was clicked
-        int id = item.getItemId();
-        View view = getView();
+        val id = item.itemId
+        val view = view
 
         // Hide the keyboard if present
         if (view != null) {
-            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+            val imm = requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(requireView().windowToken, 0)
         }
-        if (id == R.id.menu_positive_button) {
-            // Handle positive button click here
-            onPositiveButtonClick(view);
-            return true;
+        when (id) {
+            R.id.menu_positive_button -> {
+                // Handle positive button click here
+                onPositiveButtonClick(view)
+                return true
+            }
+            R.id.menu_neutral_button -> {
+                // Handle neutral button click here
+                onNeutralButtonClick(view)
+                return true
+            }
+            android.R.id.home -> {
+                // Handle negative button click here
+                onNegativeButtonClick()
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
-        else if (id == R.id.menu_neutral_button) {
-            // Handle neutral button click here
-            onNeutralButtonClick(view);
-            return true;
-        }
-        else if (id == android.R.id.home) {
-            // Handle negative button click here
-            onNegativeButtonClick();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onDestroyView() {
-        Dialog dialog = getDialog();
+    override fun onDestroyView() {
+        val dialog = dialog
         // Stop the dialog from being dismissed on rotation, due to a bug with the compatibility library
         // https://code.google.com/p/android/issues/detail?id=17423
-        if (dialog != null && getRetainInstance()) {
-            dialog.setDismissMessage(null);
+        if (dialog != null && retainInstance) {
+            dialog.setDismissMessage(null)
         }
-        super.onDestroyView();
+        super.onDestroyView()
     }
 
-    public void showFragment(FragmentManager fragmentManager, String title, boolean isLargeLayout)
-    {
-        if (isLargeLayout)
-            show(fragmentManager, title);
-        else {
+    fun showFragment(fragmentManager: FragmentManager, title: String?, isLargeLayout: Boolean) {
+        if (isLargeLayout) show(fragmentManager, title) else {
             // The device is smaller, so show the fragment fullscreen
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            val transaction = fragmentManager.beginTransaction()
             // For a little polish, specify a transition animation
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             // To make it fullscreen, use the 'content' root view as the container
             // for the fragment, which is always the root view for the activity
             transaction.add(android.R.id.content, this, title)
-                    .addToBackStack(null).commit();
+                    .addToBackStack(null).commit()
         }
     }
 
-    /** Helper function to get a View, without having to worry about the fact that is a Dialog or not*/
-    protected <T extends View> T findViewById(int id) {
-        if (getShowsDialog()) return requireDialog().findViewById(id);
-        return requireView().findViewById(id);
+    /** Helper function to get a View, without having to worry about the fact that is a Dialog or not */
+    protected fun <T : View?> findViewById(id: Int): T {
+        return if (showsDialog) requireDialog().findViewById(id) else requireView().findViewById(id)
     }
 
-
-    /** Helper method to clear focus by giving it to the parent layout */
-    protected void clearFocus() {
-        View view = getView();
+    /** Helper method to clear focus by giving it to the parent layout  */
+    protected fun clearFocus() {
+        val view = view
         if (view != null) {
-            view.requestFocus();
+            view.requestFocus()
 
             // Hide keyboard
-            InputMethodManager inputMethodManager = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            Objects.requireNonNull(inputMethodManager).hideSoftInputFromWindow(view.getWindowToken(), 0);
+            val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            Objects.requireNonNull(inputMethodManager).hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
 
-    /** Sets the title of the Fragment from the Tag */
-    private Toolbar setToolbarTitle(View view) {
-        Toolbar toolbar = view.findViewById(R.id.dialog_toolbar);
-        toolbar.setTitle(getTag());
-        return toolbar;
+    /** Sets the title of the Fragment from the Tag  */
+    private fun setToolbarTitle(view: View): Toolbar {
+        val toolbar = view.findViewById<Toolbar>(R.id.dialog_toolbar)
+        toolbar.title = tag
+        return toolbar
     }
 
-    /** Inserts the actual contents in the content Frame Layout */
-    private void insertContentView(View view, LayoutInflater inflater) {
+    /** Inserts the actual contents in the content Frame Layout  */
+    private fun insertContentView(view: View, inflater: LayoutInflater) {
         // Ensure that the content view is set
-        if (mContentLayoutId == 0) return;
+        if (mContentLayoutId == 0) return
         // Insert the content view
-        FrameLayout content = view.findViewById(R.id.dynamic_fragment_content);
-        content.addView(inflater.inflate(mContentLayoutId, (ViewGroup) view.getParent()));
+        val content = view.findViewById<FrameLayout>(R.id.dynamic_fragment_content)
+        content.addView(inflater.inflate(mContentLayoutId, view.parent as ViewGroup))
     }
 
-    protected abstract void onPositiveButtonClick(View view);
-
-    protected abstract void onNeutralButtonClick(View view);
-
-    protected abstract void onNegativeButtonClick();
+    protected abstract fun onPositiveButtonClick(view: View?)
+    protected abstract fun onNeutralButtonClick(view: View?)
+    protected abstract fun onNegativeButtonClick()
 }

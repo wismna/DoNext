@@ -1,144 +1,129 @@
-package com.wismna.geoffroy.donext.database;
+package com.wismna.geoffroy.donext.database
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-
-import com.wismna.geoffroy.donext.dao.TaskList;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import com.wismna.geoffroy.donext.dao.TaskList
 
 /**
  * Created by geoffroy on 15-11-25.
  * Data access class that handles Task Lists
  */
-@Deprecated
-public class TaskListDataAccess implements AutoCloseable {
-    public enum MODE {
+class TaskListDataAccess @JvmOverloads constructor(context: Context?, writeMode: MODE = MODE.READ) : AutoCloseable {
+    enum class MODE {
         READ,
         WRITE
     }
+
     // Database fields
-    private SQLiteDatabase database;
-    private final DatabaseHelper dbHelper;
-    private final static String[] taskListColumns =
-            {DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME,
-            DatabaseHelper.COLUMN_ORDER, DatabaseHelper.TASKLIST_COLUMN_VISIBLE};
+    private var database: SQLiteDatabase? = null
+    private val dbHelper: DatabaseHelper
 
-    public TaskListDataAccess(Context context) {
-        this(context, MODE.READ);
-    }
-    public TaskListDataAccess(Context context, MODE writeMode) {
-        dbHelper = new DatabaseHelper(context);
-        open(writeMode);
+    init {
+        dbHelper = DatabaseHelper(context)
+        open(writeMode)
     }
 
-    public void open(MODE writeMode) {
-        if (writeMode == MODE.WRITE) database = dbHelper.getWritableDatabase();
-        else database = dbHelper.getReadableDatabase();
+    fun open(writeMode: MODE) {
+        database = if (writeMode == MODE.WRITE) dbHelper.writableDatabase else dbHelper.readableDatabase
     }
 
-    public void close() {
-        dbHelper.close();
+    override fun close() {
+        dbHelper.close()
     }
 
-    public TaskList createTaskList(String name, int order) {
-        ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name);
-        values.put(DatabaseHelper.COLUMN_ORDER, order);
-        values.put(DatabaseHelper.TASKLIST_COLUMN_VISIBLE, 1);
-        long insertId = database.insert(DatabaseHelper.TASKLIST_TABLE_NAME, null,
-                values);
-        Cursor cursor = database.query(DatabaseHelper.TASKLIST_TABLE_NAME,
+    fun createTaskList(name: String?, order: Int): TaskList {
+        val values = ContentValues()
+        values.put(DatabaseHelper.TASKLIST_COLUMN_NAME, name)
+        values.put(DatabaseHelper.COLUMN_ORDER, order)
+        values.put(DatabaseHelper.TASKLIST_COLUMN_VISIBLE, 1)
+        val insertId = database!!.insert(DatabaseHelper.TASKLIST_TABLE_NAME, null,
+                values)
+        val cursor = database!!.query(DatabaseHelper.TASKLIST_TABLE_NAME,
                 taskListColumns, DatabaseHelper.COLUMN_ID + " = " + insertId, null,
-                null, null, null);
-        cursor.moveToFirst();
-        TaskList newTaskList = cursorToTaskList(cursor);
-        cursor.close();
-        return newTaskList;
+                null, null, null)
+        cursor.moveToFirst()
+        val newTaskList = cursorToTaskList(cursor)
+        cursor.close()
+        return newTaskList
     }
 
-    public void deleteTaskList(long id) {
+    fun deleteTaskList(id: Long) {
         // Mark all tasks as deleted
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.TASKS_COLUMN_DELETED, 1);
-        database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.TASKS_COLUMN_LIST
-                + " = " + id, null);
+        val contentValues = ContentValues()
+        contentValues.put(DatabaseHelper.TASKS_COLUMN_DELETED, 1)
+        database!!.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues, DatabaseHelper.TASKS_COLUMN_LIST
+                + " = " + id, null)
         // Hide list
-        update(id, DatabaseHelper.TASKLIST_COLUMN_VISIBLE, 0);
+        update(id, DatabaseHelper.TASKLIST_COLUMN_VISIBLE, 0)
     }
 
-    public void updateOrder(long id, int order) {
-        update(id, DatabaseHelper.COLUMN_ORDER, order);
+    fun updateOrder(id: Long, order: Int) {
+        update(id, DatabaseHelper.COLUMN_ORDER, order)
     }
 
-    public void updateName(long id, String name) {
-        update(id, DatabaseHelper.TASKLIST_COLUMN_NAME, name);
+    fun updateName(id: Long, name: String) {
+        update(id, DatabaseHelper.TASKLIST_COLUMN_NAME, name)
     }
 
-    public List<TaskList> getTaskLists(boolean showInvisible) {
-        List<TaskList> taskLists = new ArrayList<>();
-
-        Cursor cursor = showInvisible ? getInvisibleTaskListsCursor() : getVisibleTaskListsCursor();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            TaskList taskList = cursorToTaskList(cursor);
-            taskLists.add(taskList);
-            cursor.moveToNext();
+    fun getTaskLists(showInvisible: Boolean): MutableList<TaskList> {
+        val taskLists: MutableList<TaskList> = ArrayList()
+        val cursor = if (showInvisible) invisibleTaskListsCursor else visibleTaskListsCursor
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast) {
+            val taskList = cursorToTaskList(cursor)
+            taskLists.add(taskList)
+            cursor.moveToNext()
         }
         // make sure to close the cursor
-        cursor.close();
-        return taskLists;
+        cursor.close()
+        return taskLists
     }
 
-    private void update(long id, String column, Object value)
-    {
-        ContentValues contentValues = new ContentValues();
-        if (value instanceof String)
-            contentValues.put(column, (String) value);
-        if (value instanceof Integer)
-            contentValues.put(column, (int) value);
-        database.update(DatabaseHelper.TASKLIST_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null);
+    private fun update(id: Long, column: String, value: Any) {
+        val contentValues = ContentValues()
+        if (value is String) contentValues.put(column, value)
+        if (value is Int) contentValues.put(column, value)
+        database!!.update(DatabaseHelper.TASKLIST_TABLE_NAME, contentValues, DatabaseHelper.COLUMN_ID + " = " + id, null)
     }
 
-    private Cursor getVisibleTaskListsCursor() {
-        return database.rawQuery("SELECT *," +
+    private val visibleTaskListsCursor: Cursor
+        get() = database!!.rawQuery("SELECT *," +
                 " (SELECT COUNT(*) " +
-                    " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
-                    " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
-                      DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID + ") AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
+                " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
+                " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
+                DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID + ") AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
                 " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME +
                 " WHERE " + DatabaseHelper.TASKLIST_COLUMN_VISIBLE + " = 1" +
                 " ORDER BY " + DatabaseHelper.COLUMN_ORDER + " ASC ",
-                null);
-    }
-
-    private Cursor getInvisibleTaskListsCursor() {
-        return database.rawQuery("SELECT *," +
+                null)
+    private val invisibleTaskListsCursor: Cursor
+        get() = database!!.rawQuery("SELECT *," +
                 " (SELECT COUNT(*) " +
-                    " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
-                    " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
-                        DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID +
-                        " AND (" + DatabaseHelper.TASKS_COLUMN_DELETED + " = 1" +
-                        " OR " + DatabaseHelper.TASKS_COLUMN_DONE + " = 1)" +
+                " FROM " + DatabaseHelper.TASKS_TABLE_NAME +
+                " WHERE " + DatabaseHelper.TASKS_TABLE_NAME + "." + DatabaseHelper.TASKS_COLUMN_LIST + " = " +
+                DatabaseHelper.TASKLIST_TABLE_NAME + "." + DatabaseHelper.COLUMN_ID +
+                " AND (" + DatabaseHelper.TASKS_COLUMN_DELETED + " = 1" +
+                " OR " + DatabaseHelper.TASKS_COLUMN_DONE + " = 1)" +
                 ") AS " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT +
                 " FROM " + DatabaseHelper.TASKLIST_TABLE_NAME +
                 " WHERE " + DatabaseHelper.TASKLIST_COLUMN_VISIBLE + " = 0" +
-                    " OR " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT + " > 0" +
+                " OR " + DatabaseHelper.TASKLIST_COLUMN_TASK_COUNT + " > 0" +
                 " ORDER BY " + DatabaseHelper.COLUMN_ORDER + " ASC ",
-                null);
-    }
+                null)
 
-    private TaskList cursorToTaskList(Cursor cursor) {
-        TaskList taskList = new TaskList();
-        taskList.setId(cursor.getLong(0));
-        taskList.setName(cursor.getString(1));
+    private fun cursorToTaskList(cursor: Cursor): TaskList {
+        val taskList = TaskList()
+        taskList.id = cursor.getLong(0)
+        taskList.name = cursor.getString(1)
         // Get "false" count column if it exists
-        if (cursor.getColumnCount() == 5)
-            taskList.setTaskCount(cursor.getLong(4));
-        return taskList;
+        if (cursor.columnCount == 5) taskList.taskCount = cursor.getLong(4)
+        return taskList
     }
 
+    companion object {
+        private val taskListColumns = arrayOf<String>(DatabaseHelper.COLUMN_ID, DatabaseHelper.TASKLIST_COLUMN_NAME,
+                DatabaseHelper.COLUMN_ORDER, DatabaseHelper.TASKLIST_COLUMN_VISIBLE)
+    }
 }

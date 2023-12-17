@@ -1,107 +1,82 @@
-package com.wismna.geoffroy.donext.helpers;
+package com.wismna.geoffroy.donext.helpers
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import android.text.Layout;
-import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.view.View;
-
-import com.wismna.geoffroy.donext.R;
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
+import android.view.View
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
+import com.wismna.geoffroy.donext.R
+import java.util.Locale
 
 /**
  * Created by geoffroy on 15-12-04.
  * Helper class that handles all swipe events on a Task
  */
-public class TaskTouchHelper extends ItemTouchHelper.SimpleCallback {
-    public interface TaskTouchHelperAdapter {
-        void onItemSwiped(int position, int direction);
+class TaskTouchHelper // No drag moves, no swipes (except for 1st element, see getSwipeDirs method)
+(private val mAdapter: TaskTouchHelperAdapter, private val colorRight: Int, private val colorLeft: Int) : ItemTouchHelper.SimpleCallback(0, 0) {
+    interface TaskTouchHelperAdapter {
+        fun onItemSwiped(position: Int, direction: Int)
     }
 
-    private final TaskTouchHelperAdapter mAdapter;
-    private final int colorRight;
-    private final int colorLeft;
-
-    public TaskTouchHelper(TaskTouchHelperAdapter adapter, int colorRight, int colorLeft){
-        // No drag moves, no swipes (except for 1st element, see getSwipeDirs method)
-        super(0, 0);
-        this.colorRight = colorRight;
-        this.colorLeft = colorLeft;
-        this.mAdapter = adapter;
-    }
-
-    @Override
-    public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+    override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         // Allow both directions swiping on first item, only left on the others
-        if (viewHolder.getAbsoluteAdapterPosition() == 0)
-            return ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-        else return super.getSwipeDirs(recyclerView, viewHolder);
+        return if (viewHolder.absoluteAdapterPosition == 0) ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT else super.getSwipeDirs(recyclerView, viewHolder)
     }
 
-    @Override
-    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-        return false;
+    override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+        return false
     }
 
-    @Override
-    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-        mAdapter.onItemSwiped(viewHolder.getAbsoluteAdapterPosition(), direction);
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        mAdapter.onItemSwiped(viewHolder.absoluteAdapterPosition, direction)
     }
 
-    @Override
-    public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
-                            float dX, float dY, int actionState, boolean isCurrentlyActive) {
+    override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
+                             dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
         // Get RecyclerView item from the ViewHolder
-        View itemView = viewHolder.itemView;
-
+        val itemView = viewHolder.itemView
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-
             if (dX > 0) {
-                Rect rect = new Rect(itemView.getLeft(), itemView.getTop(), (int) dX,
-                        itemView.getBottom());
+                val rect = Rect(itemView.left, itemView.top, dX.toInt(),
+                        itemView.bottom)
                 setBackground(c, itemView, rect, dX, dY,
-                        colorLeft, R.string.task_confirmation_next_button);
+                        colorLeft, R.string.task_confirmation_next_button)
             } else {
                 // Draw Rect with varying left side, equal to the item's right side plus negative displacement dX
-                Rect rect = new Rect(itemView.getRight() + (int)dX, itemView.getTop(),
-                        itemView.getRight(), itemView.getBottom());
+                val rect = Rect(itemView.right + dX.toInt(), itemView.top,
+                        itemView.right, itemView.bottom)
                 setBackground(c, itemView, rect, dX, dY,
-                        colorRight, R.string.task_confirmation_done_button);
+                        colorRight, R.string.task_confirmation_done_button)
             }
         }
-        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
     }
 
-    private void setBackground(Canvas c, View itemView,
-            Rect rect, float dX, float dY, int color, int textId) {
-
-        TextPaint textPaint = new TextPaint();
-        textPaint.setAntiAlias(true);
-        textPaint.setTextSize(25 * itemView.getResources().getDisplayMetrics().density);
-        textPaint.setColor(Color.WHITE);
-
-        int heightOffset = itemView.getHeight() / 2 - (int)textPaint.getTextSize() / 2;
-        float widthOffset = 30f;
-
-        Paint background = new Paint();
+    private fun setBackground(c: Canvas, itemView: View,
+                              rect: Rect, dX: Float, dY: Float, color: Int, textId: Int) {
+        val textPaint = TextPaint()
+        textPaint.isAntiAlias = true
+        textPaint.textSize = 25 * itemView.resources.displayMetrics.density
+        textPaint.color = Color.WHITE
+        val heightOffset = itemView.height / 2 - textPaint.textSize.toInt() / 2
+        val widthOffset = 30f
+        val background = Paint()
         // Set your color for negative displacement
-        background.setColor(color);
+        background.color = color
         // Draw Rect with varying left side, equal to the item's right side plus negative displacement dX
-        c.drawRect(rect, background);
+        c.drawRect(rect, background)
 
         // Draw text in the rectangle
-        String text = itemView.getResources().getString(textId).toUpperCase();
-        float width = textPaint.measureText(text);
-        float textXCoordinate;
-        if (dX > 0) textXCoordinate = rect.left + widthOffset;
-        else textXCoordinate = rect.right - width - widthOffset;
-        c.translate(textXCoordinate, dY + heightOffset);
-        StaticLayout staticLayout = new StaticLayout(text, textPaint, (int)width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
-        staticLayout.draw(c);
+        val text = itemView.resources.getString(textId).uppercase(Locale.getDefault())
+        val width = textPaint.measureText(text)
+        val textXCoordinate: Float = if (dX > 0) rect.left + widthOffset else rect.right - width - widthOffset
+        c.translate(textXCoordinate, dY + heightOffset)
+        val staticLayout = StaticLayout(text, textPaint, width.toInt(), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0f, false)
+        staticLayout.draw(c)
     }
 }
