@@ -117,14 +117,6 @@ public class TaskDataAccess implements AutoCloseable {
     }
 
     public List<Task> getAllTasksFromList(long id, boolean isHistory) {
-
-        // REMOVE THIS
-        /*ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.COLUMN_ORDER, 0);
-        database.update(DatabaseHelper.TASKS_TABLE_NAME, contentValues,
-                null, null);*/
-        // --
-
         int history = isHistory ? 1 : 0;
         Cursor cursor = database.query(DatabaseHelper.TASKS_TABLE_NAME, taskColumns,
                 DatabaseHelper.TASKS_COLUMN_LIST + " = " + id +

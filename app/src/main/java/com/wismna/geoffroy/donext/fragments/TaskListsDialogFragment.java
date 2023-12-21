@@ -23,6 +23,7 @@ import com.wismna.geoffroy.donext.helpers.TaskListTouchHelper;
 import com.wismna.geoffroy.donext.utils.TaskRunner;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 /**
@@ -174,7 +175,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
     @Override
     public void onConfirmDialogClick(DialogFragment dialog, ConfirmDialogFragment.ButtonEvent event) {
         // Handle never ask again checkbox
-        CheckBox neverAskAgainCheckBox = dialog.getDialog().findViewById(R.id.task_confirmation_never);
+        CheckBox neverAskAgainCheckBox = Objects.requireNonNull(dialog.getDialog()).findViewById(R.id.task_confirmation_never);
         if (neverAskAgainCheckBox.isChecked()) {
 
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());

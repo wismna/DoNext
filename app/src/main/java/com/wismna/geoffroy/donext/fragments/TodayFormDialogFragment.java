@@ -42,7 +42,6 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         TodayFormDialogFragment fragment = new TodayFormDialogFragment();
 
         fragment.mListener = todayTaskListener;
-        fragment.setRetainInstance(true);
         return fragment;
     }
 
@@ -54,7 +53,6 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         mNegativeButtonString = getString(R.string.new_task_cancel);
         mContentLayoutId = R.layout.content_today_form;
         // Load the tasks asynchronously
-        //new LoadTasks(this).execute(getActivity());
         TaskRunner taskRunner = new TaskRunner();
         taskRunner.executeAsync(new LoadTasks(getContext()), this::setLayoutValues);
     }

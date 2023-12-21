@@ -1,7 +1,5 @@
 package com.wismna.geoffroy.donext.adapters;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -10,6 +8,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.TaskList;
@@ -56,42 +57,33 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         holder.mTaskNameView.setText(mValues.get(position).getName());
 
         // TODO: correct this...
-        holder.handleView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    mListener.onStartDrag(holder);
-                }
-                return false;
+        holder.handleView.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                mListener.onStartDrag(holder);
             }
+            return false;
         });
 
         // Handle inline name change
-        holder.mTaskNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                EditText editText = (EditText) v;
-                String name = editText.getText().toString();
+        holder.mTaskNameView.setOnFocusChangeListener((v, hasFocus) -> {
+            EditText editText = (EditText) v;
+            String name = editText.getText().toString();
 
-                if (!hasFocus && !holder.mItem.getName().matches(name)) {
-                    holder.mItem.setName(name);
+            if (!hasFocus && !holder.mItem.getName().matches(name)) {
+                holder.mItem.setName(name);
 
-                    update(holder.mItem, holder.getAdapterPosition());
-                    mListener.onEditTextLoseFocus(holder.mItem);
-                }
+                update(holder.mItem, holder.getBindingAdapterPosition());
+                mListener.onEditTextLoseFocus(holder.mItem);
             }
         });
 
         // Handle click on delete button
-        holder.mTaskDeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Disable the OnFocusChanged listener as it is now pointless and harmful
-                holder.mTaskNameView.setOnFocusChangeListener(null);
+        holder.mTaskDeleteButton.setOnClickListener(v -> {
+            // Disable the OnFocusChanged listener as it is now pointless and harmful
+            holder.mTaskNameView.setOnFocusChangeListener(null);
 
-                //remove(position);
-                mListener.onClickDeleteButton(holder.getAdapterPosition(), holder.mItem.getId());
-            }
+            //remove(position);
+            mListener.onClickDeleteButton(holder.getBindingAdapterPosition(), holder.mItem.getId());
         });
     }
 
@@ -136,7 +128,7 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         return true;
     }
 
-    class TaskViewHolder extends RecyclerView.ViewHolder {
+    static class TaskViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final ImageView handleView;
         final TextView mTaskCountView;

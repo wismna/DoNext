@@ -5,14 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +13,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.wismna.geoffroy.donext.R;
 
@@ -162,9 +163,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     @Override
     public void onDestroyView() {
         Dialog dialog = getDialog();
-        // Stop the dialog from being dismissed on rotation, due to a bug with the compatibility library
-        // https://code.google.com/p/android/issues/detail?id=17423
-        if (dialog != null && getRetainInstance()) {
+        if (dialog != null) {
             dialog.setDismissMessage(null);
         }
         super.onDestroyView();
@@ -188,7 +187,7 @@ public abstract class DynamicDialogFragment extends DialogFragment {
 
     /** Helper function to get a View, without having to worry about the fact that is a Dialog or not*/
     protected <T extends View> T findViewById(int id) {
-        if (getShowsDialog()) return getDialog().findViewById(id);
+        if (getShowsDialog()) return Objects.requireNonNull(getDialog()).findViewById(id);
         return requireView().findViewById(id);
     }
 

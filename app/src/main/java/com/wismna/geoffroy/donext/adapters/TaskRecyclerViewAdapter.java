@@ -1,14 +1,16 @@
 package com.wismna.geoffroy.donext.adapters;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.dao.Task;
@@ -24,8 +26,8 @@ import java.util.List;
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.StandardViewHolder> {
 
     private List<Task> mValues;
-    private boolean mIsToday;
-    private boolean mIsHistory;
+    private final boolean mIsToday;
+    private final boolean mIsHistory;
 
     public TaskRecyclerViewAdapter(List<Task> items, boolean isToday, boolean isHistory) {
         mValues = items;
@@ -56,17 +58,10 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         }
 
         // Set priority
-        switch (holder.mItem.getPriority())
-        {
-            case 0:
-                holder.mIconView.setImageResource(R.drawable.ic_low_priority_lightgray_24dp);
-                break;
-            case 2:
-                holder.mIconView.setImageResource(R.drawable.ic_priority_high_red_24dp);
-                break;
-            default:
-                holder.mIconView.setImageDrawable(null);
-                break;
+        switch (holder.mItem.getPriority()) {
+            case 0 -> holder.mIconView.setImageResource(R.drawable.ic_low_priority_lightgray_24dp);
+            case 2 -> holder.mIconView.setImageResource(R.drawable.ic_priority_high_red_24dp);
+            default -> holder.mIconView.setImageDrawable(null);
         }
 
         // Additional information will not be displayed in Today view
@@ -121,6 +116,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         return count;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setItems(List<Task> tasks) {
         this.mValues = tasks;
         notifyDataSetChanged();
@@ -130,7 +126,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         return mValues.get(position);
     }
 
-    class StandardViewHolder extends RecyclerView.ViewHolder {
+    static class StandardViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView mIdView;
         final ImageView mIconView;

@@ -53,7 +53,6 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         fragment.mTask = task;
         fragment.taskLists = taskLists;
         fragment.mListener = newTaskListener;
-        fragment.setRetainInstance(true);
         return fragment;
     }
 

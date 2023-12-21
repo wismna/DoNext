@@ -78,7 +78,6 @@ public class TasksFragment extends Fragment implements
         Bundle args = new Bundle();
         args.putLong(TASK_LIST_ID, taskListId);
         fragment.setArguments(args);
-        fragment.setRetainInstance(true);
         return fragment;
     }
 
@@ -130,7 +129,7 @@ public class TasksFragment extends Fragment implements
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(context, (view, position) -> {
                     boolean isLargeLayout = resources.getBoolean(R.bool.large_layout);
-                    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+                    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());
                     Bundle args = new Bundle();
                     args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
                     args.putInt("button_count", isHistory ? 1 : 3);
@@ -222,10 +221,10 @@ public class TasksFragment extends Fragment implements
         int direction = args.getInt("Direction");
 
         // Handle never ask again checkbox
-        CheckBox neverAskAgainCheckBox = dialog.getDialog().findViewById(R.id.task_confirmation_never);
+        CheckBox neverAskAgainCheckBox = Objects.requireNonNull(dialog.getDialog()).findViewById(R.id.task_confirmation_never);
         if (neverAskAgainCheckBox.isChecked()) {
 
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());
             SharedPreferences.Editor editor = sharedPref.edit();
 
             // Set system settings
@@ -315,7 +314,7 @@ public class TasksFragment extends Fragment implements
 
     @Override
     public void onNewTaskDialogNeutralClick(DialogFragment dialog) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());
         boolean showDialog = sharedPref.getBoolean("pref_conf_del", true);
         Bundle args = dialog.getArguments();
 
@@ -343,7 +342,7 @@ public class TasksFragment extends Fragment implements
 
     @Override
     public void onItemSwiped(int itemPosition, int direction) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());
         String title = "";
         boolean showDialog = false;
         int buttonLabel = -1;

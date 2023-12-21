@@ -13,6 +13,8 @@ import androidx.fragment.app.DialogFragment;
 
 import com.wismna.geoffroy.donext.R;
 
+import java.util.Objects;
+
 public class ConfirmDialogFragment extends DialogFragment {
     interface ConfirmDialogListener {
         void onConfirmDialogClick(DialogFragment dialog, ButtonEvent event);
@@ -27,7 +29,6 @@ public class ConfirmDialogFragment extends DialogFragment {
     public static ConfirmDialogFragment newInstance(ConfirmDialogListener confirmDialogListener) {
         ConfirmDialogFragment fragment = new ConfirmDialogFragment();
         fragment.confirmDialogListener = confirmDialogListener;
-        fragment.setRetainInstance(true);
         return fragment;
     }
 
@@ -45,7 +46,7 @@ public class ConfirmDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
 
         Bundle args = getArguments();
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
         // No need for a parent in a Dialog Fragment
         View view = inflater.inflate(R.layout.fragment_task_confirmation, null);
         assert args != null;
@@ -53,7 +54,7 @@ public class ConfirmDialogFragment extends DialogFragment {
             .setPositiveButton(args.getInt("button"), (dialog, id) -> confirmDialogListener.onConfirmDialogClick(ConfirmDialogFragment.this, ButtonEvent.YES))
             .setNegativeButton(R.string.task_confirmation_no_button, (dialog, id) -> {
                 // User cancelled the dialog
-                ConfirmDialogFragment.this.getDialog().cancel();
+                Objects.requireNonNull(ConfirmDialogFragment.this.getDialog()).cancel();
             })
             .setOnKeyListener((dialog, keyCode, event) -> keyCode != KeyEvent.KEYCODE_BACK);
         // Create the AlertDialog object and return it
@@ -65,9 +66,7 @@ public class ConfirmDialogFragment extends DialogFragment {
     @Override
     public void onDestroyView() {
         Dialog dialog = getDialog();
-        // Stop the dialog from being dismissed on rotation, due to a bug with the compatibility library
-        // https://code.google.com/p/android/issues/detail?id=17423
-        if (dialog != null && getRetainInstance()) {
+        if (dialog != null) {
             dialog.setDismissMessage(null);
         }
         super.onDestroyView();
