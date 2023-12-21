@@ -2,7 +2,6 @@ package com.wismna.geoffroy.donext.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -21,9 +20,10 @@ import com.wismna.geoffroy.donext.adapters.TaskListRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.database.TaskListDataAccess;
 import com.wismna.geoffroy.donext.helpers.TaskListTouchHelper;
+import com.wismna.geoffroy.donext.utils.TaskRunner;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * A fragment representing a list of Items.
@@ -64,7 +64,24 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
         mContentLayoutId = R.layout.content_tasklists;
 
         taskListDataAccess = new TaskListDataAccess(getContext(), TaskListDataAccess.MODE.WRITE);
-        new GetTaskListsTask(this).execute(taskListDataAccess);
+
+        Context context = getContext();
+        TaskRunner taskRunner = new TaskRunner();
+        taskRunner.executeAsync(new GetTaskLists(context), (taskLists) -> {
+            taskListRecyclerViewAdapter = new TaskListRecyclerViewAdapter(taskLists, this);
+
+            // Set the adapter
+            RecyclerView recyclerView = findViewById(R.id.task_lists_view);
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            recyclerView.setAdapter(taskListRecyclerViewAdapter);
+
+            // Set the Touch Helper
+            ItemTouchHelper.Callback callback = new TaskListTouchHelper(taskListRecyclerViewAdapter);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(recyclerView);
+
+            toggleVisibleCreateNewTaskListLayout();
+        });
     }
 
     @Override
@@ -122,7 +139,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
     private void toggleVisibleCreateNewTaskListLayout() {
         LinearLayout layout = findViewById(R.id.new_task_list_layout);
         int taskListCount = taskListRecyclerViewAdapter.getItemCount();
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());
         String maxTaskListsString = sharedPref.getString("pref_conf_max_lists", "5");
         int maxTaskLists = Integer.parseInt(maxTaskListsString);
         if (taskListCount >= maxTaskLists) layout.setVisibility(View.GONE);
@@ -137,7 +154,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
 
     @Override
     public void onClickDeleteButton(int position, long id) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());
 
         if(sharedPref.getBoolean("pref_conf_tasklist_del", true)) {
             String title = getResources().getString(R.string.task_list_confirmation_delete);
@@ -160,7 +177,7 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
         CheckBox neverAskAgainCheckBox = dialog.getDialog().findViewById(R.id.task_confirmation_never);
         if (neverAskAgainCheckBox.isChecked()) {
 
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());
             SharedPreferences.Editor editor = sharedPref.edit();
 
             editor.putBoolean("pref_conf_tasklist_del", false);
@@ -192,39 +209,18 @@ public class TaskListsDialogFragment extends DynamicDialogFragment implements
         toggleVisibleCreateNewTaskListLayout();
     }
 
-    private static class GetTaskListsTask extends AsyncTask<TaskListDataAccess, Void, List<TaskList>> {
-        private final WeakReference<TaskListsDialogFragment> fragmentReference;
+    static class GetTaskLists implements Callable<List<TaskList>> {
+        private final Context context;
 
-        GetTaskListsTask(TaskListsDialogFragment context) {
-            fragmentReference = new WeakReference<>(context);
+        public GetTaskLists(Context context) {
+            this.context = context;
         }
 
         @Override
-        protected List<TaskList> doInBackground(TaskListDataAccess... params) {
-            TaskListDataAccess taskListDataAccess = params[0];
-            return taskListDataAccess.getTaskLists(false);
-        }
-
-        @Override
-        protected void onPostExecute(List<TaskList> taskLists) {
-            super.onPostExecute(taskLists);
-            TaskListsDialogFragment fragment = fragmentReference.get();
-            if (fragment == null) return;
-            fragment.taskListRecyclerViewAdapter =
-                    new TaskListRecyclerViewAdapter(taskLists, fragment);
-
-            // Set the adapter
-            Context context = fragment.getContext();
-            RecyclerView recyclerView = fragment.findViewById(R.id.task_lists_view);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(fragment.taskListRecyclerViewAdapter);
-
-            // Set the Touch Helper
-            ItemTouchHelper.Callback callback = new TaskListTouchHelper(fragment.taskListRecyclerViewAdapter);
-            fragment.mItemTouchHelper = new ItemTouchHelper(callback);
-            fragment.mItemTouchHelper.attachToRecyclerView(recyclerView);
-
-            fragment.toggleVisibleCreateNewTaskListLayout();
+        public List<TaskList> call() {
+            try(TaskListDataAccess taskListDataAccess = new TaskListDataAccess(context)) {
+                return taskListDataAccess.getTaskLists(false);
+            }
         }
     }
 }

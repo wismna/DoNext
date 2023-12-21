@@ -1,25 +1,26 @@
 package com.wismna.geoffroy.donext.fragments;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import androidx.annotation.Nullable;
+
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.TodayArrayAdapter;
 import com.wismna.geoffroy.donext.dao.Task;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
+import com.wismna.geoffroy.donext.utils.TaskRunner;
 
 import org.joda.time.LocalDate;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Created by bg45 on 2017-03-21.
@@ -53,7 +54,9 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         mNegativeButtonString = getString(R.string.new_task_cancel);
         mContentLayoutId = R.layout.content_today_form;
         // Load the tasks asynchronously
-        new LoadTasks(this).execute(getActivity());
+        //new LoadTasks(this).execute(getActivity());
+        TaskRunner taskRunner = new TaskRunner();
+        taskRunner.executeAsync(new LoadTasks(getContext()), this::setLayoutValues);
     }
 
     private void setLayoutValues(List<Task> tasks) {
@@ -94,7 +97,8 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
     protected void onPositiveButtonClick(View view) {
         mListener.onTodayTaskDialogPositiveClick(view);
         // Only commit the updated tasks to DB
-        new UpdateTasks(this).execute(mUpdatedTasks.toArray(new Task[0]));
+        TaskRunner taskRunner = new TaskRunner();
+        taskRunner.executeAsync(new UpdateTasks(getContext(), mUpdatedTasks.toArray(new Task[0])), (position) -> mListener.onTodayTasksUpdated());
         dismiss();
     }
 
@@ -108,50 +112,40 @@ public class TodayFormDialogFragment extends DynamicDialogFragment {
         dismiss();
     }
 
-     static class LoadTasks extends AsyncTask<Context, Void, List<Task>> {
-        private final WeakReference<TodayFormDialogFragment> fragmentReference;
+    static class LoadTasks implements Callable<List<Task>> {
+        private final Context context;
 
-        LoadTasks(TodayFormDialogFragment context) {
-            fragmentReference = new WeakReference<>(context);
+        public LoadTasks(Context context) {
+            this.context = context;
         }
 
         @Override
-        protected  List<Task> doInBackground(Context... params) {
-            try(TaskDataAccess taskDataAccess = new TaskDataAccess(params[0])) {
+        public List<Task> call() {
+            try(TaskDataAccess taskDataAccess = new TaskDataAccess(context)) {
                 return taskDataAccess.getAllTasks();
             }
         }
-
-        @Override
-        protected void onPostExecute(List<Task> tasks) {
-            super.onPostExecute(tasks);
-            fragmentReference.get().setLayoutValues(tasks);
-        }
     }
 
-    private static class UpdateTasks extends AsyncTask<Task, Void, Integer> {
-        private final WeakReference<TodayFormDialogFragment> fragmentReference;
+    static class UpdateTasks implements Callable<Integer> {
+        private final Context context;
+        private final Task[] tasks;
 
-        UpdateTasks(TodayFormDialogFragment context) {
-            fragmentReference = new WeakReference<>(context);
+        public UpdateTasks(Context context, Task[] tasks) {
+            this.context = context;
+            this.tasks = tasks;
         }
 
         @Override
-        protected Integer doInBackground(Task... params) {
+        public Integer call() {
             int position;
-            try (TaskDataAccess taskDataAccess = new TaskDataAccess(fragmentReference.get().getActivity(), TaskDataAccess.MODE.WRITE)) {
-                for (position = 0; position < params.length; position ++) {
-                    Task task = params[position];
+            try (TaskDataAccess taskDataAccess = new TaskDataAccess(context, TaskDataAccess.MODE.WRITE)) {
+                for (position = 0; position < tasks.length; position ++) {
+                    Task task = tasks[position];
                     taskDataAccess.updateTodayTasks(task.getId(), task.isToday(), position);
                 }
             }
             return position;
-        }
-
-        @Override
-        protected void onPostExecute(Integer integer) {
-            super.onPostExecute(integer);
-            fragmentReference.get().mListener.onTodayTasksUpdated();
         }
     }
  }
