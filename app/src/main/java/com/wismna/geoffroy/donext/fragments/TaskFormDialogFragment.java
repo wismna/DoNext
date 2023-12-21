@@ -63,9 +63,9 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         Bundle args = getArguments();
         if (args != null) {
             mButtonCount = args.getInt("button_count");
-            mPositiveButtonString = getString(R.string.new_task_save);
+            mPositiveButtonString = getString(mTask != null && mTask.isHistory() ? R.string.new_task_restore : R.string.new_task_save);
             mNegativeButtonString = getString(R.string.new_task_cancel);
-            if (mTask != null) mNeutralButtonString = getString(mTask.isHistory() ? R.string.new_task_restore : R.string.new_task_delete);
+            mNeutralButtonString = getString(R.string.new_task_delete);
             listId = args.getInt("list");
             isToday = args.getBoolean("today");
         }

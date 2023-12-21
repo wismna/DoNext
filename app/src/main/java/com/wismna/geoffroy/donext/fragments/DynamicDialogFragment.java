@@ -101,18 +101,18 @@ public abstract class DynamicDialogFragment extends DialogFragment {
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
         /*switch (mButtonCount) {
-            case 1:
+            case 1 -> {
                 menu.removeItem(R.id.menu_positive_button);
                 menu.removeItem(R.id.menu_neutral_button);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 menu.removeItem(R.id.menu_neutral_button);
-                menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
-                break;
-            case 3:
-                menu.findItem(R.id.menu_neutral_button).setTitle(args.getString("button_neutral"));
-                menu.findItem(R.id.menu_positive_button).setTitle(args.getString("button_positive"));
-                break;
+                menu.findItem(R.id.menu_positive_button).setTitle(mPositiveButtonString);
+            }
+            case 3 -> {
+                menu.findItem(R.id.menu_neutral_button).setTitle(mNeutralButtonString);
+                menu.findItem(R.id.menu_positive_button).setTitle(mPositiveButtonString);
+            }
         }*/
 
         // Hide buttons depending on count

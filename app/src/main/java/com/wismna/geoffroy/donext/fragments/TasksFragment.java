@@ -99,7 +99,6 @@ public class TasksFragment extends Fragment implements
         view = inflater.inflate(R.layout.fragment_tasks, container, false);
         final Context context = view.getContext();
 
-        // TODO: is null...
         FragmentManager manager = getParentFragmentManager();
         mAdapter = (MainFragment)manager.findFragmentById(R.id.fragment_main);
 
@@ -132,10 +131,11 @@ public class TasksFragment extends Fragment implements
                     SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(requireContext());
                     Bundle args = new Bundle();
                     args.putBoolean("today", sharedPref.getBoolean("pref_conf_today_enable", false));
-                    args.putInt("button_count", isHistory ? 1 : 3);
-                    args.putString("button_positive", getString(R.string.new_task_save));
+                    args.putInt("button_count", isHistory ? 2 : 3);
+                    args.putString("button_positive",
+                            getString(isHistory ? R.string.new_task_restore : R.string.new_task_save));
                     args.putString("button_negative",
-                            isHistory ? getString(R.string.task_list_ok) : getString(R.string.new_task_cancel));
+                            getString(isHistory ? R.string.task_list_ok : R.string.new_task_cancel));
                     args.putString("button_neutral", getString(R.string.new_task_delete));
                     args.putInt("position", position);
 
@@ -251,29 +251,30 @@ public class TasksFragment extends Fragment implements
         Task task = ((TaskFormDialogFragment)dialog).getTask();
         if (task != null) id = task.getId();
 
+
         // Get the controls
-        Spinner listSpinner = dialogView.findViewById(R.id.new_task_list);
         EditText nameText = dialogView.findViewById(R.id.new_task_name);
         EditText descText = dialogView.findViewById(R.id.new_task_description);
-        SeekBar seekBar = dialogView.findViewById(R.id.new_task_priority);
-        CheckBox setDueDate = dialogView.findViewById(R.id.new_task_due_date_set);
+        SeekBar prioritySeekBar = dialogView.findViewById(R.id.new_task_priority);
+        CheckBox hasDueDateCheckBox = dialogView.findViewById(R.id.new_task_due_date_set);
         DatePicker dueDatePicker = dialogView.findViewById(R.id.new_task_due_date);
-        TaskList taskList = (TaskList) listSpinner.getSelectedItem();
-        CheckBox todayList = dialogView.findViewById(R.id.new_task_today);
-        boolean isToday = todayList.isChecked();
+        Spinner listSpinner = dialogView.findViewById(R.id.new_task_list);
+        TaskList selectedTaskList = (TaskList) listSpinner.getSelectedItem();
+        CheckBox isOnTodayViewCheckBox = dialogView.findViewById(R.id.new_task_today);
+        boolean isOnTodayView = isOnTodayViewCheckBox.isChecked();
         // Add the task to the database
         try (TaskDataAccess taskDataAccess = new TaskDataAccess(view.getContext(), TaskDataAccess.MODE.WRITE)) {
             Task newTask = taskDataAccess.createOrUpdateTask(id,
                     nameText.getText().toString(),
                     descText.getText().toString(),
-                    seekBar.getProgress(),
-                    taskList.getId(),
-                    setDueDate.isChecked() ?
+                    prioritySeekBar.getProgress(),
+                    selectedTaskList.getId(),
+                    hasDueDateCheckBox.isChecked() ?
                         new LocalDate(dueDatePicker.getYear(),
                                 dueDatePicker.getMonth() + 1,
                                 dueDatePicker.getDayOfMonth()).toString()
                         : "",
-                    isToday);
+                    isOnTodayView);
 
             Bundle args = dialog.getArguments();
             // Should never happen because we will have to be on this tab to open the dialog
@@ -283,7 +284,7 @@ public class TasksFragment extends Fragment implements
             // Add the task
             if (task == null) {
                 // If the new task is added to another task list, update the tab
-                if (mAdapter != null && taskListId != taskList.getId()) {
+                if (mAdapter != null && taskListId != selectedTaskList.getId()) {
                     mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
                 }
                 // Otherwise add it to the current one
@@ -297,13 +298,13 @@ public class TasksFragment extends Fragment implements
             else {
                 position = args != null ? args.getInt("position") : 0;
                 // Check if task list was changed
-                if ((isTodayView && !isToday) || (!isTodayView && task.getTaskListId() != taskList.getId()))
+                if ((isTodayView && !isOnTodayView) || (!isTodayView && task.getTaskListId() != selectedTaskList.getId()) || isHistory)
                 {
                     // Remove item from current tab
                     taskRecyclerViewAdapter.remove(position);
 
                     // Add it to the corresponding tab provided it is already instantiated
-                    if (mAdapter != null) mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
+                    if (mAdapter != null && !isHistory) mAdapter.onTaskListChanged(newTask, listSpinner.getSelectedItemPosition());
                 } else {
                     taskRecyclerViewAdapter.update(newTask, position);
                 }
