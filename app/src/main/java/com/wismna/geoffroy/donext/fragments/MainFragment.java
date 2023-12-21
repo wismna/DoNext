@@ -6,22 +6,22 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.Guideline;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.Guideline;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.tabs.TabLayout;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.activities.HistoryActivity;
 import com.wismna.geoffroy.donext.adapters.SectionsPagerAdapter;
@@ -126,7 +126,7 @@ public class MainFragment extends Fragment implements
 
             // Create the adapter that will return a fragment for each of the three
             // primary sections of the activity.
-            mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager(), taskLists);
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getParentFragmentManager(), taskLists);
             mSectionsPagerAdapter.notifyDataSetChanged();
         }
 
@@ -145,12 +145,7 @@ public class MainFragment extends Fragment implements
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 toggleTabLayoutArrows(tabLayout.getScrollX());
                 //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
-                tabLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                    @Override
-                    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                        toggleTabLayoutArrows(scrollX);
-                    }
-                });
+                tabLayout.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> toggleTabLayoutArrows(scrollX));
             }
         }
         else {
@@ -164,12 +159,7 @@ public class MainFragment extends Fragment implements
             // Hide the list if there is only one task list
             listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
             //listView.setSelection(lastOpenedList);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    mViewPager.setCurrentItem(position);
-                }
-            });
+            listView.setOnItemClickListener((parent, view, position, id) -> mViewPager.setCurrentItem(position));
         }
     }
 

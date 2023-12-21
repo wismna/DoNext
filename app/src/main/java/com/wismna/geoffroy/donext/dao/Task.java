@@ -9,7 +9,6 @@ import org.joda.time.LocalDate;
  * Data access object class that represents a Task
  */
 
-@Deprecated
 public class Task {
     private long id;
     private String name;

@@ -2,17 +2,17 @@ package com.wismna.geoffroy.donext.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.activities.HistoryActivity;
@@ -66,7 +66,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
             mButtonCount = args.getInt("button_count");
             mPositiveButtonString = getString(R.string.new_task_save);
             mNegativeButtonString = getString(R.string.new_task_cancel);
-            mNeutralButtonString = getString(mTask.isHistory() ? R.string.new_task_restore : R.string.new_task_delete);
+            if (mTask != null) mNeutralButtonString = getString(mTask.isHistory() ? R.string.new_task_restore : R.string.new_task_delete);
             listId = args.getInt("list");
             isToday = args.getBoolean("today");
         }
@@ -141,12 +141,7 @@ public class TaskFormDialogFragment extends DynamicDialogFragment {
         final DatePicker dueDatePicker = findViewById(R.id.new_task_due_date);
         // Handle due date spinner depending on check box
         CheckBox setDueDate = findViewById(R.id.new_task_due_date_set);
-        setDueDate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                dueDatePicker.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-            }
-        });
+        setDueDate.setOnCheckedChangeListener((buttonView, isChecked) -> dueDatePicker.setVisibility(isChecked ? View.VISIBLE : View.GONE));
 
         // Handle priority changes
         final TextView tooltip = findViewById(R.id.new_task_priority_tooltip);

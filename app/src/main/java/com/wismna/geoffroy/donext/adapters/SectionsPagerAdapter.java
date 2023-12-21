@@ -1,8 +1,8 @@
 package com.wismna.geoffroy.donext.adapters;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.wismna.geoffroy.donext.dao.TaskList;
 import com.wismna.geoffroy.donext.fragments.TasksFragment;
@@ -10,18 +10,19 @@ import com.wismna.geoffroy.donext.fragments.TasksFragment;
 import java.util.List;
 
 /**
- * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+ * A {@link SmartFragmentStatePagerAdapter} that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
 public class SectionsPagerAdapter extends SmartFragmentStatePagerAdapter {
 
-    private List<TaskList> taskLists;
+    private final List<TaskList> taskLists;
 
     public SectionsPagerAdapter(FragmentManager fm, List<TaskList> taskLists) {
         super(fm);
         this.taskLists = taskLists;
     }
 
+    @NonNull
     @Override
     public Fragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.

@@ -4,12 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.fragment.app.FragmentManager;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.viewpager.widget.ViewPager;
 
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 getString(R.string.action_new_task), getResources().getBoolean(R.bool.large_layout));
     }
 
-    private ViewPager getMainFragmentViewPager(){
+    private ViewPager getMainFragmentViewPager() {
         FragmentManager manager = getSupportFragmentManager();
         MainFragment fragment = (MainFragment)manager.findFragmentById(R.id.fragment_main);
         return fragment != null ? fragment.getViewPager() : null;
