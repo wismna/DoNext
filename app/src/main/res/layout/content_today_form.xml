@@ -14,7 +14,8 @@
         android:textSize="30sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:imeOptions="flagNoFullscreen" />
+        android:imeOptions="flagNoFullscreen"
+        android:autofillHints="@string/today_search_hint" />
     <ListView
         android:id="@+id/today_tasks"
         android:layout_width="match_parent"
