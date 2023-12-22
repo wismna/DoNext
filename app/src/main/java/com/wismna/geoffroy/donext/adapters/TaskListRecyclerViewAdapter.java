@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.adapters;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,13 +51,14 @@ public class TaskListRecyclerViewAdapter extends RecyclerView.Adapter<TaskListRe
         return new TaskViewHolder(view);
     }
 
+    // Remove the message about overriding performClick, which requires subclassing ImageView
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull final TaskViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mTaskCountView.setText(String.valueOf(mValues.get(position).getTaskCount()));
         holder.mTaskNameView.setText(mValues.get(position).getName());
 
-        // TODO: correct this...
         holder.handleView.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 mListener.onStartDrag(holder);
