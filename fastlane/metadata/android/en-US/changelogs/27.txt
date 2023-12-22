@@ -1,5 +1,0 @@
-Emphasis is made on the first task
-Correct task order handling
-Order in Today view is different from order in Main view
-Bug corrections
-Design improvements
