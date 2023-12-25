@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
     <application
         android:name=".DoNext"
         android:icon="@mipmap/ic_launcher"
@@ -9,7 +8,6 @@
         <meta-data
             android:name="android.max_aspect"
             android:value="2.1" />
-
         <activity
             android:name=".activities.MainActivity"
             android:configChanges="screenSize|orientation"
@@ -49,5 +47,4 @@
                 android:value=".activities.MainActivity" />
         </activity>
     </application>
-
 </manifest>
