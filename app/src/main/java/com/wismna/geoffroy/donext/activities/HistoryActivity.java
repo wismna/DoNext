@@ -14,6 +14,11 @@ public class HistoryActivity extends ToolBarActivityBase {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         initToolBar();
     }
 }

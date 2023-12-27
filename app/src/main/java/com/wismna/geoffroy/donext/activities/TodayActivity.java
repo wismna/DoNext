@@ -2,14 +2,15 @@ package com.wismna.geoffroy.donext.activities;
 
 import android.os.Build;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wismna.geoffroy.donext.R;
 import com.wismna.geoffroy.donext.adapters.TaskRecyclerViewAdapter;
 import com.wismna.geoffroy.donext.database.TaskDataAccess;
@@ -35,6 +36,12 @@ public class TodayActivity extends ToolBarActivityBase
         // Show the date
         TextView date = findViewById(R.id.today_date);
         date.setText(LocalDate.now().toString("EEEE, dd MMMM yyyy", getCurrentLocale()));
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         // Set the no tasks texts
         TextView noTasks = findViewById(R.id.no_more_tasks);
