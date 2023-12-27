@@ -44,10 +44,6 @@ public class MainFragment extends Fragment implements
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private TabLayout tabLayout;
 
-    public MainFragment() {
-        // Required empty public constructor
-    }
-
     public ViewPager getViewPager() {
         return mViewPager;
     }
@@ -59,8 +55,7 @@ public class MainFragment extends Fragment implements
         mView = inflater.inflate(R.layout.fragment_main, container, false);
         Toolbar toolbar = mView.findViewById(R.id.toolbar);
 
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        assert activity != null;
+        AppCompatActivity activity = (AppCompatActivity) requireActivity();
         activity.setSupportActionBar(toolbar);
 
         // Get preferences
@@ -112,8 +107,7 @@ public class MainFragment extends Fragment implements
 
     @Override
     public void onTaskListsDialogNegativeClick() {
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        assert activity != null;
+        AppCompatActivity activity = (AppCompatActivity) requireActivity();
         updateTaskLists(activity);
     }
 
@@ -144,7 +138,6 @@ public class MainFragment extends Fragment implements
             // Handles scroll detection (only available for SDK version >=23)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 toggleTabLayoutArrows(tabLayout.getScrollX());
-                //tabLayout.setScrollIndicators(TabLayout.SCROLL_INDICATOR_LEFT | TabLayout.SCROLL_INDICATOR_RIGHT);
                 tabLayout.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> toggleTabLayoutArrows(scrollX));
             }
         }
@@ -158,7 +151,6 @@ public class MainFragment extends Fragment implements
             ListView listView = mView.findViewById(R.id.list);
             // Hide the list if there is only one task list
             listView.setAdapter(new ArrayAdapter<>(activity, R.layout.list_tasklist_item, taskLists));
-            //listView.setSelection(lastOpenedList);
             listView.setOnItemClickListener((parent, view, position, id) -> mViewPager.setCurrentItem(position));
         }
     }
