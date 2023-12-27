@@ -34,8 +34,8 @@ public class TodayActivity extends ToolBarActivityBase
         initToolBar();
 
         // Show the date
-        TextView date = findViewById(R.id.today_date);
-        date.setText(LocalDate.now().toString("EEEE, dd MMMM yyyy", getCurrentLocale()));
+        TextView dateTextView = findViewById(R.id.today_date);
+        dateTextView.setText(LocalDate.now().toString("EEEE, dd MMMM yyyy", getCurrentLocale()));
 
     }
 
@@ -44,13 +44,13 @@ public class TodayActivity extends ToolBarActivityBase
         super.onStart();
 
         // Set the no tasks texts
-        TextView noTasks = findViewById(R.id.no_more_tasks);
-        noTasks.setText(R.string.today_no_tasks);
-        noTasks.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_smiley_satisfied_light, 0);
-        noTasks.setCompoundDrawablePadding(10);
+        TextView noTasksTextView = findViewById(R.id.no_more_tasks);
+        noTasksTextView.setText(R.string.today_no_tasks);
+        noTasksTextView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_smiley_satisfied_light, 0);
+        noTasksTextView.setCompoundDrawablePadding(10);
 
-        TextView createTasks = findViewById(R.id.create_tasks);
-        createTasks.setText(R.string.today_create_tasks);
+        TextView createTasksTextView = findViewById(R.id.create_tasks);
+        createTasksTextView.setText(R.string.today_create_tasks);
     }
 
     @Override
