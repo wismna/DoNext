@@ -1,2 +1,0 @@
-Able to restore from history
-Bug corrections
