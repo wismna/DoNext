@@ -8,7 +8,7 @@ on:
   workflow_dispatch: 
 
 env:
-  BUILD_DIR: app/build/outputs/bundle/release
+  BUILD_DIR: donext/build/outputs/bundle/release
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
 
       - name: Replace tokens in build.gradle
         run: |
-          sed -i 's/#{\([^}]*\)}/${\1}/g' app/build.gradle
+          sed -i 's/#{\([^}]*\)}/${\1}/g' donext/build.gradle
 
       - name: Cache Gradle
         uses: actions/cache@v3

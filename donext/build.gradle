@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
+    compileSdk 35
+
     defaultConfig {
         applicationId "com.wismna.geoffroy.donext"
         minSdkVersion 21
