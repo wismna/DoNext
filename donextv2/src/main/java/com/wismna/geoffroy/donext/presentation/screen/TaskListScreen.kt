@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.presentation.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,13 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
 
 @Composable
-fun TaskListScreen(viewModel: TaskListViewModel = hiltViewModel()) {
+fun TaskListScreen(viewModel: TaskListViewModel = hiltViewModel(), onTaskClick: (Task) -> Unit) {
     val tasks = viewModel.tasks
 
     LazyColumn(
@@ -58,6 +59,7 @@ fun TaskListScreen(viewModel: TaskListViewModel = hiltViewModel()) {
 
             TaskItem(
                 task = task,
+                onClick = { onTaskClick(task) },
                 onToggleDone = { isChecked ->
                     viewModel.updateTaskDone(task.id!!, isChecked)
                 }
@@ -69,6 +71,7 @@ fun TaskListScreen(viewModel: TaskListViewModel = hiltViewModel()) {
 @Composable
 fun TaskItem(
     task: Task,
+    onClick: () -> Unit,
     onToggleDone: (Boolean) -> Unit
 ) {
     val baseStyle = MaterialTheme.typography.bodyLarge.copy(
@@ -87,15 +90,10 @@ fun TaskItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(8.dp)
             .alpha(if (task.isDone) 0.5f else 1f),
     ) {
-        /*Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {*/
             Checkbox(
                 checked = task.isDone,
                 onCheckedChange = onToggleDone,

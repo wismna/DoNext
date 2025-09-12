@@ -3,22 +3,14 @@
 package com.wismna.geoffroy.donext.presentation.screen
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -27,7 +19,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,21 +27,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.wismna.geoffroy.donext.domain.model.Priority
-import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.presentation.viewmodel.MainViewModel
-import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
+import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
 
 @Composable
 fun MainScreen(
@@ -65,18 +51,21 @@ fun MainScreen(
             CircularProgressIndicator()
         }
     } else {
+        val taskViewModel: TaskViewModel = hiltViewModel()
         val startDestination = viewModel.taskLists[0]
         // TODO: get last opened tab from saved settings
         var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
 
         if (showBottomSheet) {
-            AddTaskBottomSheet(viewModel, selectedDestination, { showBottomSheet = false })
+            TaskBottomSheet(taskViewModel, { showBottomSheet = false })
         }
 
         Scaffold(
             modifier = modifier,
             floatingActionButton = {
                 AddNewTaskButton {
+                    val currentListId = viewModel.taskLists[selectedDestination].id
+                    taskViewModel.startNewTask(currentListId)
                     showBottomSheet = true
                 }
             }, topBar = {
@@ -103,96 +92,25 @@ fun MainScreen(
                 .padding(contentPadding)
                 .fillMaxSize()
             ) {
-                AppNavHost(navController, startDestination, viewModel)
-            }
-        }
-    }
-}
-
-@Composable
-fun AppNavHost(
-    navController: NavHostController,
-    startDestination: TaskList,
-    viewModel: MainViewModel
-) {
-    NavHost(
-        navController,
-        startDestination = "taskList/${startDestination.id}"
-    ) {
-        viewModel.taskLists.forEach { destination ->
-            composable(
-                route = "taskList/{taskListId}",
-                arguments = listOf(navArgument("taskListId") { type = NavType.LongType })) {
-                val viewModel: TaskListViewModel = hiltViewModel<TaskListViewModel>()
-                TaskListScreen(viewModel)
-            }
-        }
-    }
-}
-
-@Composable
-fun AddTaskBottomSheet(
-    viewModel: MainViewModel,
-    selectedListIndex: Int,
-    onDismiss: () -> Unit
-) {
-    val titleFocusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(Unit) {
-        titleFocusRequester.requestFocus()
-    }
-
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(16.dp)) {
-            Text(
-                "New Task",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Spacer(Modifier.height(8.dp))
-
-            // --- Title ---
-            OutlinedTextField(
-                value = viewModel.title,
-                singleLine = true,
-                onValueChange = { viewModel.onTitleChanged(it) },
-                label = { Text("Title") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(titleFocusRequester),
-                isError = !viewModel.isTitleValid && viewModel.title.isNotEmpty(),
-            )
-            Spacer(Modifier.height(8.dp))
-
-            // --- Description ---
-            OutlinedTextField(
-                value = viewModel.description,
-                onValueChange = { viewModel.onDescriptionChanged(it) },
-                label = { Text("Description") },
-                maxLines = 3,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(8.dp))
-
-            // --- Priority ---
-            Text("Priority", style = MaterialTheme.typography.labelLarge)
-            Spacer(Modifier.height(4.dp))
-            SingleChoiceSegmentedButton(
-                value = viewModel.priority,
-                onValueChange = { viewModel.onPriorityChanged(it) }
-            )
-            Spacer(Modifier.height(16.dp))
-
-            // --- Add Button ---
-            Button(
-                onClick = {
-                    val currentListId = viewModel.taskLists[selectedListIndex].id
-                    viewModel.createTask(currentListId)
-                    onDismiss()
-                    viewModel.resetTaskForm()
-                },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Add")
+                NavHost(
+                    navController,
+                    startDestination = "taskList/${startDestination.id}"
+                ) {
+                    viewModel.taskLists.forEach { destination ->
+                        composable(
+                            route = "taskList/{taskListId}",
+                            arguments = listOf(navArgument("taskListId") {
+                                type = NavType.LongType
+                            })
+                        ) {
+                            TaskListScreen(
+                                onTaskClick = { task ->
+                                    taskViewModel.startEditTask(task)
+                                    showBottomSheet = true
+                                })
+                        }
+                    }
+                }
             }
         }
     }

@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.presentation.screen.MainScreen
 import com.wismna.geoffroy.donext.presentation.ui.theme.DoNextTheme
 import com.wismna.geoffroy.donext.presentation.viewmodel.MainViewModel
