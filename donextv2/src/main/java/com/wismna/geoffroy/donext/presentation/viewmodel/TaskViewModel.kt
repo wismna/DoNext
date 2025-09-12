@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.presentation.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +13,7 @@ import com.wismna.geoffroy.donext.domain.usecase.DeleteTaskUseCase
 import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,6 +29,8 @@ class TaskViewModel @Inject constructor(
         private set
     var priority by mutableStateOf(Priority.NORMAL)
         private set
+    var dueDate by mutableStateOf<Instant?>(null)
+        private set
 
     private var editingTaskId: Long? = null
     private var taskListId: Long? = null
@@ -39,6 +43,7 @@ class TaskViewModel @Inject constructor(
         title = ""
         description = ""
         priority = Priority.NORMAL
+        dueDate = null
     }
 
     fun startEditTask(task: Task) {
@@ -47,20 +52,25 @@ class TaskViewModel @Inject constructor(
         title = task.name
         description = task.description ?: ""
         priority = task.priority
+        dueDate = task.dueDate
     }
 
     fun onTitleChanged(value: String) { title = value }
     fun onDescriptionChanged(value: String) { description = value }
     fun onPriorityChanged(value: Priority) { priority = value }
+    fun onDueDateChanged(value: Long?) {
+        dueDate = value?.let { Instant.ofEpochMilli(it) }
+        Log.d("TaskViewModel", "onDueDateChanged -> $dueDate (millis=$value)")
+    }
 
-    fun save(onDone: (() -> Unit)? = null) {
+        fun save(onDone: (() -> Unit)? = null) {
         if (title.isBlank()) return
 
         viewModelScope.launch {
             if (isEditing()) {
-                updateTaskUseCase(editingTaskId!!, taskListId!!, title, description, priority)
+                updateTaskUseCase(editingTaskId!!, taskListId!!, title, description, priority, dueDate)
             } else {
-                createTaskUseCase(taskListId!!, title, description, priority)
+                createTaskUseCase(taskListId!!, title, description, priority, dueDate)
             }
             // reset state after save
             reset()
@@ -77,7 +87,6 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    /** Optional: manual reset */
     fun reset() {
         editingTaskId = null
         taskListId = null

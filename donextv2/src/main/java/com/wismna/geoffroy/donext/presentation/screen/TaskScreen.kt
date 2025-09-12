@@ -7,21 +7,37 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +46,7 @@ fun TaskBottomSheet(
     onDismiss: () -> Unit
 ) {
     val titleFocusRequester = remember { FocusRequester() }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         titleFocusRequester.requestFocus()
@@ -54,7 +71,7 @@ fun TaskBottomSheet(
                     .focusRequester(titleFocusRequester),
                 isError = viewModel.title.isEmpty(),
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
 
             // --- Description ---
             OutlinedTextField(
@@ -64,15 +81,67 @@ fun TaskBottomSheet(
                 maxLines = 3,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
 
             // --- Priority ---
-            Text("Priority", style = MaterialTheme.typography.labelLarge)
-            Spacer(Modifier.height(4.dp))
-            SingleChoiceSegmentedButton(
-                value = viewModel.priority,
-                onValueChange = { viewModel.onPriorityChanged(it) }
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text("Priority", style = MaterialTheme.typography.labelLarge)
+                SingleChoiceSegmentedButton(
+                    value = viewModel.priority,
+                    onValueChange = { viewModel.onPriorityChanged(it) }
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+
+            // --- Due Date ---
+            var showDatePicker by remember { mutableStateOf(false) }
+
+            OutlinedTextField(
+                value = viewModel.dueDate?.atZone(ZoneId.systemDefault())
+                    ?.toLocalDate()
+                    ?.format(DateTimeFormatter.ofPattern("MMM d, yyyy")) ?: "",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Due Date") },
+                trailingIcon = {
+                    Row {
+                        if (viewModel.dueDate != null) {
+                            IconButton(onClick = { viewModel.onDueDateChanged(null) }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Clear due date")
+                            }
+                        }
+                        IconButton(onClick = { showDatePicker = true }) {
+                            Icon(Icons.Default.DateRange, contentDescription = "Pick due date")
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
+
+            if (showDatePicker) {
+                val datePickerState = rememberDatePickerState(
+                    initialSelectedDateMillis = viewModel.dueDate?.toEpochMilli()
+                )
+
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            datePickerState.selectedDateMillis?.let { viewModel.onDueDateChanged(it) }
+                            showDatePicker = false
+                        }) { Text("OK") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
+
             Spacer(Modifier.height(16.dp))
 
             Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
