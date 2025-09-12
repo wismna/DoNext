@@ -9,33 +9,39 @@ import java.time.Instant
 fun TaskEntity.toDomain() = Task(
     id = id,
     name = name,
-    isDone = isDone,
     taskListId = taskListId,
     description = description,
-    cycles = cycles,
+    cycle = cycle,
+    isDone = isDone,
     isDeleted = isDeleted,
-    updateDate = Instant.ofEpochMilli(updateDate)
+    dueDate = if (dueDate == null) null else Instant.ofEpochMilli(dueDate),
+    priority = priority,
+    order = order
 )
 
 fun Task.toEntity() = TaskEntity(
-    id = id,
+    id = id ?: 0,
     name = name,
-    isDone = isDone,
     taskListId = taskListId,
     description = description,
-    cycles = cycles,
+    cycle = cycle,
+    priority = priority,
+    order = order,
+    isDone = isDone,
     isDeleted = isDeleted,
-    updateDate = updateDate.toEpochMilli()
+    dueDate = dueDate?.toEpochMilli()
 )
 
 fun TaskListEntity.toDomain() = TaskList(
     id = id,
     name = name,
-    isDeleted = isDeleted
+    isDeleted = isDeleted,
+    order = order
 )
 
 fun TaskList.toEntity() = TaskListEntity(
     id = id,
     name = name,
-    isDeleted = isDeleted
+    isDeleted = isDeleted,
+    order = order
 )

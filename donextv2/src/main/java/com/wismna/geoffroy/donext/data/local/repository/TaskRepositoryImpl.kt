@@ -9,15 +9,14 @@ import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.time.Instant
 import javax.inject.Inject
 
 class TaskRepositoryImpl @Inject constructor(
     private val taskDao: TaskDao,
     private val taskListDao: TaskListDao
 ): TaskRepository {
-    override suspend fun getTasksForList(listId: Long): List<Task> {
-        return taskDao.getTasksForList(listId).map { it.toDomain() }
+    override fun getTasksForList(listId: Long): Flow<List<Task>> {
+        return taskDao.getTasksForList(listId).map {entity -> entity.map { it.toDomain() }}
     }
 
     override suspend fun insertTask(task: Task) {
@@ -25,8 +24,7 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateTask(task: Task) {
-        val updated = task.copy(updateDate = Instant.now())
-        taskDao.updateTask(updated.toEntity())
+        taskDao.updateTask(task.toEntity())
     }
 
     override suspend fun deleteTask(taskId: Long, isDeleted: Boolean) {

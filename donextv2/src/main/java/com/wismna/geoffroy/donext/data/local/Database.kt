@@ -31,7 +31,89 @@ abstract class AppDatabase : RoomDatabase() {
 
         val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // TODO: migrate from old Donext database (v6)
+                db.beginTransaction()
+                try {
+                    // --- TASKS TABLE ---
+                    // 1. Create the new tasks table with the updated schema
+                    db.execSQL(
+                        """
+                    CREATE TABLE tasks_new (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        description TEXT,
+                        cycle INTEGER NOT NULL DEFAULT 0,
+                        priority INTEGER NOT NULL,
+                        display_order INTEGER NOT NULL,
+                        done INTEGER NOT NULL DEFAULT 0,
+                        deleted INTEGER NOT NULL DEFAULT 0,
+                        task_list_id INTEGER NOT NULL,
+                        due_date INTEGER
+                    )
+                """.trimIndent()
+                    )
+
+                    // 2. Copy old data into the new table
+                    // Map old column names to new ones
+                    db.execSQL(
+                        """
+                    INSERT INTO tasks_new (
+                        id, name, description, cycle, priority, display_order,
+                        done, deleted, task_list_id, due_date
+                    )
+                    SELECT 
+                        _id,            -- old '_id' mapped to id
+                        name,
+                        description,
+                        cycle,
+                        priority,
+                        displayorder,   -- old 'displayorder' mapped to display_order
+                        done,
+                        deleted,
+                        list,           -- old 'list' mapped to task_list_id
+                        duedate         -- old column renamed to due_date
+                    FROM tasks
+                """.trimIndent()
+                    )
+
+                    // 3. Drop the old table
+                    db.execSQL("DROP TABLE tasks")
+
+                    // 4. Rename the new table
+                    db.execSQL("ALTER TABLE tasks_new RENAME TO tasks")
+
+                    // --- TASK_LISTS TABLE ---
+                    db.execSQL(
+                        """
+                    CREATE TABLE task_lists_new (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        deleted INTEGER NOT NULL DEFAULT 0,
+                        display_order INTEGER NOT NULL
+                    )
+                """.trimIndent()
+                    )
+
+                    db.execSQL(
+                        """
+                    INSERT INTO task_lists_new (
+                        id, name, display_order, deleted
+                    )
+                    SELECT 
+                        _id,            -- old '_id' mapped to id
+                        name,
+                        displayorder,   -- old 'displayorder' mapped to display_order
+                        1 - visible     -- old 'visible' mapped to deleted
+                    FROM tasklist
+                """.trimIndent()
+                    )
+
+                    db.execSQL("DROP TABLE tasklist")
+                    db.execSQL("ALTER TABLE task_lists_new RENAME TO task_lists")
+
+                    db.setTransactionSuccessful()
+                } finally {
+                    db.endTransaction()
+                }
             }
         }
 
@@ -50,9 +132,9 @@ abstract class AppDatabase : RoomDatabase() {
                             // insert default lists
                             CoroutineScope(Dispatchers.IO).launch {
                                 val dao = DB_INSTANCE?.taskListDao()
-                                dao?.insertTaskList(TaskListEntity(name = "Work"))
-                                dao?.insertTaskList(TaskListEntity(name = "Personal"))
-                                dao?.insertTaskList(TaskListEntity(name = "Shopping"))
+                                dao?.insertTaskList(TaskListEntity(name = "Work", order = 2))
+                                dao?.insertTaskList(TaskListEntity(name = "Personal", order = 1))
+                                dao?.insertTaskList(TaskListEntity(name = "Shopping", order = 3))
                             }
                         }
                     })

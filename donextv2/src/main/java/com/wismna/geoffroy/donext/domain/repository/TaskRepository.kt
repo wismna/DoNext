@@ -5,7 +5,7 @@ import com.wismna.geoffroy.donext.domain.model.TaskList
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
-    suspend fun getTasksForList(listId: Long): List<Task>
+    fun getTasksForList(listId: Long): Flow<List<Task>>
     suspend fun insertTask(task: Task)
     suspend fun updateTask(task: Task)
     suspend fun deleteTask(taskId: Long, isDeleted: Boolean)
