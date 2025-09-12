@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.wismna.geoffroy.donext.presentation.screen
 
 import androidx.compose.foundation.layout.Box
@@ -19,9 +21,13 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +36,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,11 +47,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.presentation.viewmodel.MainViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
@@ -62,39 +70,7 @@ fun MainScreen(
         var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
 
         if (showBottomSheet) {
-            ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("New Task", style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = viewModel.title,
-                        singleLine = true,
-                        onValueChange = { viewModel.onTitleChanged(it) },
-                        label = { Text("Title") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = !viewModel.isTitleValid && viewModel.title.isNotEmpty(),
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = viewModel.description,
-                        onValueChange = { viewModel.onDescriptionChanged(it) },
-                        label = { Text("Description") },
-                        maxLines = 3,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            val currentListId = viewModel.taskLists[selectedDestination].id
-                            viewModel.createTask(currentListId)
-                            showBottomSheet = false
-                        },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text("Add")
-                    }
-                }
-            }
+            AddTaskBottomSheet(viewModel, selectedDestination, { showBottomSheet = false })
         }
 
         Scaffold(
@@ -123,7 +99,6 @@ fun MainScreen(
                     }
                 }
             }) { contentPadding ->
-            // NavHost will now automatically be below the tabs
             Box(modifier = Modifier
                 .padding(contentPadding)
                 .fillMaxSize()
@@ -156,10 +131,99 @@ fun AppNavHost(
 }
 
 @Composable
+fun AddTaskBottomSheet(
+    viewModel: MainViewModel,
+    selectedListIndex: Int,
+    onDismiss: () -> Unit
+) {
+    val titleFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        titleFocusRequester.requestFocus()
+    }
+
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                "New Task",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(Modifier.height(8.dp))
+
+            // --- Title ---
+            OutlinedTextField(
+                value = viewModel.title,
+                singleLine = true,
+                onValueChange = { viewModel.onTitleChanged(it) },
+                label = { Text("Title") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(titleFocusRequester),
+                isError = !viewModel.isTitleValid && viewModel.title.isNotEmpty(),
+            )
+            Spacer(Modifier.height(8.dp))
+
+            // --- Description ---
+            OutlinedTextField(
+                value = viewModel.description,
+                onValueChange = { viewModel.onDescriptionChanged(it) },
+                label = { Text("Description") },
+                maxLines = 3,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+
+            // --- Priority ---
+            Text("Priority", style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(4.dp))
+            SingleChoiceSegmentedButton(
+                value = viewModel.priority,
+                onValueChange = { viewModel.onPriorityChanged(it) }
+            )
+            Spacer(Modifier.height(16.dp))
+
+            // --- Add Button ---
+            Button(
+                onClick = {
+                    val currentListId = viewModel.taskLists[selectedListIndex].id
+                    viewModel.createTask(currentListId)
+                    onDismiss()
+                    viewModel.resetTaskForm()
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Add")
+            }
+        }
+    }
+}
+
+@Composable
 fun AddNewTaskButton(onClick: () -> Unit) {
     ExtendedFloatingActionButton(
-        onClick = { onClick() },
+        onClick = onClick,
         icon = { Icon(Icons.Filled.Add, "Create a task.") },
         text = { Text(text = "Create a task") },
     )
+}
+
+@Composable
+fun SingleChoiceSegmentedButton(
+    value: Priority,
+    onValueChange: (Priority) -> Unit) {
+    val options = listOf(Priority.LOW.label, Priority.NORMAL.label, Priority.HIGH.label)
+
+    SingleChoiceSegmentedButtonRow {
+        options.forEachIndexed { index, label ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = options.size
+                ),
+                onClick = { onValueChange(Priority.fromValue(index)) },
+                selected = index == value.value,
+                label = { Text(label) }
+            )
+        }
+    }
 }

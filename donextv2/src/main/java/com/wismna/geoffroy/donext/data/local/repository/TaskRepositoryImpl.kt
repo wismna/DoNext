@@ -31,12 +31,8 @@ class TaskRepositoryImpl @Inject constructor(
         taskDao.markTaskDeleted(taskId, isDeleted)
     }
 
-    override suspend fun closeTask(taskId: Long, isDone: Boolean) {
+    override suspend fun toggleTaskDone(taskId: Long, isDone: Boolean) {
         taskDao.markTaskDone(taskId, isDone)
-    }
-
-    override suspend fun increaseTaskCycle(taskId: Long) {
-        taskDao.increaseCycle(taskId)
     }
 
     override fun getTaskLists(): Flow<List<TaskList>> {

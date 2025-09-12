@@ -7,15 +7,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wismna.geoffroy.donext.domain.model.Task
+import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDoneUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTasksForListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
     getTasks: GetTasksForListUseCase,
+    private val toggleTaskDone: ToggleTaskDoneUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -34,5 +37,11 @@ class TaskListViewModel @Inject constructor(
                 isLoading = false
             }
             .launchIn(viewModelScope)
+    }
+
+    fun updateTaskDone(taskId: Long, isDone: Boolean) {
+        viewModelScope.launch {
+            toggleTaskDone(taskId, isDone)
+        }
     }
 }

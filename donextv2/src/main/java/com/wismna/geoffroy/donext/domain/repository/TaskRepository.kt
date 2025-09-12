@@ -9,8 +9,7 @@ interface TaskRepository {
     suspend fun insertTask(task: Task)
     suspend fun updateTask(task: Task)
     suspend fun deleteTask(taskId: Long, isDeleted: Boolean)
-    suspend fun closeTask(taskId: Long, isDone: Boolean)
-    suspend fun increaseTaskCycle(taskId: Long)
+    suspend fun toggleTaskDone(taskId: Long, isDone: Boolean)
 
     fun getTaskLists(): Flow<List<TaskList>>
     suspend fun insertTaskList(taskList: TaskList)

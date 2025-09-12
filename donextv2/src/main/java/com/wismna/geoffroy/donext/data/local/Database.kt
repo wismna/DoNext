@@ -41,9 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         name TEXT NOT NULL,
                         description TEXT,
-                        cycle INTEGER NOT NULL DEFAULT 0,
                         priority INTEGER NOT NULL,
-                        display_order INTEGER NOT NULL,
                         done INTEGER NOT NULL DEFAULT 0,
                         deleted INTEGER NOT NULL DEFAULT 0,
                         task_list_id INTEGER NOT NULL,
@@ -57,16 +55,14 @@ abstract class AppDatabase : RoomDatabase() {
                     db.execSQL(
                         """
                     INSERT INTO tasks_new (
-                        id, name, description, cycle, priority, display_order,
+                        id, name, description, priority,
                         done, deleted, task_list_id, due_date
                     )
                     SELECT 
                         _id,            -- old '_id' mapped to id
                         name,
                         description,
-                        cycle,
                         priority,
-                        displayorder,   -- old 'displayorder' mapped to display_order
                         done,
                         deleted,
                         list,           -- old 'list' mapped to task_list_id

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.domain.usecase.AddTaskUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
@@ -30,6 +31,8 @@ class MainViewModel @Inject constructor(
         private set
     var description by mutableStateOf("")
         private set
+    var priority by mutableStateOf(Priority.NORMAL)
+        private set
 
     val isTitleValid: Boolean
         get() = title.isNotBlank()
@@ -46,15 +49,23 @@ class MainViewModel @Inject constructor(
     fun createTask(taskListId: Long) {
         if (!isTitleValid) return
         viewModelScope.launch {
-            addTask(taskListId, title, description)
+            addTask(taskListId, title, description, priority)
         }
     }
 
     fun onTitleChanged(newTitle: String) {
         title = newTitle
     }
-
     fun onDescriptionChanged(newDesc: String) {
         description = newDesc
+    }
+    fun onPriorityChanged(newPriority: Priority) {
+        priority = newPriority
+    }
+
+    fun resetTaskForm() {
+        title = ""
+        description = ""
+        priority = Priority.NORMAL
     }
 }
