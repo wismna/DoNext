@@ -85,7 +85,7 @@ fun TaskBottomSheet(
 
             // --- Priority ---
             Row (
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(start = 17.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
                 Text("Priority", style = MaterialTheme.typography.labelLarge)
