@@ -25,7 +25,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,8 +35,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
-import java.time.ZoneId
+import java.time.Instant
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +47,6 @@ fun TaskBottomSheet(
     onDismiss: () -> Unit
 ) {
     val titleFocusRequester = remember { FocusRequester() }
-    var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         titleFocusRequester.requestFocus()
@@ -98,11 +98,15 @@ fun TaskBottomSheet(
 
             // --- Due Date ---
             var showDatePicker by remember { mutableStateOf(false) }
+            val formattedDate = viewModel.dueDate?.let {
+                Instant.ofEpochMilli(it)
+                    .atZone(ZoneOffset.UTC)
+                    .toLocalDate()
+                    .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+            } ?: ""
 
             OutlinedTextField(
-                value = viewModel.dueDate?.atZone(ZoneId.systemDefault())
-                    ?.toLocalDate()
-                    ?.format(DateTimeFormatter.ofPattern("MMM d, yyyy")) ?: "",
+                value = formattedDate,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Due Date") },
@@ -122,9 +126,7 @@ fun TaskBottomSheet(
             )
 
             if (showDatePicker) {
-                val datePickerState = rememberDatePickerState(
-                    initialSelectedDateMillis = viewModel.dueDate?.toEpochMilli()
-                )
+                val datePickerState = rememberDatePickerState(initialSelectedDateMillis = viewModel.dueDate)
 
                 DatePickerDialog(
                     onDismissRequest = { showDatePicker = false },
@@ -144,7 +146,9 @@ fun TaskBottomSheet(
 
             Spacer(Modifier.height(16.dp))
 
-            Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = if (viewModel.isEditing()) Arrangement.SpaceBetween else Arrangement.End) {
                 // --- Delete Button ---
                 if (viewModel.isEditing()) {
                     Button(

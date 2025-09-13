@@ -17,6 +17,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -28,6 +29,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 @Composable
 fun TaskListScreen(viewModel: TaskListViewModel = hiltViewModel(), onTaskClick: (Task) -> Unit) {
@@ -74,13 +78,23 @@ fun TaskItem(
     onClick: () -> Unit,
     onToggleDone: (Boolean) -> Unit
 ) {
+    val today = remember {
+        LocalDate.now(ZoneOffset.UTC)
+    }
+    val isOverdue = task.dueDate?.let { millis ->
+        val dueDate = Instant.ofEpochMilli(millis)
+            .atZone(ZoneOffset.UTC)
+            .toLocalDate()
+        dueDate.isBefore(today)
+    } ?: false
+
     val baseStyle = MaterialTheme.typography.bodyLarge.copy(
     fontWeight = when (task.priority) {
         Priority.HIGH -> FontWeight.Bold
         Priority.NORMAL -> FontWeight.Normal
         Priority.LOW -> FontWeight.Normal
     },
-    color = when (task.priority) {
+    color = if (isOverdue && !task.isDone) MaterialTheme.colorScheme.error else when (task.priority) {
         Priority.HIGH -> MaterialTheme.colorScheme.onSurface
         Priority.NORMAL -> MaterialTheme.colorScheme.onSurface
         Priority.LOW -> MaterialTheme.colorScheme.onSurfaceVariant

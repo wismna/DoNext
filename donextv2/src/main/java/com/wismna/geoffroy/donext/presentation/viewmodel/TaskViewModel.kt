@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.presentation.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,7 +12,6 @@ import com.wismna.geoffroy.donext.domain.usecase.DeleteTaskUseCase
 import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,7 +27,7 @@ class TaskViewModel @Inject constructor(
         private set
     var priority by mutableStateOf(Priority.NORMAL)
         private set
-    var dueDate by mutableStateOf<Instant?>(null)
+    var dueDate by mutableStateOf<Long?>(null)
         private set
 
     private var editingTaskId: Long? = null
@@ -58,10 +56,7 @@ class TaskViewModel @Inject constructor(
     fun onTitleChanged(value: String) { title = value }
     fun onDescriptionChanged(value: String) { description = value }
     fun onPriorityChanged(value: Priority) { priority = value }
-    fun onDueDateChanged(value: Long?) {
-        dueDate = value?.let { Instant.ofEpochMilli(it) }
-        Log.d("TaskViewModel", "onDueDateChanged -> $dueDate (millis=$value)")
-    }
+    fun onDueDateChanged(value: Long?) { dueDate = value }
 
         fun save(onDone: (() -> Unit)? = null) {
         if (title.isBlank()) return

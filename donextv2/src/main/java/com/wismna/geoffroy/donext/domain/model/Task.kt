@@ -1,7 +1,5 @@
 package com.wismna.geoffroy.donext.domain.model
 
-import java.time.Instant
-
 data class Task(
     val id: Long? = null,
     val name: String,
@@ -10,5 +8,5 @@ data class Task(
     val isDone: Boolean,
     val isDeleted: Boolean,
     val taskListId: Long,
-    val dueDate: Instant? = null
+    val dueDate: Long? = null
 )
