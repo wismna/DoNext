@@ -106,7 +106,7 @@ fun TaskItem(
             .fillMaxWidth()
             .clickable { onClick() }
             .padding(8.dp)
-            .alpha(if (task.isDone) 0.5f else 1f),
+            .alpha(if (task.isDone || task.priority == Priority.LOW) 0.5f else 1f),
     ) {
             Checkbox(
                 checked = task.isDone,
