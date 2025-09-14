@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,11 +33,11 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 
 @Composable
-fun TaskListScreen(viewModel: TaskListViewModel = hiltViewModel(), onTaskClick: (Task) -> Unit) {
+fun TaskListScreen(modifier: Modifier = Modifier, viewModel: TaskListViewModel = hiltViewModel(), onTaskClick: (Task) -> Unit) {
     val tasks = viewModel.tasks
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        //modifier = Modifier.fillMaxSize()
     ) {
         itemsIndexed(tasks, key = { _, task -> task.id!! }) { index, task ->
             if (index > 0) {
