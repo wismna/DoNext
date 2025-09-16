@@ -20,7 +20,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -35,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
+import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -189,6 +193,27 @@ fun TaskBottomSheet(
                     Text(if (viewModel.isEditing()) "Save" else "Create")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun SingleChoiceSegmentedButton(
+    value: Priority,
+    onValueChange: (Priority) -> Unit) {
+    val options = listOf(Priority.LOW.label, Priority.NORMAL.label, Priority.HIGH.label)
+
+    SingleChoiceSegmentedButtonRow {
+        options.forEachIndexed { index, label ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = options.size
+                ),
+                onClick = { onValueChange(Priority.fromValue(index)) },
+                selected = index == value.value,
+                label = { Text(label) }
+            )
         }
     }
 }

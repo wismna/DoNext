@@ -35,7 +35,7 @@ fun TaskListEntity.toDomain() = TaskList(
 )
 
 fun TaskList.toEntity() = TaskListEntity(
-    id = id,
+    id = id ?: 0,
     name = name,
     isDeleted = isDeleted,
     order = order

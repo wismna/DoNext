@@ -12,27 +12,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
-sealed class AppDestination(
-    val route: String,
-    val title: String,
-    val showFab: Boolean = false,
-    val showBackButton: Boolean = false
-) {
-    data class TaskList(val taskListId: Long, val name: String) : AppDestination(
-        route = "taskList/$taskListId",
-        title = name,
-        showFab = true,
-        showBackButton = false
-    )
-
-    object ManageLists : AppDestination(
-        route = "manageLists",
-        title = "Manage Lists",
-        showFab = false,
-        showBackButton = true
-    )
-}
-
 @HiltViewModel
 class MainViewModel @Inject constructor(
     getTaskListsWithOverdue: GetTaskListsWithOverdueUseCase
@@ -40,9 +19,9 @@ class MainViewModel @Inject constructor(
 
     var taskLists by mutableStateOf<List<TaskListWithOverdue>>(emptyList())
         private set
-    val destinations: List<AppDestination>
+    /*val destinations: List<AppDestination>
         get() = taskLists.map { AppDestination.TaskList(it.id, it.name) } +
-                AppDestination.ManageLists
+                AppDestination.ManageLists*/
     var isLoading by mutableStateOf(true)
         private set
 

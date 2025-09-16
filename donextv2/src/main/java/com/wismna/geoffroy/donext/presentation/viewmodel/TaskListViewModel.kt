@@ -24,7 +24,6 @@ class TaskListViewModel @Inject constructor(
 
     var tasks by mutableStateOf<List<Task>>(emptyList())
         private set
-
     var isLoading by mutableStateOf(true)
         private set
 

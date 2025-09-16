@@ -1,0 +1,74 @@
+package com.wismna.geoffroy.donext.presentation.screen
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material3.Badge
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
+
+@Composable
+fun MenuScreen(
+    taskLists: List<TaskListWithOverdue>,
+    currentDestination: AppDestination,
+    onNavigate: (String) -> Unit
+) {
+    ModalDrawerSheet(
+        drawerContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        drawerContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(vertical = 8.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    text = "Task Lists",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+                taskLists.forEach { list ->
+                    NavigationDrawerItem(
+                        label = { Text(list.name) },
+                        icon = { Icon(Icons.Default.List, contentDescription = list.name) },
+                        selected = currentDestination is AppDestination.TaskList &&
+                                currentDestination.taskListId == list.id,
+                        onClick = { onNavigate("taskList/${list.id}") },
+                        badge = {
+                            if (list.overdueCount > 0) {
+                                Badge { Text(list.overdueCount.toString()) }
+                            }
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                }
+            }
+
+            Column {
+                HorizontalDivider()
+                NavigationDrawerItem(
+                    label = { Text("Edit Lists") },
+                    icon = { Icon(Icons.Default.Edit, contentDescription = "Edit Lists") },
+                    selected = currentDestination is AppDestination.ManageLists,
+                    onClick = { onNavigate(AppDestination.ManageLists.route) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+            }
+        }
+    }
+}

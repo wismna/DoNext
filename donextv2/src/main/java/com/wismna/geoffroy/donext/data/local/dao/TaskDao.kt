@@ -25,6 +25,6 @@ interface TaskDao {
     @Query("UPDATE tasks SET deleted = :deleted WHERE id = :taskId")
     suspend fun markTaskDeleted(taskId: Long, deleted: Boolean)
 
-    @Query("UPDATE tasks SET deleted = :deleted WHERE id = :taskListId")
+    @Query("UPDATE tasks SET deleted = :deleted WHERE task_list_id = :taskListId")
     suspend fun deleteAllTasksFromList(taskListId: Long, deleted: Boolean)
 }
