@@ -29,6 +29,8 @@ class TaskViewModel @Inject constructor(
         private set
     var dueDate by mutableStateOf<Long?>(null)
         private set
+    var isDone by mutableStateOf(false)
+        private set
 
     private var editingTaskId: Long? = null
     private var taskListId: Long? = null
@@ -51,6 +53,7 @@ class TaskViewModel @Inject constructor(
         description = task.description ?: ""
         priority = task.priority
         dueDate = task.dueDate
+        isDone = task.isDone
     }
 
     fun onTitleChanged(value: String) { title = value }
@@ -63,7 +66,7 @@ class TaskViewModel @Inject constructor(
 
         viewModelScope.launch {
             if (isEditing()) {
-                updateTaskUseCase(editingTaskId!!, taskListId!!, title, description, priority, dueDate)
+                updateTaskUseCase(editingTaskId!!, taskListId!!, title, description, priority, dueDate, isDone)
             } else {
                 createTaskUseCase(taskListId!!, title, description, priority, dueDate)
             }

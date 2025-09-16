@@ -15,5 +15,5 @@ interface TaskRepository {
     fun getTaskLists(): Flow<List<TaskList>>
     suspend fun insertTaskList(taskList: TaskList)
     suspend fun deleteTaskList(taskListId: Long, isDeleted: Boolean)
-    fun getTaskListsWithOverdue(): Flow<List<TaskListWithOverdue>>
+    fun getTaskListsWithOverdue(nowMillis: Long): Flow<List<TaskListWithOverdue>>
 }

@@ -8,15 +8,15 @@ import javax.inject.Inject
 class UpdateTaskUseCase @Inject constructor(
     private val repository: TaskRepository
 ) {
-    suspend operator fun invoke(taskId: Long, taskListId: Long, title: String, description: String?, priority: Priority, dueDate: Long?) {
+    suspend operator fun invoke(taskId: Long, taskListId: Long, title: String, description: String?, priority: Priority, dueDate: Long?, isDone: Boolean) {
         repository.updateTask(
             Task(
                 id = taskId,
                 taskListId = taskListId,
                 name = title,
-                description = description ?: "",
+                description = description,
                 isDeleted = false,
-                isDone = false,
+                isDone = isDone,
                 priority = priority,
                 dueDate = dueDate
             )

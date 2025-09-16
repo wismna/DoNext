@@ -15,14 +15,14 @@ interface TaskListDao {
     fun getTaskLists(): Flow<List<TaskListEntity>>
 
     @Query("""
-                SELECT 
+        SELECT 
           tl.id AS id,
           tl.name AS name,
           COALESCE(SUM(
             CASE 
               WHEN t.done = 0 
-                   AND t.due_date IS NOT NULL 
-                   AND t.due_date < :today 
+               AND t.due_date IS NOT NULL 
+               AND t.due_date < :nowMillis
               THEN 1 
               ELSE 0 
             END
@@ -31,7 +31,7 @@ interface TaskListDao {
         LEFT JOIN tasks t ON t.task_list_id = tl.id
         GROUP BY tl.id
     """)
-    fun getTaskListsWithOverdue(today: Long): Flow<List<TaskListWithOverdue>>
+    fun getTaskListsWithOverdue(nowMillis: Long): Flow<List<TaskListWithOverdue>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTaskList(taskList: TaskListEntity)

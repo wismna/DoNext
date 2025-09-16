@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +46,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.wismna.geoffroy.donext.domain.model.Priority
@@ -51,8 +56,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel = hiltViewModel<MainViewModel>()) {
     val navController = rememberNavController()
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -68,6 +73,9 @@ fun MainScreen(
         var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         val scope = rememberCoroutineScope()
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination?.route
+        val isManageLists = currentDestination == "manageLists"
 
         if (showBottomSheet) {
             TaskBottomSheet(taskViewModel, { showBottomSheet = false })
@@ -80,24 +88,42 @@ fun MainScreen(
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp)
                     )
-                    viewModel.taskLists.forEachIndexed { index, list ->
+                    viewModel.taskLists.forEachIndexed { index, destination ->
                         NavigationDrawerItem(
-                            label = { Text(list.name) },
+                            label = { Text(destination.name) },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.List,
+                                    contentDescription = destination.name
+                            )},
                             selected = selectedDestination == index,
                             onClick = {
-                                selectedDestination = index
                                 scope.launch { drawerState.close() }
+                                navController.navigate(route = "taskList/${destination.id}")
+                                selectedDestination = index
                             },
                             badge = {
-                                if (list.overdueCount > 0) {
+                                if (destination.overdueCount > 0) {
                                     Badge {
-                                        Text(list.overdueCount.toString())
+                                        Text(destination.overdueCount.toString())
                                     }
                                 }
                             },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                         )
                     }
+
+                    HorizontalDivider(modifier = Modifier)
+                    NavigationDrawerItem(
+                        label = { Text("Edit Lists") },
+                        icon = { Icon(Icons.Default.Edit, contentDescription = "Edit Lists") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navController.navigate("manageLists")
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
                 }
             },
             drawerState = drawerState
@@ -105,19 +131,30 @@ fun MainScreen(
             Scaffold(
                 modifier = modifier,
                 floatingActionButton = {
-                    AddNewTaskButton {
-                        val currentListId = viewModel.taskLists[selectedDestination].id
-                        taskViewModel.startNewTask(currentListId)
-                        showBottomSheet = true
+                    if (!isManageLists) {
+                        AddNewTaskButton {
+                            val currentListId = viewModel.taskLists[selectedDestination].id
+                            taskViewModel.startNewTask(currentListId)
+                            showBottomSheet = true
+                        }
                     }
                 }, topBar = {
-                    // TODO: add list title
-                    // TODO: add button such as edit and delete
                     TopAppBar(
-                        title = { Text(viewModel.taskLists.getOrNull(selectedDestination)?.name ?: "Tasks") },
+                        title = {
+                            Text(
+                                if (isManageLists) "Manage Lists"
+                                else viewModel.taskLists.getOrNull(selectedDestination)?.name ?: "Tasks"
+                            )
+                        },
                         navigationIcon = {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Open navigation drawer")
+                            if (isManageLists) {
+                                IconButton(onClick = { navController.popBackStack() }) {
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                                }
+                            } else {
+                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Open navigation drawer")
+                                }
                             }
                         }
                     )
@@ -140,6 +177,12 @@ fun MainScreen(
                                         showBottomSheet = true
                                     })
                             }
+                        }
+                        composable("manageLists") {
+                            ManageListsScreen(
+                                modifier = Modifier.padding(contentPadding),
+                                onBackClick = { navController.popBackStack() }
+                            )
                         }
                     }
             }

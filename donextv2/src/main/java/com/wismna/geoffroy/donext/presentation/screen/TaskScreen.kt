@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -36,6 +37,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -64,6 +67,7 @@ fun TaskBottomSheet(
             OutlinedTextField(
                 value = viewModel.title,
                 singleLine = true,
+                readOnly = viewModel.isDone,
                 onValueChange = { viewModel.onTitleChanged(it) },
                 label = { Text("Title") },
                 modifier = Modifier
@@ -76,6 +80,7 @@ fun TaskBottomSheet(
             // --- Description ---
             OutlinedTextField(
                 value = viewModel.description,
+                readOnly = viewModel.isDone,
                 onValueChange = { viewModel.onDescriptionChanged(it) },
                 label = { Text("Description") },
                 maxLines = 3,
@@ -113,11 +118,15 @@ fun TaskBottomSheet(
                 trailingIcon = {
                     Row {
                         if (viewModel.dueDate != null) {
-                            IconButton(onClick = { viewModel.onDueDateChanged(null) }) {
+                            IconButton(
+                                onClick = { viewModel.onDueDateChanged(null) },
+                                enabled = !viewModel.isDone) {
                                 Icon(Icons.Default.Clear, contentDescription = "Clear due date")
                             }
                         }
-                        IconButton(onClick = { showDatePicker = true }) {
+                        IconButton(
+                            onClick = { showDatePicker = true },
+                            enabled = !viewModel.isDone) {
                             Icon(Icons.Default.DateRange, contentDescription = "Pick due date")
                         }
                     }
@@ -126,7 +135,18 @@ fun TaskBottomSheet(
             )
 
             if (showDatePicker) {
-                val datePickerState = rememberDatePickerState(initialSelectedDateMillis = viewModel.dueDate)
+                val datePickerState = rememberDatePickerState(
+                    initialSelectedDateMillis = viewModel.dueDate,
+                    selectableDates = object: SelectableDates {
+                        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                            val todayStartMillis = LocalDate.now()
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant()
+                                .toEpochMilli()
+                            return utcTimeMillis >= todayStartMillis
+                        }
+                    }
+                )
 
                 DatePickerDialog(
                     onDismissRequest = { showDatePicker = false },
@@ -164,8 +184,7 @@ fun TaskBottomSheet(
                         viewModel.save()
                         onDismiss()
                     },
-                    enabled = viewModel.title.isNotBlank(),
-                    //modifier = Modifier.align(Alignment.End)
+                    enabled = viewModel.title.isNotBlank() && !viewModel.isDone,
                 ) {
                     Text(if (viewModel.isEditing()) "Save" else "Create")
                 }

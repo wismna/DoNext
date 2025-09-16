@@ -8,10 +8,10 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.wismna.geoffroy.donext.data.Converters
-import com.wismna.geoffroy.donext.data.local.dao.TaskDao
-import com.wismna.geoffroy.donext.data.local.dao.TaskListDao
 import com.wismna.geoffroy.donext.data.entities.TaskEntity
 import com.wismna.geoffroy.donext.data.entities.TaskListEntity
+import com.wismna.geoffroy.donext.data.local.dao.TaskDao
+import com.wismna.geoffroy.donext.data.local.dao.TaskListDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,41 +34,44 @@ abstract class AppDatabase : RoomDatabase() {
                 db.beginTransaction()
                 try {
                     // --- TASKS TABLE ---
+
+                    // 0. Convert old due date format
+                    // Add temporary column
+                    db.execSQL("ALTER TABLE tasks ADD COLUMN duedate_temp INTEGER")
+                    // Populate temporary column
+                    db.execSQL("""
+                        UPDATE tasks
+                        SET duedate_temp = 
+                            CASE
+                                WHEN duedate IS NULL OR duedate = '' THEN NULL
+                                ELSE (strftime('%s', duedate || 'T00:00:00Z') * 1000)
+                            END
+                    """.trimIndent())
+
                     // 1. Create the new tasks table with the updated schema
                     db.execSQL(
                         """
-                    CREATE TABLE tasks_new (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        name TEXT NOT NULL,
-                        description TEXT,
-                        priority INTEGER NOT NULL,
-                        done INTEGER NOT NULL DEFAULT 0,
-                        deleted INTEGER NOT NULL DEFAULT 0,
-                        task_list_id INTEGER NOT NULL,
-                        due_date INTEGER
-                    )
-                """.trimIndent()
+                        CREATE TABLE tasks_new (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            name TEXT NOT NULL,
+                            description TEXT,
+                            priority INTEGER NOT NULL,
+                            done INTEGER NOT NULL DEFAULT 0,
+                            deleted INTEGER NOT NULL DEFAULT 0,
+                            task_list_id INTEGER NOT NULL,
+                            due_date INTEGER
+                        )
+                        """.trimIndent()
                     )
 
                     // 2. Copy old data into the new table
                     // Map old column names to new ones
                     db.execSQL(
                         """
-                    INSERT INTO tasks_new (
-                        id, name, description, priority,
-                        done, deleted, task_list_id, due_date
-                    )
-                    SELECT 
-                        _id,            -- old '_id' mapped to id
-                        name,
-                        description,
-                        priority,
-                        done,
-                        deleted,
-                        list,           -- old 'list' mapped to task_list_id
-                        duedate         -- old column renamed to due_date
-                    FROM tasks
-                """.trimIndent()
+                        INSERT INTO tasks_new (id, name, description, priority,done, deleted, task_list_id, due_date)
+                        SELECT _id, name, description, priority, done, deleted, list, duedate_temp
+                        FROM tasks
+                        """.trimIndent()
                     )
 
                     // 3. Drop the old table
@@ -80,27 +83,21 @@ abstract class AppDatabase : RoomDatabase() {
                     // --- TASK_LISTS TABLE ---
                     db.execSQL(
                         """
-                    CREATE TABLE task_lists_new (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        name TEXT NOT NULL,
-                        deleted INTEGER NOT NULL DEFAULT 0,
-                        display_order INTEGER NOT NULL
-                    )
-                """.trimIndent()
+                        CREATE TABLE task_lists_new (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            name TEXT NOT NULL,
+                            deleted INTEGER NOT NULL DEFAULT 0,
+                            display_order INTEGER NOT NULL
+                        )
+                    """.trimIndent()
                     )
 
                     db.execSQL(
                         """
-                    INSERT INTO task_lists_new (
-                        id, name, display_order, deleted
-                    )
-                    SELECT 
-                        _id,            -- old '_id' mapped to id
-                        name,
-                        displayorder,   -- old 'displayorder' mapped to display_order
-                        1 - visible     -- old 'visible' mapped to deleted
-                    FROM tasklist
-                """.trimIndent()
+                        INSERT INTO task_lists_new (id, name, display_order, deleted)
+                        SELECT _id, name, displayorder, 1 - visible
+                        FROM tasklist
+                    """.trimIndent()
                     )
 
                     db.execSQL("DROP TABLE tasklist")
