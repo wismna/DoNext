@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,37 +40,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
+import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.presentation.viewmodel.MainViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
-
-sealed class AppDestination(
-    val route: String,
-    val title: String,
-    val showBackButton: Boolean = false,
-    val actions: @Composable (() -> Unit)? = null
-) {
-    data class TaskList(val taskListId: Long, val name: String) : AppDestination(
-        route = "taskList/$taskListId",
-        title = name,
-    )
-
-    object ManageLists : AppDestination(
-        route = "manageLists",
-        title = "Manage Lists",
-        showBackButton = true,
-        actions = { ManageListsActions() }
-    )
-}
 
 @Composable
 fun MainScreen(
@@ -77,7 +58,8 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showTaskSheet by remember { mutableStateOf(false) }
+    var showAddListSheet by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val taskViewModel: TaskViewModel = hiltViewModel()
@@ -89,20 +71,22 @@ fun MainScreen(
         return
     }
 
-    val firstListId = viewModel.taskLists.firstOrNull()?.id
-    if (showBottomSheet) {
-        TaskBottomSheet(taskViewModel) { showBottomSheet = false }
+    val startDestination = viewModel.destinations.firstOrNull() ?: AppDestination.ManageLists
+    if (showTaskSheet) {
+        TaskBottomSheet(taskViewModel) { showTaskSheet = false }
+    }
+    if (showAddListSheet) {
+        AddListBottomSheet { showAddListSheet = false }
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = remember(navBackStackEntry, viewModel.taskLists) {
-        deriveDestination(navBackStackEntry, viewModel.taskLists)
-    }
+    val currentDestination =
+        viewModel.deriveDestination(navBackStackEntry?.destination?.route)
+        ?: startDestination
 
     ModalNavigationDrawer(
         drawerContent = {
             MenuScreen (
-                taskLists = viewModel.taskLists,
                 currentDestination = currentDestination,
                 onNavigate = { route ->
                     scope.launch { drawerState.close() }
@@ -119,7 +103,7 @@ fun MainScreen(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    title = { Text(currentDestination.title) },
+                    title = { Text(currentDestination!!.title) },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -127,7 +111,7 @@ fun MainScreen(
                     ),
                     navigationIcon = {
                         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
-                            if (currentDestination.showBackButton) {
+                            if (currentDestination!!.showBackButton) {
                                 IconButton(onClick = { navController.popBackStack() }) {
                                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                                 }
@@ -141,7 +125,13 @@ fun MainScreen(
                             }
                         }
                     },
-                    actions = { currentDestination.actions?.invoke() }
+                    actions = {
+                        if (currentDestination is AppDestination.ManageLists) {
+                            IconButton(onClick = { showAddListSheet = true }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add List")
+                            }
+                        }
+                    }
                 )
             },
             floatingActionButton = {
@@ -149,7 +139,7 @@ fun MainScreen(
                     is AppDestination.TaskList -> {
                         TaskListFab(
                             taskListId = dest.taskListId,
-                            showBottomSheet = { showBottomSheet = it }
+                            showBottomSheet = { showTaskSheet = it }
                         )
                     }
                     else -> null
@@ -165,8 +155,7 @@ fun MainScreen(
             ) {
                 NavHost(
                     navController = navController,
-                    startDestination = firstListId?.let { "taskList/$it" }
-                        ?: AppDestination.ManageLists.route,
+                    startDestination = startDestination.route,
                     enterTransition = {
                         slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(300))
                     },
@@ -180,7 +169,7 @@ fun MainScreen(
                         slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(300))
                     }
                 ) {
-                    viewModel.taskLists.forEach { list ->
+                    viewModel.destinations.forEach { destination ->
                         composable(
                             route = "taskList/{taskListId}",
                             arguments = listOf(navArgument("taskListId") {
@@ -192,40 +181,20 @@ fun MainScreen(
                                 viewModel = viewModel,
                                 onTaskClick = { task ->
                                     taskViewModel.startEditTask(task)
-                                    showBottomSheet = true
+                                    showTaskSheet = true
                                 }
                             )
                         }
                     }
 
                     composable(AppDestination.ManageLists.route) {
-                        ManageListsScreen(modifier = Modifier)
+                        ManageListsScreen(
+                            modifier = Modifier,
+                            showAddListSheet = {showAddListSheet = true}
+                        )
                     }
                 }
             }
-        }
-    }
-}
-
-fun deriveDestination(
-    navBackStackEntry: NavBackStackEntry?,
-    taskLists: List<TaskListWithOverdue>
-): AppDestination {
-    val route = navBackStackEntry?.destination?.route
-
-    return when {
-        route == AppDestination.ManageLists.route -> AppDestination.ManageLists
-        route?.startsWith("taskList/") == true || route == "taskList/{taskListId}" -> {
-            val idArg = navBackStackEntry.arguments?.getLong("taskListId")
-            val taskListId = idArg ?: route.substringAfter("taskList/", "").toLongOrNull()
-            val matching = taskLists.find { it.id == taskListId }
-            matching?.let { AppDestination.TaskList(it.id, it.name)  }
-                ?: taskLists.firstOrNull()?.let { AppDestination.TaskList(it.id, it.name) }
-                ?: AppDestination.ManageLists
-        }
-        else -> {
-            taskLists.firstOrNull()?.let { AppDestination.TaskList(it.id, it.name) }
-                ?: AppDestination.ManageLists
         }
     }
 }

@@ -18,11 +18,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.wismna.geoffroy.donext.domain.model.AppDestination
+import com.wismna.geoffroy.donext.presentation.viewmodel.MenuViewModel
 
 @Composable
 fun MenuScreen(
-    taskLists: List<TaskListWithOverdue>,
+    viewModel: MenuViewModel = hiltViewModel(),
     currentDestination: AppDestination,
     onNavigate: (String) -> Unit
 ) {
@@ -42,7 +44,7 @@ fun MenuScreen(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(16.dp)
                 )
-                taskLists.forEach { list ->
+                viewModel.taskLists.forEach { list ->
                     NavigationDrawerItem(
                         label = { Text(list.name) },
                         icon = { Icon(Icons.Default.List, contentDescription = list.name) },
