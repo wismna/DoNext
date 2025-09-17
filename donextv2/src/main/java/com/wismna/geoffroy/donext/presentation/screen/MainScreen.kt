@@ -107,7 +107,6 @@ fun MainScreen(
                 onNavigate = { route ->
                     scope.launch { drawerState.close() }
                     navController.navigate(route) {
-                        //launchSingleTop = true
                         restoreState = true
                     }
                 }

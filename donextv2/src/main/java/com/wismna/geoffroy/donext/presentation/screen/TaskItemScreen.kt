@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -88,23 +89,19 @@ fun TaskItemScreen(
 
             // Due date badge
             viewModel.dueDateText?.let { dueMillis ->
-                Box(
+                Badge(
                     modifier = Modifier
-                        .align(
-                            if (viewModel.description.isNullOrBlank()) Alignment.CenterEnd
-                            else Alignment.TopEnd
-                        )
-                        .background(
-                            color = if (viewModel.isOverdue) MaterialTheme.colorScheme.error
-                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .align(
+                        if (viewModel.description.isNullOrBlank()) Alignment.CenterEnd
+                        else Alignment.TopEnd
+                    ),
+                    containerColor = if (viewModel.isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
+                        modifier = Modifier.padding(start = 1.dp, end = 1.dp),
                         text = viewModel.dueDateText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (viewModel.isOverdue) Color.White else MaterialTheme.colorScheme.primary
+                        color = if (viewModel.isOverdue) Color.White else MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }

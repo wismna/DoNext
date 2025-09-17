@@ -143,8 +143,8 @@ fun TaskBottomSheet(
                     initialSelectedDateMillis = viewModel.dueDate,
                     selectableDates = object: SelectableDates {
                         override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                            val todayStartMillis = LocalDate.now()
-                                .atStartOfDay(ZoneId.systemDefault())
+                            val todayStartMillis = LocalDate.now(ZoneOffset.UTC)
+                                .atStartOfDay(ZoneOffset.UTC)
                                 .toInstant()
                                 .toEpochMilli()
                             return utcTimeMillis >= todayStartMillis
@@ -173,6 +173,7 @@ fun TaskBottomSheet(
             Row (
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = if (viewModel.isEditing()) Arrangement.SpaceBetween else Arrangement.End) {
+
                 // --- Delete Button ---
                 if (viewModel.isEditing()) {
                     Button(

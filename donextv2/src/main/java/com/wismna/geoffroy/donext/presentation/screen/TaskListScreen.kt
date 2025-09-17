@@ -1,19 +1,20 @@
 package com.wismna.geoffroy.donext.presentation.screen
 
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -29,36 +30,53 @@ fun TaskListScreen(
     onTaskClick: (Task) -> Unit) {
     val tasks = viewModel.tasks
 
+    // Split tasks into active and done
+    val (active, done) = remember(tasks) {
+        tasks.partition { !it.isDone }
+    }
+
     LazyColumn(
-        modifier = modifier.fillMaxSize().padding()
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        itemsIndexed(tasks, key = { id, task -> task.id!! }) { index, task ->
-            if (index > 0) {
-                val prev = tasks[index - 1]
-
-                when {
-                    // Divider between non-done and done tasks
-                    !prev.isDone && task.isDone -> {
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-
-                    // Extra spacing between different priorities (only if done status is same)
-                    prev.priority != task.priority && prev.isDone == task.isDone -> {
-                        Spacer(modifier = Modifier.height(20.dp))
-                    }
-                }
-            }
-
+        // Active tasks section
+        items(
+            items = active,
+            key = { it.id!! }
+        ) { task ->
             TaskItemScreen(
                 modifier = Modifier.animateItem(),
                 viewModel = TaskItemViewModel(task),
                 onClick = { onTaskClick(task) },
-                onToggleDone = { isChecked ->
-                    viewModel.updateTaskDone(task.id!!, isChecked)
+                onToggleDone = { checked ->
+                    viewModel.updateTaskDone(task.id!!, checked)
+                }
+            )
+        }
+
+        // Divider between active and done (optional)
+        if (done.isNotEmpty() && active.isNotEmpty()) {
+            item {
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                )
+            }
+        }
+
+        // Done tasks section
+        items(
+            items = done,
+            key = { it.id!! }
+        ) { task ->
+            TaskItemScreen(
+                modifier = Modifier.animateItem(),
+                viewModel = TaskItemViewModel(task),
+                onClick = { onTaskClick(task) },
+                onToggleDone = { checked ->
+                    viewModel.updateTaskDone(task.id!!, checked)
                 }
             )
         }

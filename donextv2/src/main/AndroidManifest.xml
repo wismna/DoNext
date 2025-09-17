@@ -7,7 +7,7 @@
         <activity
             android:name="com.wismna.geoffroy.donext.presentation.MainActivity"
             android:exported="true"
-            android:label="@string/title_activity_main"
+            android:label="DoNext"
             android:theme="@style/Theme.DoNext">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
