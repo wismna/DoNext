@@ -9,6 +9,7 @@ import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.domain.usecase.AddTaskListUseCase
 import com.wismna.geoffroy.donext.domain.usecase.DeleteTaskListUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
+import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class ManageListsViewModel @Inject constructor(
     getTaskListsUseCase: GetTaskListsUseCase,
     private val addTaskListUseCase: AddTaskListUseCase,
+    private val updateTaskListUseCase: UpdateTaskListUseCase,
     private val deleteTaskListUseCase: DeleteTaskListUseCase
 ) : ViewModel() {
 
@@ -36,6 +38,11 @@ class ManageListsViewModel @Inject constructor(
     fun createTaskList(title: String, order: Int) {
         viewModelScope.launch {
             addTaskListUseCase(title, order)
+        }
+    }
+    fun updateTaskListName(taskList: TaskList) {
+        viewModelScope.launch {
+            updateTaskListUseCase(taskList.id!!, taskList.name, taskList.order)
         }
     }
     fun deleteTaskList(taskId: Long) {

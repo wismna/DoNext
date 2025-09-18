@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,15 +32,13 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -50,6 +49,7 @@ import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.presentation.viewmodel.MainViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,8 +58,6 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    var showTaskSheet by remember { mutableStateOf(false) }
-    var showAddListSheet by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val taskViewModel: TaskViewModel = hiltViewModel()
@@ -71,23 +69,20 @@ fun MainScreen(
         return
     }
 
-    val startDestination = viewModel.destinations.firstOrNull() ?: AppDestination.ManageLists
-    if (showTaskSheet) {
-        TaskBottomSheet(taskViewModel) { showTaskSheet = false }
+    if (viewModel.showTaskSheet) {
+        TaskBottomSheet(taskViewModel) { viewModel.showTaskSheet = false }
     }
-    if (showAddListSheet) {
-        AddListBottomSheet { showAddListSheet = false }
+    if (viewModel.showAddListSheet) {
+        AddListBottomSheet { viewModel.showAddListSheet = false }
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination =
-        viewModel.deriveDestination(navBackStackEntry?.destination?.route)
-        ?: startDestination
+    viewModel.setCurrentDestination(navBackStackEntry)
 
     ModalNavigationDrawer(
         drawerContent = {
             MenuScreen (
-                currentDestination = currentDestination,
+                currentDestination = viewModel.currentDestination,
                 onNavigate = { route ->
                     scope.launch { drawerState.close() }
                     navController.navigate(route) {
@@ -98,101 +93,113 @@ fun MainScreen(
         },
         drawerState = drawerState
     ) {
-        Scaffold(
-            modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer),
-            containerColor = Color.Transparent,
-            topBar = {
-                TopAppBar(
-                    title = { Text(currentDestination!!.title) },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    navigationIcon = {
-                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
-                            if (currentDestination!!.showBackButton) {
-                                IconButton(onClick = { navController.popBackStack() }) {
-                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                                }
-                            } else {
-                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(
-                                        Icons.Default.Menu,
-                                        contentDescription = "Open navigation drawer"
-                                    )
-                                }
-                            }
-                        }
-                    },
-                    actions = {
-                        if (currentDestination is AppDestination.ManageLists) {
-                            IconButton(onClick = { showAddListSheet = true }) {
-                                Icon(Icons.Default.Add, contentDescription = "Add List")
-                            }
-                        }
-                    }
-                )
-            },
-            floatingActionButton = {
-                when (val dest = currentDestination) {
-                    is AppDestination.TaskList -> {
-                        TaskListFab(
-                            taskListId = dest.taskListId,
-                            showBottomSheet = { showTaskSheet = it }
-                        )
-                    }
-                    else -> null
-                }
-            }
-        ) { contentPadding ->
-            Surface(
-                modifier = Modifier
-                    .padding(top = contentPadding.calculateTopPadding())
-                    .fillMaxSize(),
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer,
-            ) {
-                NavHost(
-                    navController = navController,
-                    startDestination = startDestination.route,
-                    enterTransition = {
-                        slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(300))
-                    },
-                    exitTransition = {
-                        slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth }, animationSpec = tween(300))
-                    },
-                    popEnterTransition = {
-                        slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth }, animationSpec = tween(300))
-                    },
-                    popExitTransition = {
-                        slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(300))
-                    }
-                ) {
-                    viewModel.destinations.forEach { destination ->
-                        composable(
-                            route = "taskList/{taskListId}",
-                            arguments = listOf(navArgument("taskListId") {
-                                type = NavType.LongType
-                            })
-                        ) { navBackStackEntry ->
-                            val viewModel: TaskListViewModel = hiltViewModel(navBackStackEntry)
-                            TaskListScreen(
-                                viewModel = viewModel,
-                                onTaskClick = { task ->
-                                    taskViewModel.startEditTask(task)
-                                    showTaskSheet = true
-                                }
-                            )
-                        }
-                    }
+        AppContent(viewModel = viewModel, taskViewModel = taskViewModel, navController = navController, scope = scope, drawerState = drawerState)
+    }
+}
 
-                    composable(AppDestination.ManageLists.route) {
-                        ManageListsScreen(
-                            modifier = Modifier,
-                            showAddListSheet = {showAddListSheet = true}
+@Composable
+fun AppContent(
+    modifier : Modifier = Modifier,
+    viewModel: MainViewModel,
+    taskViewModel: TaskViewModel,
+    navController: NavHostController,
+    scope: CoroutineScope,
+    drawerState: DrawerState
+) {
+    Scaffold(
+        modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer),
+        containerColor = Color.Transparent,
+        topBar = {
+            TopAppBar(
+                title = { Text(viewModel.currentDestination.title) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                navigationIcon = {
+                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
+                        if (viewModel.currentDestination.showBackButton) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            }
+                        } else {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(
+                                    Icons.Default.Menu,
+                                    contentDescription = "Open navigation drawer"
+                                )
+                            }
+                        }
+                    }
+                },
+                actions = {
+                    if (viewModel.currentDestination is AppDestination.ManageLists) {
+                        IconButton(onClick = { viewModel.showAddListSheet = true }) {
+                            Icon(Icons.Default.Add, contentDescription = "Add List")
+                        }
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            when (val dest = viewModel.currentDestination) {
+                is AppDestination.TaskList -> {
+                    TaskListFab(
+                        taskListId = dest.taskListId,
+                        showBottomSheet = { viewModel.showTaskSheet = it }
+                    )
+                }
+                else -> null
+            }
+        }
+    ) { contentPadding ->
+        Surface(
+            modifier = Modifier
+                .padding(top = contentPadding.calculateTopPadding())
+                .fillMaxSize(),
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            color = MaterialTheme.colorScheme.surfaceContainer,
+        ) {
+            NavHost(
+                navController = navController,
+                startDestination = viewModel.startDestination.route,
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth }, animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth }, animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(300))
+                }
+            ) {
+                //viewModel.destinations.forEach { destination ->
+                    composable(
+                        route = "taskList/{taskListId}",
+                        arguments = listOf(navArgument("taskListId") {
+                            type = NavType.LongType
+                        })
+                    ) { navBackStackEntry ->
+                        val taskListViewModel: TaskListViewModel = hiltViewModel(navBackStackEntry)
+                        TaskListScreen(
+                            viewModel = taskListViewModel,
+                            onTaskClick = { task ->
+                                taskViewModel.startEditTask(task)
+                                viewModel.showTaskSheet = true
+                            }
                         )
                     }
+                //}
+
+                composable(AppDestination.ManageLists.route) {
+                    ManageListsScreen(
+                        modifier = Modifier,
+                        showAddListSheet = {viewModel.showAddListSheet = true}
+                    )
                 }
             }
         }

@@ -44,6 +44,10 @@ class TaskRepositoryImpl @Inject constructor(
         taskListDao.insertTaskList(taskList.toEntity())
     }
 
+    override suspend fun updateTaskList(taskList: TaskList) {
+        taskListDao.updateTaskList(taskList.toEntity())
+    }
+
     override suspend fun deleteTaskList(taskListId: Long, isDeleted: Boolean) {
         taskDao.deleteAllTasksFromList(taskListId, isDeleted)
         taskListDao.deleteTaskList(taskListId, isDeleted)
