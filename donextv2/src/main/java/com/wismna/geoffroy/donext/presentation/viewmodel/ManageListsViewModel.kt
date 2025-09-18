@@ -50,4 +50,21 @@ class ManageListsViewModel @Inject constructor(
             deleteTaskListUseCase(taskId)
         }
     }
+
+    fun moveTaskList(fromIndex: Int, toIndex: Int) {
+        val mutable = taskLists.toMutableList()
+        val item = mutable.removeAt(fromIndex)
+        mutable.add(toIndex, item)
+        taskLists = mutable
+    }
+
+    fun commitTaskListOrder() {
+        viewModelScope.launch {
+            taskLists.forEachIndexed { index, list ->
+                if (list.order != index) {
+                    updateTaskListUseCase(list.id!!, list.name, index)
+                }
+            }
+        }
+    }
 }

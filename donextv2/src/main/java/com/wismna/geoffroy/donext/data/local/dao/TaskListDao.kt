@@ -31,6 +31,7 @@ interface TaskListDao {
         LEFT JOIN tasks t ON t.task_list_id = tl.id
         WHERE tl.deleted = 0
         GROUP BY tl.id
+        ORDER BY tl.display_order ASC
     """)
     fun getTaskListsWithOverdue(nowMillis: Long): Flow<List<TaskListWithOverdue>>
 

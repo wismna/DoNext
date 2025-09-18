@@ -61,7 +61,7 @@ fun TaskBottomSheet(
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                "New Task",
+                if (viewModel.isEditing()) "Edit Task" else "New Task",
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(8.dp))

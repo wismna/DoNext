@@ -1,5 +1,10 @@
 package com.wismna.geoffroy.donext.presentation.screen
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,17 +14,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -32,12 +38,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.ManageListsViewModel
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,56 +58,132 @@ fun ManageListsScreen(
     viewModel: ManageListsViewModel = hiltViewModel(),
     showAddListSheet: () -> Unit
 ) {
-    val lists = viewModel.taskLists
+    var lists = viewModel.taskLists.toMutableList()
+    val lazyListState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(
+        lazyListState = lazyListState,
+        onMove = { from, to ->
+            viewModel.moveTaskList(from.index, to.index)
+        }
+    )
 
-    LazyColumn(modifier = modifier.fillMaxWidth().padding()) {
+    LazyColumn(modifier = modifier.fillMaxWidth().padding(), state = lazyListState) {
         itemsIndexed(lists, key = { _, list -> list.id!! }) { index, list ->
 
             var isInEditMode by remember { mutableStateOf(false) }
             var editedName by remember { mutableStateOf(list.name) }
-            ListItem(
-                modifier = Modifier.animateItem(),
-                headlineContent = {
-                    if (isInEditMode) {
-                        OutlinedTextField(
-                            value = editedName,
-                            onValueChange = { editedName = it },
-                            singleLine = true
-                        )
-                    } else {
-                        Text(list.name)
-                    }
-                },
-                trailingContent = {
-                    if (isInEditMode) {
-                        Row {
-                            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
-                                IconButton(onClick = { isInEditMode = false }) {
-                                    Icon(Icons.Default.Close, contentDescription = "Cancel")
-                                }
-                                IconButton(onClick = {
-                                    viewModel.updateTaskListName(list.copy(name = editedName))
-                                    isInEditMode = false
-                                }) {
-                                    Icon(Icons.Default.Check, contentDescription = "Save")
-                                }
+            ReorderableItem(
+                state =  reorderState,
+                key = list.id!!
+            ) {
+                val interactionSource = remember { MutableInteractionSource() }
+                Card(
+                    onClick = {},
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    ),
+                    modifier = Modifier.draggableHandle(
+                        onDragStopped = {
+                            viewModel.commitTaskListOrder()
+                        },
+                        interactionSource = interactionSource,
+                    )
+                        .clearAndSetSemantics {
+                            customActions = listOf(
+                                CustomAccessibilityAction(
+                                    label = "Move Up",
+                                    action = {
+                                        if (index > 0) {
+                                            lists = lists.toMutableList().apply {
+                                                add(index - 1, removeAt(index))
+                                            }
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                ),
+                                CustomAccessibilityAction(
+                                    label = "Move Down",
+                                    action = {
+                                        if (index < lists.size - 1) {
+                                            lists = lists.toMutableList().apply {
+                                                add(index + 1, removeAt(index))
+                                            }
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                ),
+                            )
+                        },
+                    interactionSource = interactionSource,
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AnimatedContent(
+                            //modifier = Modifier.padding(start = 12.dp),
+                            targetState = isInEditMode,
+                            transitionSpec = {
+                                fadeIn() togetherWith fadeOut()
+                            },
+                            label = "Headline transition"
+                        ) { isEditing ->
+                            if (isEditing) {
+                                OutlinedTextField(
+                                    value = editedName,
+                                    onValueChange = { editedName = it },
+                                    singleLine = true
+                                )
+                            } else {
+                                Text(list.name)
                             }
                         }
-                    } else {
-                        Row {
-                            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
-                                IconButton(onClick = { isInEditMode = true }) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        AnimatedContent(
+                            targetState = isInEditMode,
+                            transitionSpec = {
+                                fadeIn() togetherWith fadeOut()
+                            },
+                            label = "Trailing transition"
+                        ) { editing ->
+                            if (editing) {
+                                Row {
+                                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
+                                        IconButton(onClick = { isInEditMode = false }) {
+                                            Icon(Icons.Default.Close, contentDescription = "Cancel")
+                                        }
+                                        IconButton(onClick = {
+                                            viewModel.updateTaskListName(list.copy(name = editedName))
+                                            isInEditMode = false
+                                        }) {
+                                            Icon(Icons.Default.Check, contentDescription = "Save")
+                                        }
+                                    }
                                 }
-                                IconButton(onClick = { viewModel.deleteTaskList(list.id!!) }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete")
+                            } else {
+                                Row {
+                                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
+                                        IconButton(onClick = { isInEditMode = true }) {
+                                            Icon(Icons.Default.Edit, contentDescription = "Edit")
+                                        }
+                                        IconButton(onClick = { viewModel.deleteTaskList(list.id!!) }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Delete"
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            )
-            HorizontalDivider()
+            }
         }
     }
 }

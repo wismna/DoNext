@@ -40,7 +40,9 @@ class MainViewModel @Inject constructor(
                     AppDestination.TaskList(taskList.id!!, taskList.name)
                 } + AppDestination.ManageLists
                 isLoading = false
-                if (!destinations.isEmpty()) startDestination = destinations.first()
+                if (startDestination == AppDestination.ManageLists && destinations.isNotEmpty()) {
+                    startDestination = destinations.first()
+                }
             }
             .launchIn(viewModelScope)
     }
