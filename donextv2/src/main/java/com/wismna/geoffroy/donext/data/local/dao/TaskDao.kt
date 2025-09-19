@@ -20,11 +20,11 @@ interface TaskDao {
     suspend fun updateTask(task: TaskEntity)
 
     @Query("UPDATE tasks SET done = :done WHERE id = :taskId")
-    suspend fun markTaskDone(taskId: Long, done: Boolean)
+    suspend fun toggleTaskDone(taskId: Long, done: Boolean)
 
     @Query("UPDATE tasks SET deleted = :deleted WHERE id = :taskId")
-    suspend fun markTaskDeleted(taskId: Long, deleted: Boolean)
+    suspend fun toggleTaskDeleted(taskId: Long, deleted: Boolean)
 
     @Query("UPDATE tasks SET deleted = :deleted WHERE task_list_id = :taskListId")
-    suspend fun deleteAllTasksFromList(taskListId: Long, deleted: Boolean)
+    suspend fun toggleAllTasksFromListDeleted(taskListId: Long, deleted: Boolean)
 }

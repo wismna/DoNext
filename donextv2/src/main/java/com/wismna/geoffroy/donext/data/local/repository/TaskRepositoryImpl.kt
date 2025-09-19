@@ -29,11 +29,11 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteTask(taskId: Long, isDeleted: Boolean) {
-        taskDao.markTaskDeleted(taskId, isDeleted)
+        taskDao.toggleTaskDeleted(taskId, isDeleted)
     }
 
     override suspend fun toggleTaskDone(taskId: Long, isDone: Boolean) {
-        taskDao.markTaskDone(taskId, isDone)
+        taskDao.toggleTaskDone(taskId, isDone)
     }
 
     override fun getTaskLists(): Flow<List<TaskList>> {
@@ -49,7 +49,7 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteTaskList(taskListId: Long, isDeleted: Boolean) {
-        taskDao.deleteAllTasksFromList(taskListId, isDeleted)
+        taskDao.toggleAllTasksFromListDeleted(taskListId, isDeleted)
         taskListDao.deleteTaskList(taskListId, isDeleted)
     }
 

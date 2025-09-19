@@ -7,8 +7,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wismna.geoffroy.donext.domain.model.Task
-import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDoneUseCase
+import com.wismna.geoffroy.donext.domain.usecase.DeleteTaskListUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTasksForListUseCase
+import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDoneUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
     getTasks: GetTasksForListUseCase,
-    private val toggleTaskDone: ToggleTaskDoneUseCase,
+    private val toggleTaskDoneUseCase: ToggleTaskDoneUseCase,
+    private val deleteTaskListUseCase: DeleteTaskListUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -40,7 +42,12 @@ class TaskListViewModel @Inject constructor(
 
     fun updateTaskDone(taskId: Long, isDone: Boolean) {
         viewModelScope.launch {
-            toggleTaskDone(taskId, isDone)
+            toggleTaskDoneUseCase(taskId, isDone)
+        }
+    }
+    fun deleteTask(taskId: Long) {
+        viewModelScope.launch {
+            deleteTaskListUseCase(taskId)
         }
     }
 }

@@ -17,6 +17,7 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.AppDestination
@@ -46,7 +47,13 @@ fun MenuScreen(
                 )
                 viewModel.taskLists.forEach { list ->
                     NavigationDrawerItem(
-                        label = { Text(list.name) },
+                        label = {
+                            Text(
+                                text = list.name,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
                         icon = { Icon(Icons.Default.List, contentDescription = list.name) },
                         selected = currentDestination is AppDestination.TaskList &&
                                 currentDestination.taskListId == list.id,

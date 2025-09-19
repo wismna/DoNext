@@ -7,6 +7,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,6 +46,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.ManageListsViewModel
@@ -67,7 +69,12 @@ fun ManageListsScreen(
         }
     )
 
-    LazyColumn(modifier = modifier.fillMaxWidth().padding(), state = lazyListState) {
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
+        state = lazyListState
+    ) {
         itemsIndexed(lists, key = { _, list -> list.id!! }) { index, list ->
 
             var isInEditMode by remember { mutableStateOf(false) }
@@ -81,7 +88,7 @@ fun ManageListsScreen(
                     onClick = {},
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     ),
                     modifier = Modifier.draggableHandle(
                         onDragStopped = {
@@ -127,8 +134,8 @@ fun ManageListsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         AnimatedContent(
-                            //modifier = Modifier.padding(start = 12.dp),
                             targetState = isInEditMode,
+                            modifier = Modifier.weight(1f),
                             transitionSpec = {
                                 fadeIn() togetherWith fadeOut()
                             },
@@ -141,7 +148,12 @@ fun ManageListsScreen(
                                     singleLine = true
                                 )
                             } else {
-                                Text(list.name)
+                                Text(
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1,
+                                    text = list.name
+                                )
                             }
                         }
                         AnimatedContent(
