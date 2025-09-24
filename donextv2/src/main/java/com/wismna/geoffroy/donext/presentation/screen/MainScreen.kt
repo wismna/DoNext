@@ -84,9 +84,11 @@ fun MainScreen(
             MenuScreen (
                 currentDestination = viewModel.currentDestination,
                 onNavigate = { route ->
-                    scope.launch { drawerState.close() }
-                    navController.navigate(route) {
-                        restoreState = true
+                    scope.launch {
+                        drawerState.close()
+                        navController.navigate(route) {
+                            restoreState = true
+                        }
                     }
                 }
             )
@@ -199,6 +201,12 @@ fun AppContent(
                     ManageListsScreen(
                         modifier = Modifier,
                         showAddListSheet = {viewModel.showAddListSheet = true}
+                    )
+                }
+
+                composable(AppDestination.RecycleBin.route) {
+                    RecycleBinScreen(
+                        modifier = Modifier
                     )
                 }
             }

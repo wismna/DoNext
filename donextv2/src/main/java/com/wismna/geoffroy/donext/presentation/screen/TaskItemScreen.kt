@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.presentation.screen
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,12 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
 
@@ -41,23 +40,14 @@ import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
 fun TaskItemScreen(
     modifier: Modifier = Modifier,
     viewModel: TaskItemViewModel,
-    onSwipeDone: () -> Unit,
-    onSwipeDelete: () -> Unit
+    onSwipeLeft: () -> Unit,
+    onSwipeRight: () -> Unit
 ) {
-    val context = LocalContext.current
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
             when (it) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    onSwipeDelete()
-                    Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show()
-                }
-
-                SwipeToDismissBoxValue.EndToStart -> {
-                    onSwipeDone()
-                    Toast.makeText(context, "Task done", Toast.LENGTH_SHORT).show()
-                }
-
+                SwipeToDismissBoxValue.StartToEnd -> { onSwipeRight() }
+                SwipeToDismissBoxValue.EndToStart -> { onSwipeLeft() }
                 SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState false
             }
             return@rememberSwipeToDismissBoxState true
@@ -101,6 +91,7 @@ fun TaskItemScreen(
                     // Title
                     Text(
                         text = viewModel.name,
+                        fontSize = 18.sp,
                         style = baseStyle,
                         modifier = Modifier
                             .align(
@@ -134,13 +125,14 @@ fun TaskItemScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(40.dp) // 👈 adjust to the typical description height
-                            .padding(top = 20.dp),
+                            .height(40.dp)
+                            .padding(top = 24.dp),
                         contentAlignment = Alignment.TopStart
                     ) {
                         if (!viewModel.description.isNullOrBlank()) {
                             Text(
                                 text = viewModel.description,
+                                color = MaterialTheme.colorScheme.tertiary,
                                 style = baseStyle.copy(
                                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                                     fontStyle = FontStyle.Italic

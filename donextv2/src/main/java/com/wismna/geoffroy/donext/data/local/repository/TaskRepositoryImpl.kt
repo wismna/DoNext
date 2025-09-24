@@ -20,6 +20,10 @@ class TaskRepositoryImpl @Inject constructor(
         return taskDao.getTasksForList(listId).map {entity -> entity.map { it.toDomain() }}
     }
 
+    override suspend fun getDeletedTasks(): List<Task> {
+        return taskDao.getDeletedTasks().map {entity -> entity.toDomain() }
+    }
+
     override suspend fun insertTask(task: Task) {
         taskDao.insertTask(task.toEntity())
     }
@@ -28,12 +32,16 @@ class TaskRepositoryImpl @Inject constructor(
         taskDao.updateTask(task.toEntity())
     }
 
-    override suspend fun deleteTask(taskId: Long, isDeleted: Boolean) {
+    override suspend fun toggleTaskDeleted(taskId: Long, isDeleted: Boolean) {
         taskDao.toggleTaskDeleted(taskId, isDeleted)
     }
 
     override suspend fun toggleTaskDone(taskId: Long, isDone: Boolean) {
         taskDao.toggleTaskDone(taskId, isDone)
+    }
+
+    override suspend fun permanentlyDeleteTask(taskId: Long) {
+        taskDao.permanentDeleteTask(taskId)
     }
 
     override fun getTaskLists(): Flow<List<TaskList>> {

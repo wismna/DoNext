@@ -13,6 +13,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE task_list_id = :listId AND deleted = 0 ORDER BY done ASC, priority DESC")
     fun getTasksForList(listId: Long): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE deleted = 1")
+    suspend fun getDeletedTasks(): List<TaskEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: TaskEntity)
 
@@ -27,4 +30,7 @@ interface TaskDao {
 
     @Query("UPDATE tasks SET deleted = :deleted WHERE task_list_id = :taskListId")
     suspend fun toggleAllTasksFromListDeleted(taskListId: Long, deleted: Boolean)
+
+    @Query("DELETE FROM tasks WHERE id = :taskId")
+    suspend fun permanentDeleteTask(taskId: Long)
 }

@@ -38,7 +38,7 @@ class MainViewModel @Inject constructor(
             .onEach { lists ->
                 destinations = lists.map { taskList ->
                     AppDestination.TaskList(taskList.id!!, taskList.name)
-                } + AppDestination.ManageLists
+                } + AppDestination.ManageLists + AppDestination.RecycleBin
                 isLoading = false
                 if (startDestination == AppDestination.ManageLists && destinations.isNotEmpty()) {
                     startDestination = destinations.first()

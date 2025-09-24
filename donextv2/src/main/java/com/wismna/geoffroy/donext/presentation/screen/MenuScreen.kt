@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Badge
@@ -70,6 +71,13 @@ fun MenuScreen(
 
             Column {
                 HorizontalDivider()
+                NavigationDrawerItem(
+                    label = { Text("Recycle Bin") },
+                    icon = { Icon(Icons.Default.Delete, contentDescription = "Recycle Bin") },
+                    selected = currentDestination is AppDestination.RecycleBin,
+                    onClick = { onNavigate(AppDestination.RecycleBin.route) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
                 NavigationDrawerItem(
                     label = { Text("Edit Lists") },
                     icon = { Icon(Icons.Default.Edit, contentDescription = "Edit Lists") },

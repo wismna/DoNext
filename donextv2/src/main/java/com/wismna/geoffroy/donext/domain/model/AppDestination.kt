@@ -15,4 +15,9 @@ sealed class AppDestination(
         title = "Manage Lists",
         showBackButton = true,
     )
+    object RecycleBin : AppDestination(
+        route = "recycleBin",
+        title = "Recycle Bin",
+        showBackButton = true,
+    )
 }

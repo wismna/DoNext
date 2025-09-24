@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.usecase.AddTaskUseCase
-import com.wismna.geoffroy.donext.domain.usecase.DeleteTaskUseCase
+import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
 import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ import javax.inject.Inject
 class TaskViewModel @Inject constructor(
     private val createTaskUseCase: AddTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
-    private val deleteTaskUseCase: DeleteTaskUseCase
+    private val toggleTaskDeletedUseCase: ToggleTaskDeletedUseCase
 ) : ViewModel() {
 
     var title by mutableStateOf("")
@@ -79,7 +79,7 @@ class TaskViewModel @Inject constructor(
     fun delete() {
         editingTaskId?.let { id ->
             viewModelScope.launch {
-                deleteTaskUseCase(id)
+                toggleTaskDeletedUseCase(id, true)
                 reset()
             }
         }

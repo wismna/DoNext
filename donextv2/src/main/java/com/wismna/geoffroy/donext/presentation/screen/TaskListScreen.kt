@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.presentation.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.Task
@@ -38,6 +40,7 @@ fun TaskListScreen(
         tasks.partition { !it.isDone }
     }
 
+    val context = LocalContext.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(8.dp),
@@ -58,11 +61,13 @@ fun TaskListScreen(
                 TaskItemScreen(
                     modifier = Modifier.animateItem(),
                     viewModel = TaskItemViewModel(task),
-                    onSwipeDone = {
+                    onSwipeLeft = {
                         viewModel.updateTaskDone(task.id!!, true)
+                        Toast.makeText(context, "Task done", Toast.LENGTH_SHORT).show()
                     },
-                    onSwipeDelete = {
+                    onSwipeRight = {
                         viewModel.deleteTask(task.id!!)
+                        Toast.makeText(context, "Task moved to recycle bin", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -94,11 +99,13 @@ fun TaskListScreen(
                 TaskItemScreen(
                     modifier = Modifier.animateItem(),
                     viewModel = TaskItemViewModel(task),
-                    onSwipeDone = {
+                    onSwipeLeft = {
                         viewModel.updateTaskDone(task.id!!, false)
+                        Toast.makeText(context, "Task done", Toast.LENGTH_SHORT).show()
                     },
-                    onSwipeDelete = {
+                    onSwipeRight = {
                         viewModel.deleteTask(task.id!!)
+                        Toast.makeText(context, "Task moved to recycle bin", Toast.LENGTH_SHORT).show()
                     },
                 )
             }
