@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -72,7 +73,7 @@ fun TaskItemScreen(
     SwipeToDismissBox(
         state = dismissState,
         modifier = modifier,
-        backgroundContent = { DismissBackground(dismissState, viewModel.isDone) },
+        backgroundContent = { DismissBackground(dismissState, viewModel.isDone, viewModel.isDeleted) },
         content = {
             Row(
                 modifier = modifier
@@ -148,7 +149,7 @@ fun TaskItemScreen(
 }
 
 @Composable
-fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean) {
+fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean, isDeleted: Boolean) {
     val color = when (dismissState.dismissDirection) {
         SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.error
         SwipeToDismissBoxValue.EndToStart -> Color(0xFF18590D)
@@ -164,7 +165,7 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Icon(
-            Icons.Default.Delete,
+            if (isDeleted)  Icons.Default.Clear else Icons.Default.Delete,
             tint = Color.LightGray,
             contentDescription = "Delete"
         )

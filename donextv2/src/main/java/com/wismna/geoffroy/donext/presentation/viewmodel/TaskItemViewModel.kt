@@ -15,6 +15,7 @@ class TaskItemViewModel(task: Task) {
     val name: String = task.name
     val description: String? = task.description
     val isDone: Boolean = task.isDone
+    val isDeleted: Boolean = task.isDeleted
     val priority: Priority = task.priority
 
     val today: LocalDate = LocalDate.now(ZoneOffset.UTC)

@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Badge
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -71,7 +71,7 @@ fun MenuScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                         },
-                        icon = { Icon(Icons.Default.List, contentDescription = list.name) },
+                        icon = { Icon(Icons.AutoMirrored.Default.List, contentDescription = list.name) },
                         selected = currentDestination is AppDestination.TaskList &&
                                 currentDestination.taskListId == list.id,
                         onClick = { onNavigate("taskList/${list.id}") },

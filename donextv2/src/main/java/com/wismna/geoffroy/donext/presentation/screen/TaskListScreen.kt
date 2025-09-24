@@ -101,7 +101,7 @@ fun TaskListScreen(
                     viewModel = TaskItemViewModel(task),
                     onSwipeLeft = {
                         viewModel.updateTaskDone(task.id!!, false)
-                        Toast.makeText(context, "Task done", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Task in progress", Toast.LENGTH_SHORT).show()
                     },
                     onSwipeRight = {
                         viewModel.deleteTask(task.id!!)

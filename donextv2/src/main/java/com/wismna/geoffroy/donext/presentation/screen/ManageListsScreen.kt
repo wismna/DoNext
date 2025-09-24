@@ -183,7 +183,7 @@ fun ManageListsScreen(
                                         IconButton(onClick = { isInEditMode = true }) {
                                             Icon(Icons.Default.Edit, contentDescription = "Edit")
                                         }
-                                        IconButton(onClick = { viewModel.deleteTaskList(list.id!!) }) {
+                                        IconButton(onClick = { viewModel.deleteTaskList(list.id) }) {
                                             Icon(
                                                 Icons.Default.Delete,
                                                 contentDescription = "Delete"
