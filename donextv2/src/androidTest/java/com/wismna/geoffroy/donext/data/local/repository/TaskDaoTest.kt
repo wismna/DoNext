@@ -87,4 +87,75 @@ class TaskDaoTest {
 
         TestCase.assertEquals(1, lists.first().first().overdueCount)
     }
+
+    @Test
+    fun dueToday_correctlyCalculated() = runBlocking {
+        listDao.insertTaskList(TaskListEntity(name = "Tasks", order = 0))
+        val listId = listDao.getTaskLists().first().first().id
+
+        val todayStart = Instant.parse("2025-09-15T00:00:00Z").toEpochMilli()
+        val todayEnd = Instant.parse("2025-09-15T23:59:99Z").toEpochMilli()
+
+        // One task due yesterday
+        taskDao.insertTask(
+            TaskEntity(
+                name = "Yesterday",
+                taskListId = listId,
+                dueDate = Instant.parse("2025-09-14T12:00:00Z").toEpochMilli(),
+                isDone = false,
+                description = null,
+                priority = Priority.NORMAL
+            )
+        )
+        // One task due today
+        taskDao.insertTask(
+            TaskEntity(
+                name = "Today",
+                taskListId = listId,
+                dueDate = Instant.parse("2025-09-15T12:00:00Z").toEpochMilli(),
+                isDone = false,
+                description = null,
+                priority = Priority.NORMAL
+            )
+        )
+        // One task due in the future
+        taskDao.insertTask(
+            TaskEntity(
+                name = "Tomorrow",
+                taskListId = listId,
+                dueDate = Instant.parse("2025-09-16T12:00:00Z").toEpochMilli(),
+                isDone = false,
+                description = null,
+                priority = Priority.NORMAL
+            )
+        )
+        // One task due in the future
+        taskDao.insertTask(
+            TaskEntity(
+                name = "TodayDone",
+                taskListId = listId,
+                dueDate = Instant.parse("2025-09-15T12:00:00Z").toEpochMilli(),
+                isDone = true,
+                description = null,
+                priority = Priority.NORMAL
+            )
+        )
+        // One task due in the future
+        taskDao.insertTask(
+            TaskEntity(
+                name = "TodayDeleted",
+                taskListId = listId,
+                dueDate = Instant.parse("2025-09-15T12:00:00Z").toEpochMilli(),
+                isDone = false,
+                isDeleted = true,
+                description = null,
+                priority = Priority.NORMAL
+            )
+        )
+
+        val tasks = taskDao.getDueTodayTasks(todayStart, todayEnd)
+
+        TestCase.assertEquals(1, tasks.first().count())
+        TestCase.assertEquals("Prepare slides", tasks.first().first().name)
+    }
 }

@@ -7,13 +7,11 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import javax.inject.Inject
 
-class GetTaskListsWithOverdueUseCase @Inject constructor(
-    private val taskRepository: TaskRepository
-) {
+class GetTaskListsWithOverdueUseCase @Inject constructor(private val taskRepository: TaskRepository) {
     operator fun invoke(): Flow<List<TaskListWithOverdue>> {
         return taskRepository.getTaskListsWithOverdue(
             LocalDate.now()
-            .atStartOfDay(ZoneOffset.UTC) // or system default
+            .atStartOfDay(ZoneOffset.UTC)
             .toInstant()
             .toEpochMilli()
         )

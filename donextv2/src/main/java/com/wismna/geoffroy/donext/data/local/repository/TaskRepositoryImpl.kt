@@ -20,6 +20,10 @@ class TaskRepositoryImpl @Inject constructor(
         return taskDao.getTasksForList(listId).map {entity -> entity.map { it.toDomain() }}
     }
 
+    override fun getDueTodayTasks(todayStart: Long, todayEnd: Long): Flow<List<Task>> {
+        return taskDao.getDueTodayTasks(todayStart, todayEnd).map  {entity -> entity.map { it.toDomain() }}
+    }
+
     override suspend fun getDeletedTasks(): List<Task> {
         return taskDao.getDeletedTasks().map {entity -> entity.toDomain() }
     }

@@ -3,11 +3,10 @@ package com.wismna.geoffroy.donext.presentation.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wismna.geoffroy.donext.domain.model.Task
-import com.wismna.geoffroy.donext.domain.usecase.GetTasksForListUseCase
+import com.wismna.geoffroy.donext.domain.usecase.GetDueTodayTasksUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDoneUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,32 +16,26 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskListViewModel @Inject constructor(
-    getTasks: GetTasksForListUseCase,
-    private val toggleTaskDone: ToggleTaskDoneUseCase,
+class DueTodayViewModel @Inject constructor(
+    getDueTodayTasks: GetDueTodayTasksUseCase,
     private val toggleTaskDeleted: ToggleTaskDeletedUseCase,
-    savedStateHandle: SavedStateHandle
+    private val toggleTaskDone: ToggleTaskDoneUseCase
 ) : ViewModel() {
 
-    var tasks by mutableStateOf<List<Task>>(emptyList())
+    var dueTodayTasks by mutableStateOf<List<Task>>(emptyList())
         private set
-    var isLoading by mutableStateOf(true)
-        private set
-
-    private val taskListId: Long = checkNotNull(savedStateHandle["taskListId"])
 
     init {
-        getTasks(taskListId)
-            .onEach { list ->
-                tasks = list
-                isLoading = false
+        getDueTodayTasks()
+            .onEach { tasks ->
+                dueTodayTasks = tasks
             }
             .launchIn(viewModelScope)
     }
 
-    fun updateTaskDone(taskId: Long, isDone: Boolean) {
+    fun updateTaskDone(taskId: Long) {
         viewModelScope.launch {
-            toggleTaskDone(taskId, isDone)
+            toggleTaskDone(taskId, true)
         }
     }
     fun deleteTask(taskId: Long) {

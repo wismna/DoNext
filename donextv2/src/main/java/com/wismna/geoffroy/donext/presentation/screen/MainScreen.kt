@@ -203,7 +203,15 @@ fun AppContent(
                         showAddListSheet = {viewModel.showAddListSheet = true}
                     )
                 }
-
+                composable(AppDestination.DueTodayList.route) {
+                    DueTodayTasksScreen (
+                        modifier = Modifier,
+                        onTaskClick = { task ->
+                            taskViewModel.startEditTask(task)
+                            viewModel.showTaskSheet = true
+                        }
+                    )
+                }
                 composable(AppDestination.RecycleBin.route) {
                     RecycleBinScreen(
                         modifier = Modifier

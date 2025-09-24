@@ -10,6 +10,11 @@ sealed class AppDestination(
         title = name,
     )
 
+    object DueTodayList : AppDestination(
+        route = "todayList",
+        title = "Due Today",
+        showBackButton = true,
+    )
     object ManageLists : AppDestination(
         route = "manageLists",
         title = "Manage Lists",
