@@ -13,7 +13,6 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE task_list_id = :listId AND deleted = 0 ORDER BY done ASC, priority DESC")
     fun getTasksForList(listId: Long): Flow<List<TaskEntity>>
 
-    // TODO: fix WHERE clause
     @Query("""
         SELECT * FROM tasks 
         WHERE due_date BETWEEN :todayStart AND :todayEnd AND deleted = 0 AND done = 0 
