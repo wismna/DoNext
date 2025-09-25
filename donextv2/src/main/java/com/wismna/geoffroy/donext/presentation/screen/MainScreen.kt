@@ -26,6 +26,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
@@ -136,10 +137,18 @@ fun AppContent(
                     }
                 },
                 actions = {
-                    if (viewModel.currentDestination is AppDestination.ManageLists) {
-                        IconButton(onClick = { viewModel.showAddListSheet = true }) {
-                            Icon(Icons.Default.Add, contentDescription = "Add List")
+                    when (viewModel.currentDestination) {
+                        is AppDestination.ManageLists -> {
+                            IconButton(onClick = { viewModel.showAddListSheet = true }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add List")
+                            }
                         }
+                        is AppDestination.RecycleBin -> {
+                            TextButton(onClick = { viewModel.emptyRecycleBin() }) {
+                                Text(text = "Empty Recycle Bin", color = MaterialTheme.colorScheme.onPrimary)
+                            }
+                        }
+                        else -> null
                     }
                 }
             )
@@ -179,23 +188,21 @@ fun AppContent(
                     slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(300))
                 }
             ) {
-                //viewModel.destinations.forEach { destination ->
-                    composable(
-                        route = "taskList/{taskListId}",
-                        arguments = listOf(navArgument("taskListId") {
-                            type = NavType.LongType
-                        })
-                    ) { navBackStackEntry ->
-                        val taskListViewModel: TaskListViewModel = hiltViewModel(navBackStackEntry)
-                        TaskListScreen(
-                            viewModel = taskListViewModel,
-                            onTaskClick = { task ->
-                                taskViewModel.startEditTask(task)
-                                viewModel.showTaskSheet = true
-                            }
-                        )
-                    }
-                //}
+                composable(
+                    route = "taskList/{taskListId}",
+                    arguments = listOf(navArgument("taskListId") {
+                        type = NavType.LongType
+                    })
+                ) { navBackStackEntry ->
+                    val taskListViewModel: TaskListViewModel = hiltViewModel(navBackStackEntry)
+                    TaskListScreen(
+                        viewModel = taskListViewModel,
+                        onTaskClick = { task ->
+                            taskViewModel.startEditTask(task)
+                            viewModel.showTaskSheet = true
+                        }
+                    )
+                }
 
                 composable(AppDestination.ManageLists.route) {
                     ManageListsScreen(
@@ -214,7 +221,11 @@ fun AppContent(
                 }
                 composable(AppDestination.RecycleBin.route) {
                     RecycleBinScreen(
-                        modifier = Modifier
+                        modifier = Modifier,
+                        onTaskClick = { task ->
+                            taskViewModel.startEditTask(task)
+                            viewModel.showTaskSheet = true
+                        }
                     )
                 }
             }

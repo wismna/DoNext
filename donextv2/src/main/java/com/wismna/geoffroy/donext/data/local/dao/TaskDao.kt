@@ -21,7 +21,7 @@ interface TaskDao {
     fun getDueTodayTasks(todayStart: Long, todayEnd: Long): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE deleted = 1")
-    suspend fun getDeletedTasks(): List<TaskEntity>
+    fun getDeletedTasks(): Flow<List<TaskEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: TaskEntity)
@@ -40,4 +40,7 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks WHERE id = :taskId")
     suspend fun permanentDeleteTask(taskId: Long)
+
+    @Query("DELETE FROM tasks WHERE deleted = 1")
+    suspend fun permanentDeleteAllDeletedTasks()
 }

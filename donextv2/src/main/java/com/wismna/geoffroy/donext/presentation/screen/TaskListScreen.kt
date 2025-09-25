@@ -10,12 +10,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -51,26 +48,19 @@ fun TaskListScreen(
             items = active,
             key = { it.id!! }
         ) { task ->
-            Card(
-                onClick = { onTaskClick(task) },
-                //elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                ),
-            ) {
-                TaskItemScreen(
-                    modifier = Modifier.animateItem(),
-                    viewModel = TaskItemViewModel(task),
-                    onSwipeLeft = {
-                        viewModel.updateTaskDone(task.id!!, true)
-                        Toast.makeText(context, "Task done", Toast.LENGTH_SHORT).show()
-                    },
-                    onSwipeRight = {
-                        viewModel.deleteTask(task.id!!)
-                        Toast.makeText(context, "Task moved to recycle bin", Toast.LENGTH_SHORT).show()
-                    }
-                )
-            }
+            TaskItemScreen(
+                modifier = Modifier.animateItem(),
+                viewModel = TaskItemViewModel(task),
+                onTaskClick = { onTaskClick(task) },
+                onSwipeLeft = {
+                    viewModel.updateTaskDone(task.id!!, true)
+                    Toast.makeText(context, "Task done", Toast.LENGTH_SHORT).show()
+                },
+                onSwipeRight = {
+                    viewModel.deleteTask(task.id!!)
+                    Toast.makeText(context, "Task moved to recycle bin", Toast.LENGTH_SHORT).show()
+                }
+            )
         }
 
         // Divider between active and done (optional)
@@ -89,27 +79,21 @@ fun TaskListScreen(
             items = done,
             key = { it.id!! }
         ) { task ->
-            Card(
-                onClick = { onTaskClick(task) },
-                //elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                ),
-            ) {
-                TaskItemScreen(
-                    modifier = Modifier.animateItem(),
-                    viewModel = TaskItemViewModel(task),
-                    onSwipeLeft = {
-                        viewModel.updateTaskDone(task.id!!, false)
-                        Toast.makeText(context, "Task in progress", Toast.LENGTH_SHORT).show()
-                    },
-                    onSwipeRight = {
-                        viewModel.deleteTask(task.id!!)
-                        Toast.makeText(context, "Task moved to recycle bin", Toast.LENGTH_SHORT).show()
-                    },
-                )
-            }
+            TaskItemScreen(
+                modifier = Modifier.animateItem(),
+                viewModel = TaskItemViewModel(task),
+                onTaskClick = { onTaskClick(task) },
+                onSwipeLeft = {
+                    viewModel.updateTaskDone(task.id!!, false)
+                    Toast.makeText(context, "Task in progress", Toast.LENGTH_SHORT).show()
+                },
+                onSwipeRight = {
+                    viewModel.deleteTask(task.id!!)
+                    Toast.makeText(context, "Task moved to recycle bin", Toast.LENGTH_SHORT).show()
+                },
+            )
         }
+
     }
 }
 

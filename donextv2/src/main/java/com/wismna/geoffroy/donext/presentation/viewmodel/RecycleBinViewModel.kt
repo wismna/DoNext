@@ -10,6 +10,8 @@ import com.wismna.geoffroy.donext.domain.usecase.GetDeletedTasksUseCase
 import com.wismna.geoffroy.donext.domain.usecase.PermanentlyDeleteTaskUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,9 +30,11 @@ class RecycleBinViewModel @Inject constructor(
     }
 
     fun loadDeletedTasks() {
-        viewModelScope.launch {
-            deletedTasks = getDeletedTasks()
-        }
+        getDeletedTasks()
+            .onEach { tasks ->
+                deletedTasks = tasks
+            }
+            .launchIn(viewModelScope)
     }
 
     fun restore(taskId: Long) {

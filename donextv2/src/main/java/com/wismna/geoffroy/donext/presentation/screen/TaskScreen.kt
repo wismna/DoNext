@@ -42,6 +42,7 @@ import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -108,7 +109,7 @@ fun TaskBottomSheet(
             var showDatePicker by remember { mutableStateOf(false) }
             val formattedDate = viewModel.dueDate?.let {
                 Instant.ofEpochMilli(it)
-                    .atZone(ZoneOffset.UTC)
+                    .atZone(ZoneId.systemDefault())
                     .toLocalDate()
                     .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
             } ?: ""

@@ -11,6 +11,7 @@ import com.wismna.geoffroy.donext.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlin.collections.map
 
 class TaskRepositoryImpl @Inject constructor(
     private val taskDao: TaskDao,
@@ -21,11 +22,11 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override fun getDueTodayTasks(todayStart: Long, todayEnd: Long): Flow<List<Task>> {
-        return taskDao.getDueTodayTasks(todayStart, todayEnd).map  {entity -> entity.map { it.toDomain() }}
+        return taskDao.getDueTodayTasks(todayStart, todayEnd).map {entity -> entity.map { it.toDomain() }}
     }
 
-    override suspend fun getDeletedTasks(): List<Task> {
-        return taskDao.getDeletedTasks().map {entity -> entity.toDomain() }
+    override fun getDeletedTasks(): Flow<List<Task>> {
+        return taskDao.getDeletedTasks().map {entity -> entity.map { it.toDomain() }}
     }
 
     override suspend fun insertTask(task: Task) {
@@ -46,6 +47,10 @@ class TaskRepositoryImpl @Inject constructor(
 
     override suspend fun permanentlyDeleteTask(taskId: Long) {
         taskDao.permanentDeleteTask(taskId)
+    }
+
+    override suspend fun permanentlyDeleteAllDeletedTask() {
+        taskDao.permanentDeleteAllDeletedTasks()
     }
 
     override fun getTaskLists(): Flow<List<TaskList>> {

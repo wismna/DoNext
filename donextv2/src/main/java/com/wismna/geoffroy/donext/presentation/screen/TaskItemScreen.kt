@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Badge
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
@@ -41,6 +43,7 @@ import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
 fun TaskItemScreen(
     modifier: Modifier = Modifier,
     viewModel: TaskItemViewModel,
+    onTaskClick: (taskId: Long) -> Unit,
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit
 ) {
@@ -69,83 +72,95 @@ fun TaskItemScreen(
         },
         textDecoration = if (viewModel.isDone) TextDecoration.LineThrough else TextDecoration.None
     )
-
-    SwipeToDismissBox(
-        state = dismissState,
+    Card(
         modifier = modifier,
-        backgroundContent = { DismissBackground(dismissState, viewModel.isDone, viewModel.isDeleted) },
-        content = {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(8.dp)
-                    .alpha(if (viewModel.isDone || viewModel.priority == Priority.LOW) 0.5f else 1f),
-                verticalAlignment = Alignment.CenterVertically // centers checkbox + content
-            ) {
-                Box(
+        onClick = { onTaskClick(viewModel.id) },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+    ) {
+        SwipeToDismissBox(
+            state = dismissState,
+            backgroundContent = {
+                DismissBackground(
+                    dismissState,
+                    viewModel.isDone,
+                    viewModel.isDeleted
+                )
+            },
+            content = {
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp)
-                        .height(IntrinsicSize.Min) // shrink to fit title/description
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .padding(8.dp)
+                        .alpha(if (viewModel.isDone || viewModel.priority == Priority.LOW) 0.5f else 1f),
+                    verticalAlignment = Alignment.CenterVertically // centers checkbox + content
                 ) {
-                    // Title
-                    Text(
-                        text = viewModel.name,
-                        fontSize = 18.sp,
-                        style = baseStyle,
-                        modifier = Modifier
-                            .align(
-                                if (viewModel.description.isNullOrBlank()) Alignment.CenterStart
-                                else Alignment.TopStart
-                            ),
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                    )
-
-                    // Due date badge
-                    viewModel.dueDateText?.let { dueMillis ->
-                        Badge(
-                            modifier = Modifier
-                                .align(
-                                    if (viewModel.description.isNullOrBlank()) Alignment.CenterEnd
-                                    else Alignment.TopEnd
-                                ),
-                            containerColor = if (viewModel.isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primaryContainer
-                        ) {
-                            Text(
-                                modifier = Modifier.padding(start = 1.dp, end = 1.dp),
-                                text = viewModel.dueDateText,
-                                color = if (viewModel.isOverdue) Color.White else MaterialTheme.colorScheme.onPrimaryContainer,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-
-                    // Optional description
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .padding(top = 24.dp),
-                        contentAlignment = Alignment.TopStart
+                            .weight(1f)
+                            .padding(start = 8.dp)
+                            .height(IntrinsicSize.Min) // shrink to fit title/description
                     ) {
-                        if (!viewModel.description.isNullOrBlank()) {
-                            Text(
-                                text = viewModel.description,
-                                color = MaterialTheme.colorScheme.tertiary,
-                                style = baseStyle.copy(
-                                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                    fontStyle = FontStyle.Italic
+                        // Title
+                        Text(
+                            text = viewModel.name,
+                            fontSize = 18.sp,
+                            style = baseStyle,
+                            modifier = Modifier
+                                .align(
+                                    if (viewModel.description.isNullOrBlank()) Alignment.CenterStart
+                                    else Alignment.TopStart
                                 ),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                        )
+
+                        // Due date badge
+                        viewModel.dueDateText?.let { dueMillis ->
+                            Badge(
+                                modifier = Modifier
+                                    .align(
+                                        if (viewModel.description.isNullOrBlank()) Alignment.CenterEnd
+                                        else Alignment.TopEnd
+                                    ),
+                                containerColor = if (viewModel.isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primaryContainer
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(start = 1.dp, end = 1.dp),
+                                    text = viewModel.dueDateText,
+                                    color = if (viewModel.isOverdue) Color.White else MaterialTheme.colorScheme.onPrimaryContainer,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+
+                        // Optional description
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(40.dp)
+                                .padding(top = 24.dp),
+                            contentAlignment = Alignment.TopStart
+                        ) {
+                            if (!viewModel.description.isNullOrBlank()) {
+                                Text(
+                                    text = viewModel.description,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    style = baseStyle.copy(
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                        fontStyle = FontStyle.Italic
+                                    ),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
-            }
-        })
+            })
+    }
 }
 
 @Composable

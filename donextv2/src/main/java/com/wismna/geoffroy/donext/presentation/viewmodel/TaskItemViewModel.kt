@@ -4,7 +4,7 @@ import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
@@ -18,11 +18,11 @@ class TaskItemViewModel(task: Task) {
     val isDeleted: Boolean = task.isDeleted
     val priority: Priority = task.priority
 
-    val today: LocalDate = LocalDate.now(ZoneOffset.UTC)
+    val today: LocalDate = LocalDate.now(ZoneId.systemDefault())
 
     val isOverdue: Boolean = task.dueDate?.let { millis ->
         val dueDate = Instant.ofEpochMilli(millis)
-            .atZone(ZoneOffset.UTC)
+            .atZone(ZoneId.systemDefault())
             .toLocalDate()
         dueDate.isBefore(today)
     } ?: false
@@ -30,7 +30,7 @@ class TaskItemViewModel(task: Task) {
     val dueDateText: String? = task.dueDate?.let { formatDueDate(it) }
 
     private fun formatDueDate(dueMillis: Long): String {
-        val dueDate = Instant.ofEpochMilli(dueMillis).atZone(ZoneOffset.UTC).toLocalDate()
+        val dueDate = Instant.ofEpochMilli(dueMillis).atZone(ZoneId.systemDefault()).toLocalDate()
 
         return when {
             dueDate.isEqual(today) -> "Today"
