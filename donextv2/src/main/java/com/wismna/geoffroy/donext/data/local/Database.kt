@@ -125,8 +125,8 @@ abstract class AppDatabase : RoomDatabase() {
                             // insert default lists
                             CoroutineScope(Dispatchers.IO).launch {
                                 val dao = DB_INSTANCE?.taskListDao()
-                                dao?.insertTaskList(TaskListEntity(name = "Work", order = 2))
                                 dao?.insertTaskList(TaskListEntity(name = "Personal", order = 1))
+                                dao?.insertTaskList(TaskListEntity(name = "Work", order = 2))
                                 dao?.insertTaskList(TaskListEntity(name = "Shopping", order = 3))
                             }
                         }

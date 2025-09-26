@@ -38,9 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
+import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
-import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -76,8 +76,7 @@ fun TaskBottomSheet(
                 label = { Text("Title") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(titleFocusRequester),
-                isError = viewModel.title.isEmpty(),
+                    .focusRequester(titleFocusRequester)
             )
             Spacer(Modifier.height(12.dp))
 
@@ -107,12 +106,9 @@ fun TaskBottomSheet(
 
             // --- Due Date ---
             var showDatePicker by remember { mutableStateOf(false) }
-            val formattedDate = viewModel.dueDate?.let {
-                Instant.ofEpochMilli(it)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate()
-                    .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
-            } ?: ""
+            val formattedDate = viewModel.dueDate?.toLocalDate()?.format(
+                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+                ?: ""
 
             OutlinedTextField(
                 value = formattedDate,
@@ -143,11 +139,11 @@ fun TaskBottomSheet(
                     initialSelectedDateMillis = viewModel.dueDate,
                     selectableDates = object: SelectableDates {
                         override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                            val todayStartMillis = LocalDate.now(ZoneOffset.UTC)
+                            val todayStartUtcMillis = LocalDate.now(ZoneId.systemDefault())
                                 .atStartOfDay(ZoneOffset.UTC)
                                 .toInstant()
                                 .toEpochMilli()
-                            return utcTimeMillis >= todayStartMillis
+                            return utcTimeMillis >= todayStartUtcMillis
                         }
                     }
                 )
@@ -155,7 +151,8 @@ fun TaskBottomSheet(
                 DatePickerDialog(
                     onDismissRequest = { showDatePicker = false },
                     confirmButton = {
-                        TextButton(onClick = {
+                        TextButton(
+                            onClick = {
                             datePickerState.selectedDateMillis?.let { viewModel.onDueDateChanged(it) }
                             showDatePicker = false
                         }) { Text("OK") }

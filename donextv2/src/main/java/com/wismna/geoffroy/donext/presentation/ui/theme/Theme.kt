@@ -48,7 +48,7 @@ fun DoNextTheme(
 
         else -> lightColorScheme(
             primary = Purple80,
-            onPrimary = DarkSurfaceContainer,
+            onPrimary = LightSurfaceContainer,
             primaryContainer = Purple80Container,
             onPrimaryContainer = DarkSurfaceContainer,
             secondary = PurpleGrey80,

@@ -1,6 +1,7 @@
 package com.wismna.geoffroy.donext.presentation.viewmodel
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -26,11 +27,14 @@ class ManageListsViewModel @Inject constructor(
 
     var taskLists by mutableStateOf<List<TaskList>>(emptyList())
         private set
+    var taskCount by mutableIntStateOf(0)
+        private set
 
     init {
         getTaskListsUseCase()
             .onEach { lists ->
                 taskLists = lists
+                taskCount = lists.size
             }
             .launchIn(viewModelScope)
     }

@@ -12,6 +12,9 @@ import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
 import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
 import javax.inject.Inject
 
 @HiltViewModel
@@ -59,9 +62,17 @@ class TaskViewModel @Inject constructor(
     fun onTitleChanged(value: String) { title = value }
     fun onDescriptionChanged(value: String) { description = value }
     fun onPriorityChanged(value: Priority) { priority = value }
-    fun onDueDateChanged(value: Long?) { dueDate = value }
+    fun onDueDateChanged(value: Long?) {
+        dueDate = if (value == null) null else
+            Instant.ofEpochMilli(value)
+                .atZone(ZoneOffset.UTC)
+                .toLocalDate()
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+    }
 
-        fun save(onDone: (() -> Unit)? = null) {
+    fun save(onDone: (() -> Unit)? = null) {
         if (title.isBlank()) return
 
         viewModelScope.launch {

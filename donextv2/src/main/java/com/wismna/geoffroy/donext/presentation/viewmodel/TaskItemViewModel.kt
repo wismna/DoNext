@@ -1,8 +1,8 @@
 package com.wismna.geoffroy.donext.presentation.viewmodel
 
+import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
-import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -21,16 +21,14 @@ class TaskItemViewModel(task: Task) {
     val today: LocalDate = LocalDate.now(ZoneId.systemDefault())
 
     val isOverdue: Boolean = task.dueDate?.let { millis ->
-        val dueDate = Instant.ofEpochMilli(millis)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
+        val dueDate = millis.toLocalDate()
         dueDate.isBefore(today)
     } ?: false
 
     val dueDateText: String? = task.dueDate?.let { formatDueDate(it) }
 
     private fun formatDueDate(dueMillis: Long): String {
-        val dueDate = Instant.ofEpochMilli(dueMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+        val dueDate = dueMillis.toLocalDate()
 
         return when {
             dueDate.isEqual(today) -> "Today"

@@ -218,7 +218,7 @@ fun AddListBottomSheet(
         //var description by remember { mutableStateOf("") }
 
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Create New List", style = MaterialTheme.typography.titleMedium)
+            Text("New List", style = MaterialTheme.typography.titleMedium)
 
             Spacer(Modifier.height(8.dp))
             /*TextField(
@@ -234,8 +234,7 @@ fun AddListBottomSheet(
                 label = { Text("Title") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(titleFocusRequester),
-                isError = name.isEmpty(),
+                    .focusRequester(titleFocusRequester)
             )
 
             Spacer(Modifier.height(8.dp))
@@ -253,11 +252,14 @@ fun AddListBottomSheet(
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 //TextButton(onClick = onDismiss) { Text("Cancel") }
                 //Spacer(Modifier.width(8.dp))
-                Button(onClick = {
-                    viewModel.createTaskList(name/*, type, description*/, 1)
-                    onDismiss()
-                }) {
-                    Text("Add")
+                Button(
+                    onClick = {
+                        viewModel.createTaskList(name/*, type, description*/, viewModel.taskCount + 1)
+                        onDismiss()
+                    },
+                    enabled = name.isNotBlank()
+                ) {
+                    Text("Create")
                 }
             }
         }

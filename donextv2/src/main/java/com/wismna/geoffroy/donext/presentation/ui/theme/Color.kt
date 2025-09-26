@@ -3,7 +3,7 @@ package com.wismna.geoffroy.donext.presentation.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Primary shades
-val Purple80 = Color(0xFFD0BCFF)       // Light theme primary
+val Purple80 = Color(0xFF6A59C7)       // Light theme primary
 val Purple40 = Color(0xFF6650A4)       // Dark theme primary
 
 val PurpleGrey80 = Color(0xFFCCC2DC)
