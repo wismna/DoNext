@@ -3,6 +3,7 @@ package com.wismna.geoffroy.donext.presentation.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,10 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -179,16 +181,31 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean, isD
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Icon(
-            if (isDeleted)  Icons.Default.Clear else Icons.Default.Delete,
-            tint = Color.LightGray,
-            contentDescription = "Delete"
-        )
+        Column (horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                if (isDeleted) Icons.Default.Clear else Icons.Default.Delete,
+                tint = Color.LightGray,
+                contentDescription = "Delete"
+            )
+            Text(
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 10.sp,
+                text = if (isDeleted) "Delete" else "Trash"
+            )
+        }
         Spacer(modifier = Modifier)
-        Icon(
-            if (isDone) Icons.Default.Close else Icons.Default.Done,
-            tint = Color.LightGray,
-            contentDescription = "Archive"
-        )
+        Column (horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                if (isDeleted) Icons.Default.AddCircle else
+                    if (isDone) Icons.Default.PlayArrow else Icons.Default.CheckCircle,
+                tint = Color.LightGray,
+                contentDescription = "Archive"
+            )
+            Text(
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 10.sp,
+                text = if (isDeleted) "Restore" else if (isDone) "Active" else "Done"
+            )
+        }
     }
 }
