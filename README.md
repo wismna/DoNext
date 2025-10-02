@@ -2,10 +2,19 @@
 
 [![Android CI](https://github.com/wismna/DoNext/actions/workflows/android.yaml/badge.svg)](https://github.com/wismna/DoNext/actions/workflows/android.yaml)
 
-DoNext is an innovative task application.
+DoNext is an a task app that aims for simplicity.
 You can create and arrange task lists, create, edit and delete tasks...
-But the emphasis is not a long list, as the more you have to do, the less you actually do!
 
-Instead, focus only on the first task on the list:
-Swipe it to the left: it's done!
-Swipe it to the right: "nexted!". It goes to the end of the list and you can work on the next task.
+Focus on what's important:
+- Tasks are sorted by priority
+- Easily see when each task is due, with a warning when it's overdue
+- All tasks due today are grouped in a special view
+
+## Technical stack
+
+DoNext is made with:
+- Kotlin
+- Jetpack Compose for UI
+- Hilt for dependency injection
+- Room for the Database
+- Clean Architecture

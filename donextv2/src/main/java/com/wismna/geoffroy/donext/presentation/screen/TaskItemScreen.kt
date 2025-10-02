@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.RestoreFromTrash
+import androidx.compose.material.icons.filled.Unpublished
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,6 +49,7 @@ fun TaskItemScreen(
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit
 ) {
+    // TODO: change this
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
             when (it) {
@@ -183,7 +184,7 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean, isD
     ) {
         Column (horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                if (isDeleted) Icons.Default.Clear else Icons.Default.Delete,
+                if (isDeleted) Icons.Default.DeleteForever else Icons.Default.DeleteOutline,
                 tint = Color.LightGray,
                 contentDescription = "Delete"
             )
@@ -196,15 +197,15 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean, isD
         Spacer(modifier = Modifier)
         Column (horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                if (isDeleted) Icons.Default.AddCircle else
-                    if (isDone) Icons.Default.PlayArrow else Icons.Default.CheckCircle,
+                if (isDeleted) Icons.Default.RestoreFromTrash else
+                    if (isDone) Icons.Default.Unpublished else Icons.Default.CheckCircle,
                 tint = Color.LightGray,
                 contentDescription = "Archive"
             )
             Text(
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 10.sp,
-                text = if (isDeleted) "Restore" else if (isDone) "Active" else "Done"
+                text = if (isDeleted) "Restore" else if (isDone) "Undone" else "Done"
             )
         }
     }

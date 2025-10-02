@@ -145,7 +145,7 @@ fun AppContent(
                         }
                         is AppDestination.RecycleBin -> {
                             TextButton(onClick = { viewModel.emptyRecycleBin() }) {
-                                Text(text = "Empty Recycle Bin", color = MaterialTheme.colorScheme.onPrimary)
+                                Text(text = "Empty Recycle Bin", color = MaterialTheme.colorScheme.onPrimaryContainer)
                             }
                         }
                         else -> null

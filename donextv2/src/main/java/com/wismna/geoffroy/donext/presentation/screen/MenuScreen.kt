@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.LineWeight
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Badge
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -56,7 +56,7 @@ fun MenuScreen(
                             Text(viewModel.dueTodayTasksCount.toString())
                         }
                     },
-                    icon = { Icon(Icons.Default.DateRange, contentDescription = "Due Today") },
+                    icon = { Icon(Icons.Default.Today, contentDescription = "Due Today") },
                     selected = currentDestination is AppDestination.DueTodayList,
                     onClick = { onNavigate(AppDestination.DueTodayList.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -71,7 +71,7 @@ fun MenuScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                         },
-                        icon = { Icon(Icons.AutoMirrored.Default.List, contentDescription = list.name) },
+                        icon = { Icon(Icons.Default.LineWeight, contentDescription = list.name) },
                         selected = currentDestination is AppDestination.TaskList &&
                                 currentDestination.taskListId == list.id,
                         onClick = { onNavigate("taskList/${list.id}") },
@@ -96,7 +96,7 @@ fun MenuScreen(
                 )
                 NavigationDrawerItem(
                     label = { Text("Edit Lists") },
-                    icon = { Icon(Icons.Default.Edit, contentDescription = "Edit Lists") },
+                    icon = { Icon(Icons.Default.EditNote, contentDescription = "Edit Lists") },
                     selected = currentDestination is AppDestination.ManageLists,
                     onClick = { onNavigate(AppDestination.ManageLists.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
