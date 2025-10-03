@@ -5,7 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wismna.geoffroy.donext.domain.model.Task
+import com.wismna.geoffroy.donext.domain.model.TaskWithListName
+import com.wismna.geoffroy.donext.domain.usecase.EmptyRecycleBinUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetDeletedTasksUseCase
 import com.wismna.geoffroy.donext.domain.usecase.PermanentlyDeleteTaskUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
@@ -19,10 +20,11 @@ import javax.inject.Inject
 class RecycleBinViewModel @Inject constructor(
     private val getDeletedTasks: GetDeletedTasksUseCase,
     private val restoreTask: ToggleTaskDeletedUseCase,
-    private val permanentlyDeleteTask: PermanentlyDeleteTaskUseCase
+    private val permanentlyDeleteTask: PermanentlyDeleteTaskUseCase,
+    private val emptyRecycleBinUseCase: EmptyRecycleBinUseCase
 ) : ViewModel() {
 
-    var deletedTasks by mutableStateOf<List<Task>>(emptyList())
+    var deletedTasks by mutableStateOf<List<TaskWithListName>>(emptyList())
         private set
 
     init {
@@ -48,6 +50,11 @@ class RecycleBinViewModel @Inject constructor(
         viewModelScope.launch {
             permanentlyDeleteTask(taskId)
             loadDeletedTasks()
+        }
+    }
+    fun emptyRecycleBin() {
+        viewModelScope.launch {
+            emptyRecycleBinUseCase()
         }
     }
 }

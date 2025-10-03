@@ -26,7 +26,6 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
@@ -61,6 +60,7 @@ fun MainScreen(
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    // TODO: find a way to get rid of this
     val taskViewModel: TaskViewModel = hiltViewModel()
 
     if (viewModel.isLoading) {
@@ -144,9 +144,7 @@ fun AppContent(
                             }
                         }
                         is AppDestination.RecycleBin -> {
-                            TextButton(onClick = { viewModel.emptyRecycleBin() }) {
-                                Text(text = "Empty Recycle Bin", color = MaterialTheme.colorScheme.onPrimaryContainer)
-                            }
+                            EmptyRecycleBinAction()
                         }
                         else -> null
                     }
@@ -194,6 +192,7 @@ fun AppContent(
                         type = NavType.LongType
                     })
                 ) { navBackStackEntry ->
+                    // TODO: when task list has been deleted, we should not navigate to it event if in the stack
                     val taskListViewModel: TaskListViewModel = hiltViewModel(navBackStackEntry)
                     TaskListScreen(
                         viewModel = taskListViewModel,

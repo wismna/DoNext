@@ -35,6 +35,9 @@ interface TaskListDao {
     """)
     fun getTaskListsWithOverdue(nowMillis: Long): Flow<List<TaskListWithOverdue>>
 
+    @Query("SELECT * FROM task_lists WHERE id = :taskListId")
+    suspend fun getTaskListById(taskListId: Long): TaskListEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTaskList(taskList: TaskListEntity)
 

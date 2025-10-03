@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.RestoreFromTrash
-import androidx.compose.material.icons.filled.Unpublished
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Unpublished
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -153,7 +152,6 @@ fun TaskItemScreen(
                                     color = MaterialTheme.colorScheme.tertiary,
                                     style = baseStyle.copy(
                                         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                                        fontStyle = FontStyle.Italic
                                     ),
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis
@@ -191,14 +189,14 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean, isD
             Text(
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 10.sp,
-                text = if (isDeleted) "Delete" else "Trash"
+                text = if (isDeleted) "Delete" else "Recycle"
             )
         }
         Spacer(modifier = Modifier)
         Column (horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 if (isDeleted) Icons.Default.RestoreFromTrash else
-                    if (isDone) Icons.Default.Unpublished else Icons.Default.CheckCircle,
+                    if (isDone) Icons.Outlined.Unpublished else Icons.Outlined.CheckCircle,
                 tint = Color.LightGray,
                 contentDescription = "Archive"
             )

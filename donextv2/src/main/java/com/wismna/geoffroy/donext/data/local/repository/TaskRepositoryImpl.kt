@@ -7,6 +7,7 @@ import com.wismna.geoffroy.donext.data.toEntity
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
+import com.wismna.geoffroy.donext.domain.model.TaskWithListName
 import com.wismna.geoffroy.donext.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -25,8 +26,12 @@ class TaskRepositoryImpl @Inject constructor(
         return taskDao.getDueTodayTasks(todayStart, todayEnd).map {entity -> entity.map { it.toDomain() }}
     }
 
-    override fun getDeletedTasks(): Flow<List<Task>> {
-        return taskDao.getDeletedTasks().map {entity -> entity.map { it.toDomain() }}
+    override fun getDeletedTasks(): Flow<List<TaskWithListName>> {
+        return taskDao.getDeletedTasksWithListName().map {entity -> entity.map { it.toDomain() }}
+    }
+
+    override suspend fun getTaskById(taskId: Long): Task? {
+        return taskDao.getTaskById(taskId)?.toDomain()
     }
 
     override suspend fun insertTask(task: Task) {
@@ -55,6 +60,10 @@ class TaskRepositoryImpl @Inject constructor(
 
     override fun getTaskLists(): Flow<List<TaskList>> {
         return taskListDao.getTaskLists().map {entities -> entities.map { it.toDomain() }}
+    }
+
+    override suspend fun getTaskListById(taskListId: Long): TaskList? {
+        return taskListDao.getTaskListById(taskListId)?.toDomain()
     }
 
     override suspend fun insertTaskList(taskList: TaskList) {

@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.usecase.AddTaskUseCase
-import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
 import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -20,8 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val createTaskUseCase: AddTaskUseCase,
-    private val updateTaskUseCase: UpdateTaskUseCase,
-    private val toggleTaskDeletedUseCase: ToggleTaskDeletedUseCase
+    private val updateTaskUseCase: UpdateTaskUseCase
 ) : ViewModel() {
 
     var title by mutableStateOf("")
@@ -34,10 +32,13 @@ class TaskViewModel @Inject constructor(
         private set
     var isDone by mutableStateOf(false)
         private set
+    var isDeleted by mutableStateOf(false)
+        private set
 
     private var editingTaskId: Long? = null
     private var taskListId: Long? = null
 
+    fun screenTitle(): String = if (isDeleted) "Task details" else if (isEditing()) "Edit Task" else "New Task"
     fun isEditing(): Boolean = editingTaskId != null
 
     fun startNewTask(selectedListId: Long) {
@@ -47,6 +48,7 @@ class TaskViewModel @Inject constructor(
         description = ""
         priority = Priority.NORMAL
         dueDate = null
+        isDeleted = false
     }
 
     fun startEditTask(task: Task) {
@@ -57,6 +59,7 @@ class TaskViewModel @Inject constructor(
         priority = task.priority
         dueDate = task.dueDate
         isDone = task.isDone
+        isDeleted = task.isDeleted
     }
 
     fun onTitleChanged(value: String) { title = value }
@@ -84,15 +87,6 @@ class TaskViewModel @Inject constructor(
             // reset state after save
             reset()
             onDone?.invoke()
-        }
-    }
-
-    fun delete() {
-        editingTaskId?.let { id ->
-            viewModelScope.launch {
-                toggleTaskDeletedUseCase(id, true)
-                reset()
-            }
         }
     }
 

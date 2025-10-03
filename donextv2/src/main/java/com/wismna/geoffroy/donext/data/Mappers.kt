@@ -2,8 +2,10 @@ package com.wismna.geoffroy.donext.data
 
 import com.wismna.geoffroy.donext.data.entities.TaskEntity
 import com.wismna.geoffroy.donext.data.entities.TaskListEntity
+import com.wismna.geoffroy.donext.data.entities.TaskWithListNameEntity
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.model.TaskList
+import com.wismna.geoffroy.donext.domain.model.TaskWithListName
 
 fun TaskEntity.toDomain() = Task(
     id = id,
@@ -15,6 +17,12 @@ fun TaskEntity.toDomain() = Task(
     dueDate = dueDate,
     priority = priority,
 )
+fun TaskWithListNameEntity.toDomain(): TaskWithListName {
+    return TaskWithListName(
+        task = task.toDomain(),
+        listName = listName
+    )
+}
 
 fun Task.toEntity() = TaskEntity(
     id = id ?: 0,

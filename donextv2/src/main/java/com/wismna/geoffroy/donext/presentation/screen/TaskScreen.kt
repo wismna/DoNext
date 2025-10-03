@@ -27,11 +27,13 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -54,15 +57,19 @@ fun TaskBottomSheet(
     onDismiss: () -> Unit
 ) {
     val titleFocusRequester = remember { FocusRequester() }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         titleFocusRequester.requestFocus()
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                if (viewModel.isEditing()) "Edit Task" else "New Task",
+                viewModel.screenTitle(),
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(8.dp))
@@ -71,7 +78,7 @@ fun TaskBottomSheet(
             OutlinedTextField(
                 value = viewModel.title,
                 singleLine = true,
-                readOnly = viewModel.isDone,
+                readOnly = viewModel.isDeleted,
                 onValueChange = { viewModel.onTitleChanged(it) },
                 label = { Text("Title") },
                 modifier = Modifier
@@ -83,7 +90,7 @@ fun TaskBottomSheet(
             // --- Description ---
             OutlinedTextField(
                 value = viewModel.description,
-                readOnly = viewModel.isDone,
+                readOnly = viewModel.isDeleted,
                 onValueChange = { viewModel.onDescriptionChanged(it) },
                 label = { Text("Description") },
                 maxLines = 3,
@@ -99,6 +106,7 @@ fun TaskBottomSheet(
                 Text("Priority", style = MaterialTheme.typography.labelLarge)
                 SingleChoiceSegmentedButton(
                     value = viewModel.priority,
+                    isEnabled = !viewModel.isDeleted,
                     onValueChange = { viewModel.onPriorityChanged(it) }
                 )
             }
@@ -120,13 +128,13 @@ fun TaskBottomSheet(
                         if (viewModel.dueDate != null) {
                             IconButton(
                                 onClick = { viewModel.onDueDateChanged(null) },
-                                enabled = !viewModel.isDone) {
+                                enabled = !viewModel.isDeleted) {
                                 Icon(Icons.Default.Clear, contentDescription = "Clear due date")
                             }
                         }
                         IconButton(
                             onClick = { showDatePicker = true },
-                            enabled = !viewModel.isDone) {
+                            enabled = !viewModel.isDeleted) {
                             Icon(Icons.Default.CalendarMonth, contentDescription = "Pick due date")
                         }
                     }
@@ -164,31 +172,39 @@ fun TaskBottomSheet(
                     DatePicker(state = datePickerState)
                 }
             }
+            if (!viewModel.isDeleted) {
+                Spacer(Modifier.height(16.dp))
 
-            Spacer(Modifier.height(16.dp))
-
-            Row (
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = if (viewModel.isEditing()) Arrangement.SpaceBetween else Arrangement.End) {
-
-                // --- Delete Button ---
-                if (viewModel.isEditing()) {
-                    Button(
-                        onClick = { viewModel.delete(); onDismiss() },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) { Text("Delete") }
-                }
-                // --- Save Button ---
-                Button(
-                    onClick = {
-                        viewModel.save()
-                        onDismiss()
-                    },
-                    enabled = viewModel.title.isNotBlank() && !viewModel.isDone,
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(if (viewModel.isEditing()) "Save" else "Create")
+                    // --- Cancel Button ---
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                sheetState.hide()
+                                onDismiss()
+                            }
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) { Text("Cancel") }
+
+                    // --- Save Button ---
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                viewModel.save()
+                                sheetState.hide()
+                                onDismiss()
+                            }
+                        },
+                        enabled = viewModel.title.isNotBlank() && !viewModel.isDeleted,
+                    ) {
+                        Text(if (viewModel.isEditing()) "Save" else "Create")
+                    }
                 }
             }
         }
@@ -198,6 +214,7 @@ fun TaskBottomSheet(
 @Composable
 fun SingleChoiceSegmentedButton(
     value: Priority,
+    isEnabled: Boolean,
     onValueChange: (Priority) -> Unit) {
     val options = listOf(Priority.LOW.label, Priority.NORMAL.label, Priority.HIGH.label)
 
@@ -208,6 +225,7 @@ fun SingleChoiceSegmentedButton(
                     index = index,
                     count = options.size
                 ),
+                enabled = isEnabled,
                 onClick = { onValueChange(Priority.fromValue(index)) },
                 selected = index == value.value,
                 label = { Text(label) }

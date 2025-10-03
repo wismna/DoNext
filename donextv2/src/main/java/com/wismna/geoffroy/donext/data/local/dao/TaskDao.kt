@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.wismna.geoffroy.donext.data.entities.TaskEntity
+import com.wismna.geoffroy.donext.data.entities.TaskWithListNameEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,8 +21,17 @@ interface TaskDao {
     """)
     fun getDueTodayTasks(todayStart: Long, todayEnd: Long): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE deleted = 1")
-    fun getDeletedTasks(): Flow<List<TaskEntity>>
+    @Query("""
+        SELECT t.*, l.name AS listName
+        FROM tasks t
+        INNER JOIN task_lists l ON t.task_list_id = l.id
+        WHERE t.deleted = 1
+        ORDER BY l.name
+    """)
+    fun getDeletedTasksWithListName(): Flow<List<TaskWithListNameEntity>>
+
+    @Query("SELECT * FROM tasks WHERE id = :taskId")
+    suspend fun getTaskById(taskId: Long): TaskEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: TaskEntity)

@@ -7,18 +7,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import com.wismna.geoffroy.donext.domain.model.AppDestination
-import com.wismna.geoffroy.donext.domain.usecase.EmptyRecycleBinUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    getTaskListsUseCase: GetTaskListsUseCase,
-    private val emptyRecycleBinUseCase: EmptyRecycleBinUseCase
+    getTaskListsUseCase: GetTaskListsUseCase
 ) : ViewModel() {
 
     var isLoading by mutableStateOf(true)
@@ -63,11 +60,5 @@ class MainViewModel @Inject constructor(
                 else -> dest.route == route
             }
         } ?: startDestination
-    }
-
-    fun emptyRecycleBin() {
-        viewModelScope.launch {
-            emptyRecycleBinUseCase()
-        }
     }
 }

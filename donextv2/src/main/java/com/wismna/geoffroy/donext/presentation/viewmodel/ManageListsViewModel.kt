@@ -49,9 +49,9 @@ class ManageListsViewModel @Inject constructor(
             updateTaskListUseCase(taskList.id!!, taskList.name, taskList.order)
         }
     }
-    fun deleteTaskList(taskId: Long) {
+    fun deleteTaskList(taskListId: Long) {
         viewModelScope.launch {
-            deleteTaskListUseCase(taskId)
+            deleteTaskListUseCase(taskListId)
         }
     }
 
