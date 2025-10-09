@@ -58,7 +58,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
-    modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
