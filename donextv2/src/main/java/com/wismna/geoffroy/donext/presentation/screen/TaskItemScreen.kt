@@ -38,16 +38,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wismna.geoffroy.donext.domain.model.Priority
+import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
 
 @Composable
 fun TaskItemScreen(
     modifier: Modifier = Modifier,
-    viewModel: TaskItemViewModel,
+    task: Task,
     onTaskClick: (taskId: Long) -> Unit,
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit
 ) {
+    val viewModel = TaskItemViewModel(task)
     // TODO: change this
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {

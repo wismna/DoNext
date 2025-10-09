@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.Task
-import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
 
@@ -50,7 +49,7 @@ fun TaskListScreen(
         ) { task ->
             TaskItemScreen(
                 modifier = Modifier.animateItem(),
-                viewModel = TaskItemViewModel(task),
+                task = task,
                 onTaskClick = { onTaskClick(task) },
                 onSwipeLeft = {
                     viewModel.updateTaskDone(task.id!!, true)
@@ -81,7 +80,7 @@ fun TaskListScreen(
         ) { task ->
             TaskItemScreen(
                 modifier = Modifier.animateItem(),
-                viewModel = TaskItemViewModel(task),
+                task = task,
                 onTaskClick = { onTaskClick(task) },
                 onSwipeLeft = {
                     viewModel.updateTaskDone(task.id!!, false)
@@ -95,20 +94,4 @@ fun TaskListScreen(
         }
 
     }
-}
-
-@Composable
-fun TaskListFab(
-    taskListId: Long,
-    viewModel: TaskViewModel = hiltViewModel(),
-    showBottomSheet: (Boolean) -> Unit = {}
-) {
-    ExtendedFloatingActionButton(
-        onClick = {
-            viewModel.startNewTask(taskListId)
-            showBottomSheet(true)
-        },
-        icon = { Icon(Icons.Filled.Add, "Create a task.") },
-        text = { Text("Create a task") },
-    )
 }

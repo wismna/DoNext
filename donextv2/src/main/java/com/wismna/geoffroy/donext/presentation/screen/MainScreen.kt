@@ -18,6 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -31,7 +32,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,7 +64,7 @@ fun MainScreen(
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    // TODO: find a way to get rid of this
+    // TODO: find a way to do this better
     val taskViewModel: TaskViewModel = hiltViewModel()
 
     if (viewModel.isLoading) {
@@ -154,9 +158,13 @@ fun AppContent(
         floatingActionButton = {
             when (val dest = viewModel.currentDestination) {
                 is AppDestination.TaskList -> {
-                    TaskListFab(
-                        taskListId = dest.taskListId,
-                        showBottomSheet = { viewModel.showTaskSheet = it }
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            taskViewModel.startNewTask(dest.taskListId)
+                            viewModel.showTaskSheet = true
+                        },
+                        icon = { Icon(Icons.Filled.Add, "Create a task.") },
+                        text = { Text("Create a task") },
                     )
                 }
                 else -> null
@@ -192,7 +200,16 @@ fun AppContent(
                         type = NavType.LongType
                     })
                 ) { navBackStackEntry ->
-                    // TODO: when task list has been deleted, we should not navigate to it event if in the stack
+                    val taskListId = navBackStackEntry.arguments?.getLong("taskListId") ?: return@composable
+                    val listExists by remember(taskListId, viewModel.destinations) {
+                        derivedStateOf { viewModel.doesListExist(taskListId) }
+                    }
+                    LaunchedEffect(listExists) {
+                        if (!viewModel.doesListExist(taskListId)) {
+                            navController.popBackStack()
+                        }
+                    }
+
                     val taskListViewModel: TaskListViewModel = hiltViewModel(navBackStackEntry)
                     TaskListScreen(
                         viewModel = taskListViewModel,

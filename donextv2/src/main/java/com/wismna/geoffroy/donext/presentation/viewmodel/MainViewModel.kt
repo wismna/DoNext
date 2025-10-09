@@ -61,4 +61,10 @@ class MainViewModel @Inject constructor(
             }
         } ?: startDestination
     }
+
+    fun doesListExist(taskListId: Long): Boolean {
+        return destinations.any { dest ->
+            dest is AppDestination.TaskList && dest.taskListId == taskListId
+        }
+    }
 }

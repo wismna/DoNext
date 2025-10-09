@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.DueTodayViewModel
-import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
 
 @Composable
 fun DueTodayTasksScreen(
@@ -41,7 +40,7 @@ fun DueTodayTasksScreen(
             items(tasks, key = { it.id!! }) { task ->
                 TaskItemScreen(
                     modifier = Modifier.animateItem(),
-                    viewModel = TaskItemViewModel(task),
+                    task = task,
                     onTaskClick = { onTaskClick(task) },
                     onSwipeLeft = {
                         viewModel.updateTaskDone(task.id!!)

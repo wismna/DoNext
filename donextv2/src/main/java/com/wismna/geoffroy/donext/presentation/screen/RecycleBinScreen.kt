@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.RecycleBinViewModel
-import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
 
 @Composable
 fun RecycleBinScreen(
@@ -77,7 +76,7 @@ fun RecycleBinScreen(
             items(items, key = { it.task.id!! }) { item ->
                 TaskItemScreen(
                     modifier = Modifier.animateItem(),
-                    viewModel = TaskItemViewModel(item.task),
+                    task = item.task,
                     onTaskClick = { onTaskClick(item.task) },
                     onSwipeLeft = {
                         viewModel.restore(item.task.id!!)
