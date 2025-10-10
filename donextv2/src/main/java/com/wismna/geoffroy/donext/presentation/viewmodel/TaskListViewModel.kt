@@ -65,7 +65,7 @@ class TaskListViewModel @Inject constructor(
 
             uiEventBus.send(
                 UiEvent.ShowUndoSnackbar(
-                    message = "Task moved to trash",
+                    message = "Task moved to recycle bin",
                     undoAction = {
                         viewModelScope.launch {
                             toggleTaskDeletedUseCase(taskId, false)

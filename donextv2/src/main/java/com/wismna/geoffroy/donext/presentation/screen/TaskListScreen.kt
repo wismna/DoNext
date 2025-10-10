@@ -1,7 +1,7 @@
 package com.wismna.geoffroy.donext.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,8 +12,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
@@ -27,12 +27,11 @@ fun TaskListScreen(
 
     if (tasks.isEmpty()) {
         // Placeholder when recycle bin is empty
-        Column (
-            modifier = modifier.fillMaxSize().padding(10.dp),
-            Arrangement.Center
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Text("Nothing here!", modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-            Text("Add tasks with the Create Task button", modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+            Text("Tap + to create a new task.")
         }
         return
     }

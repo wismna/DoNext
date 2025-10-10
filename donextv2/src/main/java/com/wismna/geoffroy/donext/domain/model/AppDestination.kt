@@ -13,16 +13,16 @@ sealed class AppDestination(
     object DueTodayList : AppDestination(
         route = "todayList",
         title = "Due Today",
-        showBackButton = true,
+        showBackButton = false,
     )
     object ManageLists : AppDestination(
         route = "manageLists",
         title = "Manage Lists",
-        showBackButton = true,
+        showBackButton = false,
     )
     object RecycleBin : AppDestination(
         route = "recycleBin",
         title = "Recycle Bin",
-        showBackButton = true,
+        showBackButton = false,
     )
 }

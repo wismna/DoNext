@@ -11,6 +11,8 @@ import com.wismna.geoffroy.donext.domain.usecase.AddTaskListUseCase
 import com.wismna.geoffroy.donext.domain.usecase.DeleteTaskListUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
 import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskListUseCase
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -22,7 +24,8 @@ class ManageListsViewModel @Inject constructor(
     getTaskListsUseCase: GetTaskListsUseCase,
     private val addTaskListUseCase: AddTaskListUseCase,
     private val updateTaskListUseCase: UpdateTaskListUseCase,
-    private val deleteTaskListUseCase: DeleteTaskListUseCase
+    private val deleteTaskListUseCase: DeleteTaskListUseCase,
+    private val uiEventBus: UiEventBus
 ) : ViewModel() {
 
     var taskLists by mutableStateOf<List<TaskList>>(emptyList())
@@ -51,7 +54,18 @@ class ManageListsViewModel @Inject constructor(
     }
     fun deleteTaskList(taskListId: Long) {
         viewModelScope.launch {
-            deleteTaskListUseCase(taskListId)
+            deleteTaskListUseCase(taskListId, true)
+
+            uiEventBus.send(
+                UiEvent.ShowUndoSnackbar(
+                    message = "Task list moved to recycle bin",
+                    undoAction = {
+                        viewModelScope.launch {
+                            deleteTaskListUseCase(taskListId, false)
+                        }
+                    }
+                )
+            )
         }
     }
 

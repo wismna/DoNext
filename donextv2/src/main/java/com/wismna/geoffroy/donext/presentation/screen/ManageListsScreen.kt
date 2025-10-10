@@ -6,10 +6,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -62,6 +64,18 @@ fun ManageListsScreen(
     showAddListSheet: () -> Unit
 ) {
     var lists = viewModel.taskLists.toMutableList()
+
+    if (lists.isEmpty()) {
+        // Placeholder when no task lists exist
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Tap + to create a new task list.")
+        }
+        return
+    }
+
     val lazyListState = rememberLazyListState()
     val reorderState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
