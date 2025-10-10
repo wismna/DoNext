@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
 import com.wismna.geoffroy.donext.domain.usecase.GetDueTodayTasksUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsWithOverdueUseCase
@@ -42,9 +43,11 @@ class MenuViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun navigateTo(route: String) {
-        viewModelScope.launch {
-            uiEventBus.send(UiEvent.Navigate(route))
+    fun navigateTo(route: String, currentRoute: String) {
+        if (route != currentRoute) {
+            viewModelScope.launch {
+                uiEventBus.send(UiEvent.Navigate(route))
+            }
         }
     }
 }

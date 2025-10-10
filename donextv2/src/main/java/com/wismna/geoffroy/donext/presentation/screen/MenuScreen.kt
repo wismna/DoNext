@@ -57,7 +57,7 @@ fun MenuScreen(
                     },
                     icon = { Icon(Icons.Default.Today, contentDescription = "Due Today") },
                     selected = currentDestination is AppDestination.DueTodayList,
-                    onClick = { viewModel.navigateTo(AppDestination.DueTodayList.route) },
+                    onClick = { viewModel.navigateTo(AppDestination.DueTodayList.route, currentDestination.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 HorizontalDivider()
@@ -73,7 +73,7 @@ fun MenuScreen(
                         icon = { Icon(Icons.Default.LineWeight, contentDescription = list.name) },
                         selected = currentDestination is AppDestination.TaskList &&
                                 currentDestination.taskListId == list.id,
-                        onClick = { viewModel.navigateTo("taskList/${list.id}") },
+                        onClick = { viewModel.navigateTo("taskList/${list.id}", currentDestination.route) },
                         badge = {
                             if (list.overdueCount > 0) {
                                 Badge { Text(list.overdueCount.toString()) }
@@ -90,14 +90,14 @@ fun MenuScreen(
                     label = { Text("Recycle Bin") },
                     icon = { Icon(Icons.Default.Delete, contentDescription = "Recycle Bin") },
                     selected = currentDestination is AppDestination.RecycleBin,
-                    onClick = { viewModel.navigateTo(AppDestination.RecycleBin.route) },
+                    onClick = { viewModel.navigateTo(AppDestination.RecycleBin.route, currentDestination.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 NavigationDrawerItem(
                     label = { Text("Edit Lists") },
                     icon = { Icon(Icons.Default.EditNote, contentDescription = "Edit Lists") },
                     selected = currentDestination is AppDestination.ManageLists,
-                    onClick = { viewModel.navigateTo(AppDestination.ManageLists.route) },
+                    onClick = { viewModel.navigateTo(AppDestination.ManageLists.route, currentDestination.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
             }
