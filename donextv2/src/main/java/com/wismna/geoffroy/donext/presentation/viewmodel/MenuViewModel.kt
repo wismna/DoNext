@@ -9,17 +9,20 @@ import androidx.lifecycle.viewModelScope
 import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
 import com.wismna.geoffroy.donext.domain.usecase.GetDueTodayTasksUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsWithOverdueUseCase
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MenuViewModel @Inject constructor(
     getTaskListsWithOverdue: GetTaskListsWithOverdueUseCase,
-    getDueTodayTasks: GetDueTodayTasksUseCase
+    getDueTodayTasks: GetDueTodayTasksUseCase,
+    private val uiEventBus: UiEventBus
 ) : ViewModel() {
-
     var taskLists by mutableStateOf<List<TaskListWithOverdue>>(emptyList())
         private set
 
@@ -37,5 +40,11 @@ class MenuViewModel @Inject constructor(
                 dueTodayTasksCount = tasks.count()
             }
             .launchIn(viewModelScope)
+    }
+
+    fun navigateTo(route: String) {
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.Navigate(route))
+        }
     }
 }

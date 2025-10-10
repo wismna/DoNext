@@ -50,10 +50,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.wismna.geoffroy.donext.domain.model.AppDestination
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.viewmodel.MainViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
-import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,8 +64,6 @@ fun MainScreen(
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    // TODO: find a way to do this better
-    val taskViewModel: TaskViewModel = hiltViewModel()
 
     if (viewModel.isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -74,7 +73,7 @@ fun MainScreen(
     }
 
     if (viewModel.showTaskSheet) {
-        TaskBottomSheet(taskViewModel) { viewModel.showTaskSheet = false }
+        TaskBottomSheet { viewModel.onDismissTaskSheet() }
     }
     if (viewModel.showAddListSheet) {
         AddListBottomSheet { viewModel.showAddListSheet = false }
@@ -85,21 +84,11 @@ fun MainScreen(
 
     ModalNavigationDrawer(
         drawerContent = {
-            MenuScreen (
-                currentDestination = viewModel.currentDestination,
-                onNavigate = { route ->
-                    scope.launch {
-                        drawerState.close()
-                        navController.navigate(route) {
-                            restoreState = true
-                        }
-                    }
-                }
-            )
+            MenuScreen (currentDestination = viewModel.currentDestination)
         },
         drawerState = drawerState
     ) {
-        AppContent(viewModel = viewModel, taskViewModel = taskViewModel, navController = navController, scope = scope, drawerState = drawerState)
+        AppContent(viewModel = viewModel, navController = navController, scope = scope, drawerState = drawerState)
     }
 }
 
@@ -107,11 +96,22 @@ fun MainScreen(
 fun AppContent(
     modifier : Modifier = Modifier,
     viewModel: MainViewModel,
-    taskViewModel: TaskViewModel,
     navController: NavHostController,
     scope: CoroutineScope,
     drawerState: DrawerState
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.uiEventBus.events.collectLatest { event ->
+            when (event) {
+                is UiEvent.Navigate -> {
+                    drawerState.close()
+                    navController.navigate(event.route)
+                }
+                is UiEvent.NavigateBack -> navController.popBackStack()
+                else -> {}
+            }
+        }
+    }
     Scaffold(
         modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer),
         containerColor = Color.Transparent,
@@ -126,7 +126,7 @@ fun AppContent(
                 navigationIcon = {
                     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
                         if (viewModel.currentDestination.showBackButton) {
-                            IconButton(onClick = { navController.popBackStack() }) {
+                            IconButton(onClick = { viewModel.navigateBack() }) {
                                 Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                             }
                         } else {
@@ -158,10 +158,7 @@ fun AppContent(
             when (val dest = viewModel.currentDestination) {
                 is AppDestination.TaskList -> {
                     ExtendedFloatingActionButton(
-                        onClick = {
-                            taskViewModel.startNewTask(dest.taskListId)
-                            viewModel.showTaskSheet = true
-                        },
+                        onClick = { viewModel.onNewTaskButtonClicked(dest.taskListId) },
                         icon = { Icon(Icons.Filled.Add, "Create a task.") },
                         text = { Text("Create a task") },
                     )
@@ -205,17 +202,14 @@ fun AppContent(
                     }
                     LaunchedEffect(listExists) {
                         if (!viewModel.doesListExist(taskListId)) {
-                            navController.popBackStack()
+                            viewModel.navigateBack()
                         }
                     }
 
                     val taskListViewModel: TaskListViewModel = hiltViewModel(navBackStackEntry)
                     TaskListScreen(
                         viewModel = taskListViewModel,
-                        onTaskClick = { task ->
-                            taskViewModel.startEditTask(task)
-                            viewModel.showTaskSheet = true
-                        }
+                        onTaskClick = { task -> viewModel.onTaskClicked(task) }
                     )
                 }
 
@@ -228,19 +222,13 @@ fun AppContent(
                 composable(AppDestination.DueTodayList.route) {
                     DueTodayTasksScreen (
                         modifier = Modifier,
-                        onTaskClick = { task ->
-                            taskViewModel.startEditTask(task)
-                            viewModel.showTaskSheet = true
-                        }
+                        onTaskClick = { task -> viewModel.onTaskClicked(task) }
                     )
                 }
                 composable(AppDestination.RecycleBin.route) {
                     RecycleBinScreen(
                         modifier = Modifier,
-                        onTaskClick = { task ->
-                            taskViewModel.startEditTask(task)
-                            viewModel.showTaskSheet = true
-                        }
+                        onTaskClick = { task -> viewModel.onTaskClicked(task) }
                     )
                 }
             }

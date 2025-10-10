@@ -31,7 +31,6 @@ import com.wismna.geoffroy.donext.presentation.viewmodel.MenuViewModel
 fun MenuScreen(
     viewModel: MenuViewModel = hiltViewModel(),
     currentDestination: AppDestination,
-    onNavigate: (String) -> Unit
 ) {
     ModalDrawerSheet(
         drawerContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -58,7 +57,7 @@ fun MenuScreen(
                     },
                     icon = { Icon(Icons.Default.Today, contentDescription = "Due Today") },
                     selected = currentDestination is AppDestination.DueTodayList,
-                    onClick = { onNavigate(AppDestination.DueTodayList.route) },
+                    onClick = { viewModel.navigateTo(AppDestination.DueTodayList.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 HorizontalDivider()
@@ -74,7 +73,7 @@ fun MenuScreen(
                         icon = { Icon(Icons.Default.LineWeight, contentDescription = list.name) },
                         selected = currentDestination is AppDestination.TaskList &&
                                 currentDestination.taskListId == list.id,
-                        onClick = { onNavigate("taskList/${list.id}") },
+                        onClick = { viewModel.navigateTo("taskList/${list.id}") },
                         badge = {
                             if (list.overdueCount > 0) {
                                 Badge { Text(list.overdueCount.toString()) }
@@ -91,14 +90,14 @@ fun MenuScreen(
                     label = { Text("Recycle Bin") },
                     icon = { Icon(Icons.Default.Delete, contentDescription = "Recycle Bin") },
                     selected = currentDestination is AppDestination.RecycleBin,
-                    onClick = { onNavigate(AppDestination.RecycleBin.route) },
+                    onClick = { viewModel.navigateTo(AppDestination.RecycleBin.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 NavigationDrawerItem(
                     label = { Text("Edit Lists") },
                     icon = { Icon(Icons.Default.EditNote, contentDescription = "Edit Lists") },
                     selected = currentDestination is AppDestination.ManageLists,
-                    onClick = { onNavigate(AppDestination.ManageLists.route) },
+                    onClick = { viewModel.navigateTo(AppDestination.ManageLists.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
             }

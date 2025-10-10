@@ -9,6 +9,8 @@ import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.usecase.AddTaskUseCase
 import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskUseCase
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -19,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val createTaskUseCase: AddTaskUseCase,
-    private val updateTaskUseCase: UpdateTaskUseCase
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val uiEventBus: UiEventBus
 ) : ViewModel() {
 
     var title by mutableStateOf("")
@@ -38,10 +41,23 @@ class TaskViewModel @Inject constructor(
     private var editingTaskId: Long? = null
     private var taskListId: Long? = null
 
+    init {
+        viewModelScope.launch {
+            uiEventBus.events.collect { event ->
+                when (event) {
+                    is UiEvent.EditTask -> startEditTask(event.task)
+                    is UiEvent.CreateNewTask -> startNewTask(event.taskListId)
+                    is UiEvent.CloseTask -> reset()
+                    else -> {}
+                }
+            }
+        }
+    }
+
     fun screenTitle(): String = if (isDeleted) "Task details" else if (isEditing()) "Edit Task" else "New Task"
     fun isEditing(): Boolean = editingTaskId != null
 
-    fun startNewTask(selectedListId: Long) {
+    private fun startNewTask(selectedListId: Long) {
         editingTaskId = null
         taskListId = selectedListId
         title = ""
@@ -51,7 +67,7 @@ class TaskViewModel @Inject constructor(
         isDeleted = false
     }
 
-    fun startEditTask(task: Task) {
+    private fun startEditTask(task: Task) {
         editingTaskId = task.id
         taskListId = task.taskListId
         title = task.name
@@ -84,8 +100,6 @@ class TaskViewModel @Inject constructor(
             } else {
                 createTaskUseCase(taskListId!!, title, description, priority, dueDate)
             }
-            // reset state after save
-            reset()
             onDone?.invoke()
         }
     }

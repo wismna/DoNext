@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
@@ -53,7 +54,7 @@ import java.time.format.FormatStyle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskBottomSheet(
-    viewModel: TaskViewModel,
+    viewModel: TaskViewModel = hiltViewModel(),
     onDismiss: () -> Unit
 ) {
     val titleFocusRequester = remember { FocusRequester() }

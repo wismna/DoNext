@@ -7,15 +7,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import com.wismna.geoffroy.donext.domain.model.AppDestination
+import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    getTaskListsUseCase: GetTaskListsUseCase
+    getTaskListsUseCase: GetTaskListsUseCase,
+    val uiEventBus: UiEventBus
 ) : ViewModel() {
 
     var isLoading by mutableStateOf(true)
@@ -48,6 +53,33 @@ class MainViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    fun navigateBack() {
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.NavigateBack)
+        }
+    }
+
+    fun onNewTaskButtonClicked(taskLisId: Long) {
+        showTaskSheet = true
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.CreateNewTask(taskLisId))
+        }
+    }
+
+    fun onTaskClicked(task: Task) {
+        showTaskSheet = true
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.EditTask(task))
+        }
+    }
+
+    fun onDismissTaskSheet() {
+        showTaskSheet = false
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.CloseTask)
+        }
     }
 
     fun setCurrentDestination(navBackStackEntry: NavBackStackEntry?) {

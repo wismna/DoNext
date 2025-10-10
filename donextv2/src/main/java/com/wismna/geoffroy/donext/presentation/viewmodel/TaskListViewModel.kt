@@ -19,9 +19,9 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
     getTasks: GetTasksForListUseCase,
+    savedStateHandle: SavedStateHandle,
     private val toggleTaskDone: ToggleTaskDoneUseCase,
     private val toggleTaskDeleted: ToggleTaskDeletedUseCase,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     var tasks by mutableStateOf<List<Task>>(emptyList())
