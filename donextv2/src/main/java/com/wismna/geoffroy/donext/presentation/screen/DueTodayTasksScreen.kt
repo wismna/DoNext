@@ -37,7 +37,8 @@ fun DueTodayTasksScreen(
                     modifier = Modifier.animateItem(),
                     task = task,
                     onSwipeLeft = { viewModel.updateTaskDone(task.id!!) },
-                    onSwipeRight = { viewModel.deleteTask(task.id!!) }
+                    onSwipeRight = { viewModel.deleteTask(task.id!!) },
+                    onTaskClick = { viewModel.onTaskClicked(task) }
                 )
             }
         }

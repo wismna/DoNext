@@ -80,7 +80,8 @@ fun RecycleBinScreen(
                         // TODO: add confirmation dialog
                         viewModel.deleteForever(item.task.id!!)
                         Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show()
-                    }
+                    },
+                    onTaskClick = { viewModel.onTaskClicked(item.task) }
                 )
             }
         }

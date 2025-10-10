@@ -36,6 +36,12 @@ class DueTodayViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    fun onTaskClicked(task: Task) {
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.EditTask(task))
+        }
+    }
+
     fun updateTaskDone(taskId: Long) {
         viewModelScope.launch {
             toggleTaskDoneUseCase(taskId, true)

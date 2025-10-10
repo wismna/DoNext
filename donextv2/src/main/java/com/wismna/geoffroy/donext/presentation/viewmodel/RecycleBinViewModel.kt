@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.model.TaskWithListName
 import com.wismna.geoffroy.donext.domain.usecase.EmptyRecycleBinUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetDeletedTasksUseCase
@@ -32,6 +33,12 @@ class RecycleBinViewModel @Inject constructor(
 
     init {
         loadDeletedTasks()
+    }
+
+    fun onTaskClicked(task: Task) {
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.EditTask(task))
+        }
     }
 
     fun loadDeletedTasks() {

@@ -28,6 +28,8 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,33 +39,42 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
+import kotlinx.coroutines.flow.filter
 
 @Composable
 fun TaskItemScreen(
     modifier: Modifier = Modifier,
     task: Task,
-    viewModel: TaskItemViewModel = hiltViewModel<TaskItemViewModel>(),
     onSwipeLeft: () -> Unit,
-    onSwipeRight: () -> Unit
+    onSwipeRight: () -> Unit,
+    onTaskClick: (task: Task) -> Unit
 ) {
-    viewModel.populateTask(task)
-    // TODO: change this
+    val viewModel = TaskItemViewModel(task)
+
     val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            when (it) {
-                SwipeToDismissBoxValue.StartToEnd -> { onSwipeRight() }
-                SwipeToDismissBoxValue.EndToStart -> { onSwipeLeft() }
-                SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState false
-            }
-            return@rememberSwipeToDismissBoxState true
-        },
         // positional threshold of 25%
         positionalThreshold = { it * .25f }
     )
+    LaunchedEffect(dismissState) {
+        snapshotFlow { dismissState.targetValue }
+            .filter { it != SwipeToDismissBoxValue.Settled }
+            .collect { target ->
+                when (target) {
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        onSwipeRight()
+                        dismissState.reset()
+                    }
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        onSwipeLeft()
+                    }
+                    else -> Unit
+                }
+            }
+    }
+
     val baseStyle = MaterialTheme.typography.bodyLarge.copy(
         fontWeight = when (viewModel.priority) {
             Priority.HIGH -> FontWeight.Bold
@@ -79,7 +90,7 @@ fun TaskItemScreen(
     )
     Card(
         modifier = modifier,
-        onClick = { viewModel.onTaskClicked(task) },
+        onClick = { onTaskClick(task) },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
@@ -110,7 +121,7 @@ fun TaskItemScreen(
                     ) {
                         // Title
                         Text(
-                            text = viewModel.name!!,
+                            text = viewModel.name,
                             fontSize = 18.sp,
                             style = baseStyle,
                             modifier = Modifier
@@ -123,7 +134,7 @@ fun TaskItemScreen(
                         )
 
                         // Due date badge
-                        viewModel.dueDate?.let { dueMillis ->
+                        viewModel.dueDateText?.let { dueMillis ->
                             Badge(
                                 modifier = Modifier
                                     .align(
@@ -134,7 +145,7 @@ fun TaskItemScreen(
                             ) {
                                 Text(
                                     modifier = Modifier.padding(start = 1.dp, end = 1.dp),
-                                    text = viewModel.dueDate!!,
+                                    text = viewModel.dueDateText,
                                     color = if (viewModel.isOverdue) Color.White else MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.bodySmall
                                 )
@@ -151,7 +162,7 @@ fun TaskItemScreen(
                         ) {
                             if (!viewModel.description.isNullOrBlank()) {
                                 Text(
-                                    text = viewModel.description!!,
+                                    text = viewModel.description,
                                     color = MaterialTheme.colorScheme.tertiary,
                                     style = baseStyle.copy(
                                         fontSize = MaterialTheme.typography.bodyMedium.fontSize,

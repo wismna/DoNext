@@ -55,7 +55,8 @@ fun TaskListScreen(
                 modifier = Modifier.animateItem(),
                 task = task,
                 onSwipeLeft = { viewModel.updateTaskDone(task.id!!, true) },
-                onSwipeRight = { viewModel.deleteTask(task.id!!) }
+                onSwipeRight = { viewModel.deleteTask(task.id!!) },
+                onTaskClick = { viewModel.onTaskClicked(task) }
             )
         }
 
@@ -80,8 +81,8 @@ fun TaskListScreen(
                 task = task,
                 onSwipeLeft = { viewModel.updateTaskDone(task.id!!, false) },
                 onSwipeRight = { viewModel.deleteTask(task.id!!) },
+                onTaskClick = { viewModel.onTaskClicked(task) }
             )
         }
-
     }
 }

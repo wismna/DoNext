@@ -43,6 +43,12 @@ class TaskListViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    fun onTaskClicked(task: Task) {
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.EditTask(task))
+        }
+    }
+
     fun updateTaskDone(taskId: Long, isDone: Boolean) {
         viewModelScope.launch {
             toggleTaskDoneUseCase(taskId, isDone)
