@@ -60,8 +60,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun ManageListsScreen(
     modifier: Modifier,
-    viewModel: ManageListsViewModel = hiltViewModel(),
-    showAddListSheet: () -> Unit
+    viewModel: ManageListsViewModel = hiltViewModel()
 ) {
     var lists = viewModel.taskLists.toMutableList()
 

@@ -56,28 +56,6 @@ class TaskViewModel @Inject constructor(
 
     fun screenTitle(): String = if (isDeleted) "Task details" else if (isEditing()) "Edit Task" else "New Task"
     fun isEditing(): Boolean = editingTaskId != null
-
-    private fun startNewTask(selectedListId: Long) {
-        editingTaskId = null
-        taskListId = selectedListId
-        title = ""
-        description = ""
-        priority = Priority.NORMAL
-        dueDate = null
-        isDeleted = false
-    }
-
-    private fun startEditTask(task: Task) {
-        editingTaskId = task.id
-        taskListId = task.taskListId
-        title = task.name
-        description = task.description ?: ""
-        priority = task.priority
-        dueDate = task.dueDate
-        isDone = task.isDone
-        isDeleted = task.isDeleted
-    }
-
     fun onTitleChanged(value: String) { title = value }
     fun onDescriptionChanged(value: String) { description = value }
     fun onPriorityChanged(value: Priority) { priority = value }
@@ -104,7 +82,28 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    fun reset() {
+    private fun startNewTask(selectedListId: Long) {
+        editingTaskId = null
+        taskListId = selectedListId
+        title = ""
+        description = ""
+        priority = Priority.NORMAL
+        dueDate = null
+        isDeleted = false
+    }
+
+    private fun startEditTask(task: Task) {
+        editingTaskId = task.id
+        taskListId = task.taskListId
+        title = task.name
+        description = task.description ?: ""
+        priority = task.priority
+        dueDate = task.dueDate
+        isDone = task.isDone
+        isDeleted = task.isDeleted
+    }
+
+    private fun reset() {
         editingTaskId = null
         taskListId = null
         title = ""

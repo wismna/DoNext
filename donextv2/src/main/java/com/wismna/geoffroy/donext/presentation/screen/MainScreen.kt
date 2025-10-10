@@ -227,10 +227,7 @@ fun AppContent(
                 }
 
                 composable(AppDestination.ManageLists.route) {
-                    ManageListsScreen(
-                        modifier = Modifier,
-                        showAddListSheet = {viewModel.showAddListSheet = true}
-                    )
+                    ManageListsScreen(modifier = Modifier)
                 }
                 composable(AppDestination.DueTodayList.route) {
                     DueTodayTasksScreen (modifier = Modifier)
