@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import com.wismna.geoffroy.donext.domain.model.AppDestination
-import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
@@ -65,13 +64,6 @@ class MainViewModel @Inject constructor(
         showTaskSheet = true
         viewModelScope.launch {
             uiEventBus.send(UiEvent.CreateNewTask(taskLisId))
-        }
-    }
-
-    fun onTaskClicked(task: Task) {
-        showTaskSheet = true
-        viewModelScope.launch {
-            uiEventBus.send(UiEvent.EditTask(task))
         }
     }
 

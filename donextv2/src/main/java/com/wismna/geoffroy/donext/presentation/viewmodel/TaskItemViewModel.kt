@@ -1,31 +1,42 @@
 package com.wismna.geoffroy.donext.presentation.viewmodel
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.util.Locale
+import javax.inject.Inject
 
-class TaskItemViewModel(task: Task) {
-    val id: Long = task.id!!
-    val name: String = task.name
-    val description: String? = task.description
-    val isDone: Boolean = task.isDone
-    val isDeleted: Boolean = task.isDeleted
-    val priority: Priority = task.priority
+@HiltViewModel
+class TaskItemViewModel @Inject constructor(
+    private val uiEventBus: UiEventBus
+): ViewModel() {
+    var id: Long? = null
+    var name: String? = null
+    var description: String? = null
+    var dueDate: Long? = null
+    var isDone: Boolean = false
+    var isDeleted: Boolean = false
+    var priority: Priority = Priority.NORMAL
 
     val today: LocalDate = LocalDate.now(ZoneId.systemDefault())
 
-    val isOverdue: Boolean = task.dueDate?.let { millis ->
+    val isOverdue: Boolean = dueDate?.let { millis ->
         val dueDate = millis.toLocalDate()
         dueDate.isBefore(today)
     } ?: false
 
-    val dueDateText: String? = task.dueDate?.let { formatDueDate(it) }
+    val dueDateText: String? = dueDate?.let { formatDueDate(it) }
 
     private fun formatDueDate(dueMillis: Long): String {
         val dueDate = dueMillis.toLocalDate()
@@ -38,6 +49,21 @@ class TaskItemViewModel(task: Task) {
                 dueDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
             else ->
                 dueDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()))
+        }
+    }
+
+    fun populateTask(task: Task) {
+        id = task.id!!
+        name = task.name
+        description = task.description
+        isDone = task.isDone
+        isDeleted = task.isDeleted
+        priority = task.priority
+    }
+
+    fun onTaskClicked(task: Task) {
+        viewModelScope.launch {
+            uiEventBus.send(UiEvent.EditTask(task))
         }
     }
 }

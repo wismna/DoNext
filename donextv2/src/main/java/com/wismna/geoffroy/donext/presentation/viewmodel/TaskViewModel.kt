@@ -45,8 +45,8 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch {
             uiEventBus.events.collect { event ->
                 when (event) {
-                    is UiEvent.EditTask -> startEditTask(event.task)
                     is UiEvent.CreateNewTask -> startNewTask(event.taskListId)
+                    is UiEvent.EditTask -> startEditTask(event.task)
                     is UiEvent.CloseTask -> reset()
                     else -> {}
                 }

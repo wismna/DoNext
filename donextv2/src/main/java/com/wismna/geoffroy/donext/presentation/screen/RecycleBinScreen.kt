@@ -29,14 +29,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.RecycleBinViewModel
 
 @Composable
 fun RecycleBinScreen(
     modifier: Modifier = Modifier,
     viewModel: RecycleBinViewModel = hiltViewModel(),
-    onTaskClick: (task: Task) -> Unit
 ) {
     val tasks = viewModel.deletedTasks
 
@@ -77,7 +75,6 @@ fun RecycleBinScreen(
                 TaskItemScreen(
                     modifier = Modifier.animateItem(),
                     task = item.task,
-                    onTaskClick = { onTaskClick(item.task) },
                     onSwipeLeft = {
                         viewModel.restore(item.task.id!!)
                         Toast.makeText(context, "Task restored", Toast.LENGTH_SHORT).show()

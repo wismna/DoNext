@@ -13,14 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.DueTodayViewModel
 
 @Composable
 fun DueTodayTasksScreen(
     modifier: Modifier = Modifier,
     viewModel: DueTodayViewModel = hiltViewModel(),
-    onTaskClick: (task: Task) -> Unit
 ) {
     val tasks = viewModel.dueTodayTasks
 
@@ -41,7 +39,6 @@ fun DueTodayTasksScreen(
                 TaskItemScreen(
                     modifier = Modifier.animateItem(),
                     task = task,
-                    onTaskClick = { onTaskClick(task) },
                     onSwipeLeft = {
                         viewModel.updateTaskDone(task.id!!)
                         Toast.makeText(context, "Task done", Toast.LENGTH_SHORT).show()

@@ -15,13 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
 
 @Composable
 fun TaskListScreen(
     viewModel: TaskListViewModel = hiltViewModel<TaskListViewModel>(),
-    onTaskClick: (Task) -> Unit) {
+) {
     val tasks = viewModel.tasks
 
     // Split tasks into active and done
@@ -43,7 +42,6 @@ fun TaskListScreen(
             TaskItemScreen(
                 modifier = Modifier.animateItem(),
                 task = task,
-                onTaskClick = { onTaskClick(task) },
                 onSwipeLeft = {
                     viewModel.updateTaskDone(task.id!!, true)
                     Toast.makeText(context, "Task done", Toast.LENGTH_SHORT).show()
@@ -74,7 +72,6 @@ fun TaskListScreen(
             TaskItemScreen(
                 modifier = Modifier.animateItem(),
                 task = task,
-                onTaskClick = { onTaskClick(task) },
                 onSwipeLeft = {
                     viewModel.updateTaskDone(task.id!!, false)
                     Toast.makeText(context, "Task in progress", Toast.LENGTH_SHORT).show()

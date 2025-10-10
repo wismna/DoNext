@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
@@ -45,11 +46,11 @@ import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
 fun TaskItemScreen(
     modifier: Modifier = Modifier,
     task: Task,
-    onTaskClick: (taskId: Long) -> Unit,
+    viewModel: TaskItemViewModel = hiltViewModel<TaskItemViewModel>(),
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit
 ) {
-    val viewModel = TaskItemViewModel(task)
+    viewModel.populateTask(task)
     // TODO: change this
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
@@ -78,7 +79,7 @@ fun TaskItemScreen(
     )
     Card(
         modifier = modifier,
-        onClick = { onTaskClick(viewModel.id) },
+        onClick = { viewModel.onTaskClicked(task) },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
@@ -109,7 +110,7 @@ fun TaskItemScreen(
                     ) {
                         // Title
                         Text(
-                            text = viewModel.name,
+                            text = viewModel.name!!,
                             fontSize = 18.sp,
                             style = baseStyle,
                             modifier = Modifier
@@ -150,7 +151,7 @@ fun TaskItemScreen(
                         ) {
                             if (!viewModel.description.isNullOrBlank()) {
                                 Text(
-                                    text = viewModel.description,
+                                    text = viewModel.description!!,
                                     color = MaterialTheme.colorScheme.tertiary,
                                     style = baseStyle.copy(
                                         fontSize = MaterialTheme.typography.bodyMedium.fontSize,

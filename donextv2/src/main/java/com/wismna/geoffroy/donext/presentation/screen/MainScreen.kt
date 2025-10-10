@@ -108,6 +108,7 @@ fun AppContent(
                     navController.navigate(event.route)
                 }
                 is UiEvent.NavigateBack -> navController.popBackStack()
+                is UiEvent.EditTask -> { viewModel.showTaskSheet = true }
                 else -> {}
             }
         }
@@ -207,10 +208,7 @@ fun AppContent(
                     }
 
                     val taskListViewModel: TaskListViewModel = hiltViewModel(navBackStackEntry)
-                    TaskListScreen(
-                        viewModel = taskListViewModel,
-                        onTaskClick = { task -> viewModel.onTaskClicked(task) }
-                    )
+                    TaskListScreen(viewModel = taskListViewModel)
                 }
 
                 composable(AppDestination.ManageLists.route) {
@@ -220,16 +218,10 @@ fun AppContent(
                     )
                 }
                 composable(AppDestination.DueTodayList.route) {
-                    DueTodayTasksScreen (
-                        modifier = Modifier,
-                        onTaskClick = { task -> viewModel.onTaskClicked(task) }
-                    )
+                    DueTodayTasksScreen (modifier = Modifier)
                 }
                 composable(AppDestination.RecycleBin.route) {
-                    RecycleBinScreen(
-                        modifier = Modifier,
-                        onTaskClick = { task -> viewModel.onTaskClicked(task) }
-                    )
+                    RecycleBinScreen(modifier = Modifier)
                 }
             }
         }
