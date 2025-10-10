@@ -25,6 +25,10 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -53,7 +57,6 @@ import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.viewmodel.MainViewModel
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskListViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -63,7 +66,6 @@ fun MainScreen(
 ) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
 
     if (viewModel.isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -88,7 +90,7 @@ fun MainScreen(
         },
         drawerState = drawerState
     ) {
-        AppContent(viewModel = viewModel, navController = navController, scope = scope, drawerState = drawerState)
+        AppContent(viewModel = viewModel, navController = navController, drawerState = drawerState)
     }
 }
 
@@ -97,9 +99,11 @@ fun AppContent(
     modifier : Modifier = Modifier,
     viewModel: MainViewModel,
     navController: NavHostController,
-    scope: CoroutineScope,
     drawerState: DrawerState
 ) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     LaunchedEffect(Unit) {
         viewModel.uiEventBus.events.collectLatest { event ->
             when (event) {
@@ -109,13 +113,24 @@ fun AppContent(
                 }
                 is UiEvent.NavigateBack -> navController.popBackStack()
                 is UiEvent.EditTask -> { viewModel.showTaskSheet = true }
-                else -> {}
+                is UiEvent.ShowUndoSnackbar -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = event.message,
+                        actionLabel = "Undo",
+                        duration = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        event.undoAction()
+                    }
+                }
+                else -> Unit
             }
         }
     }
     Scaffold(
         modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer),
         containerColor = Color.Transparent,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(viewModel.currentDestination.title) },

@@ -75,11 +75,9 @@ fun RecycleBinScreen(
                 TaskItemScreen(
                     modifier = Modifier.animateItem(),
                     task = item.task,
-                    onSwipeLeft = {
-                        viewModel.restore(item.task.id!!)
-                        Toast.makeText(context, "Task restored", Toast.LENGTH_SHORT).show()
-                    },
+                    onSwipeLeft = { viewModel.restore(item.task.id!!) },
                     onSwipeRight = {
+                        // TODO: add confirmation dialog
                         viewModel.deleteForever(item.task.id!!)
                         Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show()
                     }

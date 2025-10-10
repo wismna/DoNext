@@ -10,6 +10,8 @@ import com.wismna.geoffroy.donext.domain.usecase.EmptyRecycleBinUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetDeletedTasksUseCase
 import com.wismna.geoffroy.donext.domain.usecase.PermanentlyDeleteTaskUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -18,10 +20,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RecycleBinViewModel @Inject constructor(
-    private val getDeletedTasks: GetDeletedTasksUseCase,
-    private val restoreTask: ToggleTaskDeletedUseCase,
-    private val permanentlyDeleteTask: PermanentlyDeleteTaskUseCase,
-    private val emptyRecycleBinUseCase: EmptyRecycleBinUseCase
+    private val getDeletedTasksUseCase: GetDeletedTasksUseCase,
+    private val toggleTaskDeletedUseCase: ToggleTaskDeletedUseCase,
+    private val permanentlyDeleteTaskUseCase: PermanentlyDeleteTaskUseCase,
+    private val emptyRecycleBinUseCase: EmptyRecycleBinUseCase,
+    private val uiEventBus: UiEventBus
 ) : ViewModel() {
 
     var deletedTasks by mutableStateOf<List<TaskWithListName>>(emptyList())
@@ -32,7 +35,7 @@ class RecycleBinViewModel @Inject constructor(
     }
 
     fun loadDeletedTasks() {
-        getDeletedTasks()
+        getDeletedTasksUseCase()
             .onEach { tasks ->
                 deletedTasks = tasks
             }
@@ -41,14 +44,25 @@ class RecycleBinViewModel @Inject constructor(
 
     fun restore(taskId: Long) {
         viewModelScope.launch {
-            restoreTask(taskId, false)
+            toggleTaskDeletedUseCase(taskId, false)
             loadDeletedTasks()
+
+            uiEventBus.send(
+                UiEvent.ShowUndoSnackbar(
+                    message = "Task restored",
+                    undoAction = {
+                        viewModelScope.launch {
+                            toggleTaskDeletedUseCase(taskId, true)
+                        }
+                    }
+                )
+            )
         }
     }
 
     fun deleteForever(taskId: Long) {
         viewModelScope.launch {
-            permanentlyDeleteTask(taskId)
+            permanentlyDeleteTaskUseCase(taskId)
             loadDeletedTasks()
         }
     }

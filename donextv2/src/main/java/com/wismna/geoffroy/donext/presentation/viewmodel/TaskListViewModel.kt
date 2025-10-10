@@ -10,6 +10,8 @@ import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.usecase.GetTasksForListUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDoneUseCase
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
+import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -18,10 +20,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
-    getTasks: GetTasksForListUseCase,
     savedStateHandle: SavedStateHandle,
-    private val toggleTaskDone: ToggleTaskDoneUseCase,
-    private val toggleTaskDeleted: ToggleTaskDeletedUseCase,
+    getTasksUseCase: GetTasksForListUseCase,
+    private val toggleTaskDoneUseCase: ToggleTaskDoneUseCase,
+    private val toggleTaskDeletedUseCase: ToggleTaskDeletedUseCase,
+    private val uiEventBus: UiEventBus
 ) : ViewModel() {
 
     var tasks by mutableStateOf<List<Task>>(emptyList())
@@ -32,7 +35,7 @@ class TaskListViewModel @Inject constructor(
     private val taskListId: Long = checkNotNull(savedStateHandle["taskListId"])
 
     init {
-        getTasks(taskListId)
+        getTasksUseCase(taskListId)
             .onEach { list ->
                 tasks = list
                 isLoading = false
@@ -42,12 +45,34 @@ class TaskListViewModel @Inject constructor(
 
     fun updateTaskDone(taskId: Long, isDone: Boolean) {
         viewModelScope.launch {
-            toggleTaskDone(taskId, isDone)
+            toggleTaskDoneUseCase(taskId, isDone)
+
+            uiEventBus.send(
+                UiEvent.ShowUndoSnackbar(
+                    message = "Task done",
+                    undoAction = {
+                        viewModelScope.launch {
+                            toggleTaskDoneUseCase(taskId, !isDone)
+                        }
+                    }
+                )
+            )
         }
     }
     fun deleteTask(taskId: Long) {
         viewModelScope.launch {
-            toggleTaskDeleted(taskId, true)
+            toggleTaskDeletedUseCase(taskId, true)
+
+            uiEventBus.send(
+                UiEvent.ShowUndoSnackbar(
+                    message = "Task moved to trash",
+                    undoAction = {
+                        viewModelScope.launch {
+                            toggleTaskDeletedUseCase(taskId, false)
+                        }
+                    }
+                )
+            )
         }
     }
 }

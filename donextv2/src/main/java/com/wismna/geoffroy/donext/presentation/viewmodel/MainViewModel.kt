@@ -46,10 +46,10 @@ class MainViewModel @Inject constructor(
                     AppDestination.ManageLists +
                     AppDestination.RecycleBin +
                     AppDestination.DueTodayList
-                isLoading = false
                 if (startDestination == AppDestination.ManageLists && destinations.isNotEmpty()) {
                     startDestination = destinations.first()
                 }
+                isLoading = false
             }
             .launchIn(viewModelScope)
     }

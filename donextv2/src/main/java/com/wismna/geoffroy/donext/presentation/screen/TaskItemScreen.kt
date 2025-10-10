@@ -123,7 +123,7 @@ fun TaskItemScreen(
                         )
 
                         // Due date badge
-                        viewModel.dueDateText?.let { dueMillis ->
+                        viewModel.dueDate?.let { dueMillis ->
                             Badge(
                                 modifier = Modifier
                                     .align(
@@ -134,7 +134,7 @@ fun TaskItemScreen(
                             ) {
                                 Text(
                                     modifier = Modifier.padding(start = 1.dp, end = 1.dp),
-                                    text = viewModel.dueDateText,
+                                    text = viewModel.dueDate!!,
                                     color = if (viewModel.isOverdue) Color.White else MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.bodySmall
                                 )

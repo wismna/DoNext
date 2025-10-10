@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
 import com.wismna.geoffroy.donext.domain.usecase.GetDueTodayTasksUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsWithOverdueUseCase

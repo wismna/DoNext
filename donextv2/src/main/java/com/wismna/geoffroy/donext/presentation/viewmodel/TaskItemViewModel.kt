@@ -24,41 +24,25 @@ class TaskItemViewModel @Inject constructor(
     var id: Long? = null
     var name: String? = null
     var description: String? = null
-    var dueDate: Long? = null
+    var dueDate: String? = null
     var isDone: Boolean = false
     var isDeleted: Boolean = false
     var priority: Priority = Priority.NORMAL
-
+    var isOverdue: Boolean = false
     val today: LocalDate = LocalDate.now(ZoneId.systemDefault())
-
-    val isOverdue: Boolean = dueDate?.let { millis ->
-        val dueDate = millis.toLocalDate()
-        dueDate.isBefore(today)
-    } ?: false
-
-    val dueDateText: String? = dueDate?.let { formatDueDate(it) }
-
-    private fun formatDueDate(dueMillis: Long): String {
-        val dueDate = dueMillis.toLocalDate()
-
-        return when {
-            dueDate.isEqual(today) -> "Today"
-            dueDate.isEqual(today.plusDays(1)) -> "Tomorrow"
-            dueDate.isEqual(today.minusDays(1)) -> "Yesterday"
-            dueDate.isAfter(today) && dueDate.isBefore(today.plusDays(7)) ->
-                dueDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-            else ->
-                dueDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()))
-        }
-    }
 
     fun populateTask(task: Task) {
         id = task.id!!
         name = task.name
         description = task.description
+        dueDate = task.dueDate?.let { formatDueDate(it) }
         isDone = task.isDone
         isDeleted = task.isDeleted
         priority = task.priority
+        isOverdue = task.dueDate?.let { millis ->
+            val dueDate = millis.toLocalDate()
+            dueDate.isBefore(today)
+        } ?: false
     }
 
     fun onTaskClicked(task: Task) {
@@ -66,4 +50,19 @@ class TaskItemViewModel @Inject constructor(
             uiEventBus.send(UiEvent.EditTask(task))
         }
     }
+
+    private fun formatDueDate(dueMillis: Long): String {
+        val dueDateLocal = dueMillis.toLocalDate()
+
+        return when {
+            dueDateLocal.isEqual(today) -> "Today"
+            dueDateLocal.isEqual(today.plusDays(1)) -> "Tomorrow"
+            dueDateLocal.isEqual(today.minusDays(1)) -> "Yesterday"
+            dueDateLocal.isAfter(today) && dueDateLocal.isBefore(today.plusDays(7)) ->
+                dueDateLocal.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+            else ->
+                dueDateLocal.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()))
+        }
+    }
+
 }
