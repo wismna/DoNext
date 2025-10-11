@@ -28,8 +28,6 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
-import kotlinx.coroutines.flow.filter
 
 @Composable
 fun TaskItemScreen(
@@ -55,25 +52,17 @@ fun TaskItemScreen(
     val viewModel = TaskItemViewModel(task)
 
     val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            when (it) {
+                SwipeToDismissBoxValue.StartToEnd -> { onSwipeRight() }
+                SwipeToDismissBoxValue.EndToStart -> { onSwipeLeft() }
+                SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState false
+            }
+            return@rememberSwipeToDismissBoxState true
+        },
         // positional threshold of 25%
         positionalThreshold = { it * .25f }
     )
-    LaunchedEffect(dismissState) {
-        snapshotFlow { dismissState.targetValue }
-            .filter { it != SwipeToDismissBoxValue.Settled }
-            .collect { target ->
-                when (target) {
-                    SwipeToDismissBoxValue.StartToEnd -> {
-                        onSwipeRight()
-                        dismissState.reset()
-                    }
-                    SwipeToDismissBoxValue.EndToStart -> {
-                        onSwipeLeft()
-                    }
-                    else -> Unit
-                }
-            }
-    }
 
     val baseStyle = MaterialTheme.typography.bodyLarge.copy(
         fontWeight = when (viewModel.priority) {
