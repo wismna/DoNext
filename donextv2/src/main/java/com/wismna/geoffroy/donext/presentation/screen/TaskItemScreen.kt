@@ -53,12 +53,9 @@ fun TaskItemScreen(
 
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            when (it) {
-                SwipeToDismissBoxValue.StartToEnd -> { onSwipeRight() }
-                SwipeToDismissBoxValue.EndToStart -> { onSwipeLeft() }
-                SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState false
-            }
-            return@rememberSwipeToDismissBoxState true
+            if (it == SwipeToDismissBoxValue.StartToEnd) onSwipeRight()
+            else if (it == SwipeToDismissBoxValue.EndToStart) onSwipeLeft()
+            return@rememberSwipeToDismissBoxState false
         },
         // positional threshold of 25%
         positionalThreshold = { it * .25f }
