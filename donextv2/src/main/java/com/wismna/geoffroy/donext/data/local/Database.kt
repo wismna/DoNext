@@ -15,6 +15,7 @@ import com.wismna.geoffroy.donext.data.local.dao.TaskListDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
 
 @Database(
     entities = [TaskEntity::class, TaskListEntity::class],
@@ -40,11 +41,24 @@ abstract class AppDatabase : RoomDatabase() {
                     db.execSQL("ALTER TABLE tasks ADD COLUMN duedate_temp INTEGER")
                     // Populate temporary column
                     db.execSQL("""
+                        WITH offset AS (
+                            SELECT (strftime('%s', 'now', 'localtime') - strftime('%s', 'now')) / 3600.0 AS diff
+                        )
                         UPDATE tasks
                         SET duedate_temp = 
                             CASE
                                 WHEN duedate IS NULL OR duedate = '' THEN NULL
-                                ELSE (strftime('%s', duedate || 'T00:00:00Z') * 1000)
+                                ELSE (
+                                    strftime(
+                                        '%s',
+                                        duedate || ' 00:00:00',
+                                        CASE
+                                            WHEN (SELECT diff FROM offset) >= 0
+                                                THEN '-' || (SELECT diff FROM offset) || ' hours'
+                                            ELSE '+' || abs((SELECT diff FROM offset)) || ' hours'
+                                        END
+                                    ) * 1000
+                                )
                             END
                     """.trimIndent())
 
