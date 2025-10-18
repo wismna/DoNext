@@ -2,6 +2,7 @@
 
 package com.wismna.geoffroy.donext.presentation.screen
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -24,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -34,6 +36,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -62,10 +67,10 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
+    windowSizeClass: WindowSizeClass,
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
     if (viewModel.isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -84,13 +89,36 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     viewModel.setCurrentDestination(navBackStackEntry)
 
-    ModalNavigationDrawer(
-        drawerContent = {
-            MenuScreen (currentDestination = viewModel.currentDestination)
-        },
-        drawerState = drawerState
-    ) {
-        AppContent(viewModel = viewModel, navController = navController, drawerState = drawerState)
+    val isExpandedScreen = windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
+    val orientation = LocalConfiguration.current.orientation
+    val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+    val showPermanentDrawer = isExpandedScreen || isLandscape
+
+    if (showPermanentDrawer) {
+        PermanentNavigationDrawer(
+            drawerContent = {
+                MenuScreen(currentDestination = viewModel.currentDestination)
+            }
+        ) {
+            AppContent(
+                viewModel = viewModel,
+                navController = navController
+            )
+        }
+    } else {
+        val drawerState = rememberDrawerState(DrawerValue.Closed)
+        ModalNavigationDrawer(
+            drawerContent = {
+                MenuScreen(currentDestination = viewModel.currentDestination)
+            },
+            drawerState = drawerState
+        ) {
+            AppContent(
+                viewModel = viewModel,
+                navController = navController,
+                drawerState = drawerState
+            )
+        }
     }
 }
 
@@ -99,7 +127,7 @@ fun AppContent(
     modifier : Modifier = Modifier,
     viewModel: MainViewModel,
     navController: NavHostController,
-    drawerState: DrawerState
+    drawerState: DrawerState? = null
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -108,7 +136,7 @@ fun AppContent(
         viewModel.uiEventBus.events.collectLatest { event ->
             when (event) {
                 is UiEvent.Navigate -> {
-                    drawerState.close()
+                    drawerState?.close()
                     navController.navigate(event.route)
                 }
                 is UiEvent.NavigateBack -> navController.popBackStack()
@@ -140,17 +168,22 @@ fun AppContent(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 navigationIcon = {
-                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
-                        if (viewModel.currentDestination.showBackButton) {
-                            IconButton(onClick = { viewModel.navigateBack() }) {
-                                Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
-                            }
-                        } else {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(
-                                    Icons.Default.Menu,
-                                    contentDescription = "Open navigation drawer"
-                                )
+                    if (drawerState != null) {
+                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer) {
+                            if (viewModel.currentDestination.showBackButton) {
+                                IconButton(onClick = { viewModel.navigateBack() }) {
+                                    Icon(
+                                        Icons.AutoMirrored.Default.ArrowBack,
+                                        contentDescription = "Back"
+                                    )
+                                }
+                            } else {
+                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                    Icon(
+                                        Icons.Default.Menu,
+                                        contentDescription = "Open navigation drawer"
+                                    )
+                                }
                             }
                         }
                     }

@@ -44,7 +44,7 @@ fun MenuScreen(
         ) {
             Column {
                 Text(
-                    text = "Task Lists",
+                    text = "DoNext v2",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(16.dp)
                 )

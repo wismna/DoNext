@@ -15,7 +15,6 @@ import com.wismna.geoffroy.donext.data.local.dao.TaskListDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.time.ZonedDateTime
 
 @Database(
     entities = [TaskEntity::class, TaskListEntity::class],
