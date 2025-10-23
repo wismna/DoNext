@@ -8,8 +8,13 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -35,7 +41,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -50,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -79,33 +88,90 @@ fun MainScreen(
         return
     }
 
-    if (viewModel.showTaskSheet) {
-        TaskBottomSheet { viewModel.onDismissTaskSheet() }
-    }
-    if (viewModel.showAddListSheet) {
-        AddListBottomSheet { viewModel.showAddListSheet = false }
-    }
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     viewModel.setCurrentDestination(navBackStackEntry)
 
     val isExpandedScreen = windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
     val orientation = LocalConfiguration.current.orientation
     val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
-    val showPermanentDrawer = isExpandedScreen || isLandscape
+    val isLargeLayout = isExpandedScreen || isLandscape
 
-    if (showPermanentDrawer) {
+    if (isLargeLayout) {
         PermanentNavigationDrawer(
             drawerContent = {
-                MenuScreen(currentDestination = viewModel.currentDestination)
+                MenuScreen(
+                    modifier = Modifier.width(240.dp),
+                    currentDestination = viewModel.currentDestination
+                )
             }
         ) {
-            AppContent(
-                viewModel = viewModel,
-                navController = navController
-            )
+            Row(Modifier.fillMaxSize()) {
+                // Main app content area
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    AppContent(
+                        viewModel = viewModel,
+                        navController = navController
+                    )
+                }
+
+                // Show side "details" pane for the task editor when requested
+                if (viewModel.showTaskSheet) {
+                    VerticalDivider(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(1.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .width(380.dp)
+                            .fillMaxHeight()
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    ) {
+                        TaskScreen { viewModel.onDismissTaskSheet() }
+                    }
+                }
+                if (viewModel.showAddListSheet) {
+                    Dialog(onDismissRequest = { viewModel.showAddListSheet = false }) {
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            tonalElevation = 6.dp,
+                            modifier = Modifier
+                                .widthIn(max = 400.dp)
+                                .wrapContentHeight()
+                                .padding(16.dp)
+                        ) {
+                            AddListScreen { viewModel.showAddListSheet = false }
+                        }
+                    }
+                }
+            }
         }
     } else {
+        if (viewModel.showTaskSheet) {
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+            val scope = rememberCoroutineScope()
+
+            ModalBottomSheet(
+                onDismissRequest = {
+                    scope.launch {
+                        sheetState.hide()
+                        viewModel.onDismissTaskSheet()
+                    }
+                },
+                sheetState = sheetState) {
+                TaskScreen { viewModel.onDismissTaskSheet() }
+            }
+        }
+        if (viewModel.showAddListSheet) {
+            ModalBottomSheet(onDismissRequest = { viewModel.showAddListSheet = false }) {
+                AddListScreen { viewModel.showAddListSheet = false }
+            }
+        }
+
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         ModalNavigationDrawer(
             drawerContent = {

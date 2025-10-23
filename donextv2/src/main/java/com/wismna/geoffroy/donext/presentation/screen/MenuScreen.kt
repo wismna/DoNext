@@ -29,10 +29,12 @@ import com.wismna.geoffroy.donext.presentation.viewmodel.MenuViewModel
 
 @Composable
 fun MenuScreen(
+    modifier: Modifier = Modifier,
     viewModel: MenuViewModel = hiltViewModel(),
     currentDestination: AppDestination,
 ) {
     ModalDrawerSheet(
+        modifier = modifier,
         drawerContainerColor = MaterialTheme.colorScheme.surfaceVariant,
         drawerContentColor = MaterialTheme.colorScheme.onSurfaceVariant
     ) {

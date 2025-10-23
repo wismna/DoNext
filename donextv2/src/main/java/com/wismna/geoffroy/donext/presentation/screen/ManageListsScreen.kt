@@ -32,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -217,7 +216,7 @@ fun ManageListsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddListBottomSheet(
+fun AddListScreen(
     viewModel: ManageListsViewModel = hiltViewModel(),
     onDismiss: () -> Unit
 ) {
@@ -227,35 +226,34 @@ fun AddListBottomSheet(
         titleFocusRequester.requestFocus()
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        var name by remember { mutableStateOf("") }
-        //var type by remember { mutableStateOf(ListType.Default) }
-        //var description by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    //var type by remember { mutableStateOf(ListType.Default) }
+    //var description by remember { mutableStateOf("") }
 
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("New List", style = MaterialTheme.typography.titleMedium)
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("New List", style = MaterialTheme.typography.titleMedium)
 
-            Spacer(Modifier.height(8.dp))
-            /*TextField(
+        Spacer(Modifier.height(8.dp))
+        /*TextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("List Name") },
                 singleLine = true
             )*/
-            OutlinedTextField(
-                value = name,
-                singleLine = true,
-                onValueChange = { name = it },
-                label = { Text("Title") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(titleFocusRequester)
-            )
+        OutlinedTextField(
+            value = name,
+            singleLine = true,
+            onValueChange = { name = it },
+            label = { Text("Title") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(titleFocusRequester)
+        )
 
-            Spacer(Modifier.height(8.dp))
-            //DropdownSelector(selected = type, onSelect = { type = it })
+        Spacer(Modifier.height(8.dp))
+        //DropdownSelector(selected = type, onSelect = { type = it })
 
-            /*Spacer(Modifier.height(8.dp))
+        /*Spacer(Modifier.height(8.dp))
             TextField(
                 value = description,
                 onValueChange = { description = it },
@@ -263,19 +261,18 @@ fun AddListBottomSheet(
                 maxLines = 3
             )*/
 
-            Spacer(Modifier.height(16.dp))
-            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                //TextButton(onClick = onDismiss) { Text("Cancel") }
-                //Spacer(Modifier.width(8.dp))
-                Button(
-                    onClick = {
-                        viewModel.createTaskList(name/*, type, description*/, viewModel.taskCount + 1)
-                        onDismiss()
-                    },
-                    enabled = name.isNotBlank()
-                ) {
-                    Text("Create")
-                }
+        Spacer(Modifier.height(16.dp))
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            //TextButton(onClick = onDismiss) { Text("Cancel") }
+            //Spacer(Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    viewModel.createTaskList(name/*, type, description*/, viewModel.taskCount + 1)
+                    onDismiss()
+                },
+                enabled = name.isNotBlank()
+            ) {
+                Text("Create")
             }
         }
     }
