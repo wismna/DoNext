@@ -3,6 +3,7 @@ package com.wismna.geoffroy.donext.presentation.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wismna.geoffroy.donext.domain.model.Task
@@ -25,10 +26,14 @@ class RecycleBinViewModel @Inject constructor(
     private val toggleTaskDeletedUseCase: ToggleTaskDeletedUseCase,
     private val permanentlyDeleteTaskUseCase: PermanentlyDeleteTaskUseCase,
     private val emptyRecycleBinUseCase: EmptyRecycleBinUseCase,
-    private val uiEventBus: UiEventBus
+    private val uiEventBus: UiEventBus,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     var deletedTasks by mutableStateOf<List<TaskWithListName>>(emptyList())
+        private set
+
+    var taskToDelete by mutableStateOf(savedStateHandle.get<Long>("taskToDelete"))
         private set
 
     init {
@@ -52,7 +57,6 @@ class RecycleBinViewModel @Inject constructor(
     fun restore(taskId: Long) {
         viewModelScope.launch {
             toggleTaskDeletedUseCase(taskId, false)
-            loadDeletedTasks()
 
             uiEventBus.send(
                 UiEvent.ShowUndoSnackbar(
@@ -66,13 +70,26 @@ class RecycleBinViewModel @Inject constructor(
             )
         }
     }
-
-    fun deleteForever(taskId: Long) {
-        viewModelScope.launch {
-            permanentlyDeleteTaskUseCase(taskId)
-            loadDeletedTasks()
-        }
+    fun onTaskDeleteRequest(taskId: Long) {
+        taskToDelete = taskId
+        savedStateHandle["taskToDelete"] = taskId
     }
+
+    fun onConfirmDelete() {
+        taskToDelete?.let {
+            viewModelScope.launch {
+                permanentlyDeleteTaskUseCase(it)
+            }
+        }
+        taskToDelete = null
+        savedStateHandle["taskToDelete"] = null
+    }
+
+    fun onCancelDelete() {
+        taskToDelete = null
+        savedStateHandle["taskToDelete"] = null
+    }
+
     fun emptyRecycleBin() {
         viewModelScope.launch {
             emptyRecycleBinUseCase()

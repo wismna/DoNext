@@ -50,8 +50,35 @@ fun RecycleBinScreen(
     }
 
     val grouped = tasks.groupBy { it.listName }
-
     val context = LocalContext.current
+
+    if (viewModel.taskToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onCancelDelete() },
+            title = { Text("Delete task") },
+            text = {
+                Text("Are you sure you want to permanently delete this task? This cannot be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.onConfirmDelete()
+                        Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show()
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.onCancelDelete() }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
     LazyColumn(
         modifier = modifier.padding(8.dp)
     ) {
@@ -76,11 +103,7 @@ fun RecycleBinScreen(
                     modifier = Modifier.animateItem(),
                     task = item.task,
                     onSwipeLeft = { viewModel.restore(item.task.id!!) },
-                    onSwipeRight = {
-                        // TODO: add confirmation dialog
-                        viewModel.deleteForever(item.task.id!!)
-                        Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show()
-                    },
+                    onSwipeRight = { viewModel.onTaskDeleteRequest(item.task.id!!) },
                     onTaskClick = { viewModel.onTaskClicked(item.task) }
                 )
             }
