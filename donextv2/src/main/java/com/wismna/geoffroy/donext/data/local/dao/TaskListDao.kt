@@ -28,7 +28,7 @@ interface TaskListDao {
             END
           ), 0) AS overdueCount
         FROM task_lists tl
-        LEFT JOIN tasks t ON t.task_list_id = tl.id
+        LEFT JOIN tasks t ON t.task_list_id = tl.id AND t.deleted = 0
         WHERE tl.deleted = 0
         GROUP BY tl.id
         ORDER BY tl.display_order ASC
