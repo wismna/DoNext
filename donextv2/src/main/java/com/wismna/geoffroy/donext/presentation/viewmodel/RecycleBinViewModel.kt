@@ -30,11 +30,15 @@ class RecycleBinViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    companion object {
+        private const val TASK_TO_DELETE = "taskToDeleteId"
+        private const val EMPTY_RECYCLE_BIN = "emptyRecycleBin"
+    }
     var deletedTasks by mutableStateOf<List<TaskWithListName>>(emptyList())
         private set
 
-    var taskToDelete by mutableStateOf(savedStateHandle.get<Long>("taskToDelete"))
-        private set
+    val taskToDeleteFlow = savedStateHandle.getStateFlow<Long?>(TASK_TO_DELETE, null)
+    val emptyRecycleBinFlow = savedStateHandle.getStateFlow<Boolean>(EMPTY_RECYCLE_BIN, false)
 
     init {
         loadDeletedTasks()
@@ -70,29 +74,36 @@ class RecycleBinViewModel @Inject constructor(
             )
         }
     }
-    fun onTaskDeleteRequest(taskId: Long) {
-        taskToDelete = taskId
-        savedStateHandle["taskToDelete"] = taskId
+
+    fun onEmptyRecycleBinRequest() {
+        savedStateHandle[EMPTY_RECYCLE_BIN] = true
     }
 
-    fun onConfirmDelete() {
-        taskToDelete?.let {
-            viewModelScope.launch {
-                permanentlyDeleteTaskUseCase(it)
-            }
-        }
-        taskToDelete = null
-        savedStateHandle["taskToDelete"] = null
-    }
-
-    fun onCancelDelete() {
-        taskToDelete = null
-        savedStateHandle["taskToDelete"] = null
+    fun onCancelEmptyRecycleBinRequest() {
+        savedStateHandle[EMPTY_RECYCLE_BIN] = false
     }
 
     fun emptyRecycleBin() {
         viewModelScope.launch {
             emptyRecycleBinUseCase()
+            savedStateHandle[EMPTY_RECYCLE_BIN] = false
         }
+    }
+
+    fun onTaskDeleteRequest(taskId: Long) {
+        savedStateHandle[TASK_TO_DELETE] = taskId
+    }
+
+    fun onConfirmDelete() {
+        taskToDeleteFlow.value?.let {
+            viewModelScope.launch {
+                permanentlyDeleteTaskUseCase(it)
+            }
+        }
+        savedStateHandle[TASK_TO_DELETE] = null
+    }
+
+    fun onCancelDelete() {
+        savedStateHandle[TASK_TO_DELETE] = null
     }
 }

@@ -37,13 +37,14 @@ class TaskViewModel @Inject constructor(
         private set
     var isDeleted by mutableStateOf(false)
         private set
-
-    private var editingTaskId: Long? = null
-    private var taskListId: Long? = null
+    var taskListId by mutableStateOf<Long?>(null)
+        private set
+    var editingTaskId by mutableStateOf<Long?>(null)
+        private set
 
     init {
         viewModelScope.launch {
-            uiEventBus.events.collect { event ->
+            uiEventBus.stickyEvents.collect { event ->
                 when (event) {
                     is UiEvent.CreateNewTask -> startNewTask(event.taskListId)
                     is UiEvent.EditTask -> startEditTask(event.task)

@@ -2,12 +2,15 @@ package com.wismna.geoffroy.donext.presentation.screen
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -19,9 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wismna.geoffroy.donext.presentation.viewmodel.RecycleBinViewModel
 
 @Composable
@@ -37,6 +38,7 @@ fun RecycleBinScreen(
     viewModel: RecycleBinViewModel = hiltViewModel(),
 ) {
     val tasks = viewModel.deletedTasks
+    val taskToDelete by viewModel.taskToDeleteFlow.collectAsStateWithLifecycle()
 
     if (tasks.isEmpty()) {
         // Placeholder when recycle bin is empty
@@ -44,7 +46,15 @@ fun RecycleBinScreen(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Recycle Bin is empty")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    Icons.Default.DeleteOutline,
+                    contentDescription = "Recycle bin background icon",
+                    modifier = Modifier.size(60.dp),
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+                Text("Recycle Bin is empty", color = MaterialTheme.colorScheme.secondary)
+            }
         }
         return
     }
@@ -52,7 +62,7 @@ fun RecycleBinScreen(
     val grouped = tasks.groupBy { it.listName }
     val context = LocalContext.current
 
-    if (viewModel.taskToDelete != null) {
+    if (taskToDelete != null) {
         AlertDialog(
             onDismissRequest = { viewModel.onCancelDelete() },
             title = { Text("Delete task") },
@@ -114,10 +124,10 @@ fun RecycleBinScreen(
 @Composable
 fun EmptyRecycleBinAction(viewModel: RecycleBinViewModel = hiltViewModel()) {
     val isEmpty = viewModel.deletedTasks.isEmpty()
-    var showConfirmDialog by remember { mutableStateOf(false) }
+    val emptyRecycleBin by viewModel.emptyRecycleBinFlow.collectAsStateWithLifecycle()
 
     IconButton(
-        onClick = { showConfirmDialog = true },
+        onClick = { viewModel.onEmptyRecycleBinRequest() },
         enabled = !isEmpty) {
         Icon(
             Icons.Default.DeleteSweep,
@@ -127,9 +137,9 @@ fun EmptyRecycleBinAction(viewModel: RecycleBinViewModel = hiltViewModel()) {
         )
     }
 
-    if (showConfirmDialog) {
+    if (emptyRecycleBin) {
         AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
+            onDismissRequest = { viewModel.onCancelEmptyRecycleBinRequest() },
             title = { Text("Empty Recycle Bin") },
             text = {
                 Text("Are you sure you want to permanently delete all tasks in the recycle bin? This cannot be undone.")
@@ -138,7 +148,6 @@ fun EmptyRecycleBinAction(viewModel: RecycleBinViewModel = hiltViewModel()) {
                 TextButton(
                     onClick = {
                         viewModel.emptyRecycleBin()
-                        showConfirmDialog = false
                     },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
@@ -148,7 +157,7 @@ fun EmptyRecycleBinAction(viewModel: RecycleBinViewModel = hiltViewModel()) {
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showConfirmDialog = false }) {
+                TextButton(onClick = { viewModel.onCancelEmptyRecycleBinRequest() }) {
                     Text("Cancel")
                 }
             }

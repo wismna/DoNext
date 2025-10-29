@@ -206,7 +206,6 @@ fun AppContent(
                     navController.navigate(event.route)
                 }
                 is UiEvent.NavigateBack -> navController.popBackStack()
-                is UiEvent.EditTask -> { viewModel.showTaskSheet = true }
                 is UiEvent.ShowUndoSnackbar -> {
                     val result = snackbarHostState.showSnackbar(
                         message = event.message,
@@ -221,6 +220,15 @@ fun AppContent(
             }
         }
     }
+    LaunchedEffect(Unit) {
+        viewModel.uiEventBus.stickyEvents.collect { event ->
+            when (event) {
+                is UiEvent.EditTask -> { viewModel.showTaskSheet = true }
+                else -> Unit
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer),
         containerColor = Color.Transparent,

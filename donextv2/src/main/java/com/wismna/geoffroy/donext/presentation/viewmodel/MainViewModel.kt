@@ -71,6 +71,7 @@ class MainViewModel @Inject constructor(
         showTaskSheet = false
         viewModelScope.launch {
             uiEventBus.send(UiEvent.CloseTask)
+            uiEventBus.clearSticky()
         }
     }
 
