@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.LineWeight
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Badge
 import androidx.compose.material3.HorizontalDivider
@@ -74,7 +74,7 @@ fun MenuScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                         },
-                        icon = { Icon(Icons.Default.LineWeight, contentDescription = list.name) },
+                        icon = { Icon(Icons.Default.Checklist, contentDescription = list.name) },
                         selected = currentDestination is AppDestination.TaskList &&
                                 currentDestination.taskListId == list.id,
                         onClick = { viewModel.navigateTo("taskList/${list.id}", currentDestination.route) },
@@ -91,17 +91,17 @@ fun MenuScreen(
             Column {
                 HorizontalDivider()
                 NavigationDrawerItem(
-                    label = { Text(stringResource(R.string.navigation_recycle_bin)) },
-                    icon = { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.navigation_recycle_bin)) },
-                    selected = currentDestination is AppDestination.RecycleBin,
-                    onClick = { viewModel.navigateTo(AppDestination.RecycleBin.route, currentDestination.route) },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                NavigationDrawerItem(
                     label = { Text(stringResource(R.string.navigation_edit_lists)) },
                     icon = { Icon(Icons.Default.EditNote, contentDescription = stringResource(R.string.navigation_edit_lists)) },
                     selected = currentDestination is AppDestination.ManageLists,
                     onClick = { viewModel.navigateTo(AppDestination.ManageLists.route, currentDestination.route) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
+                    label = { Text(stringResource(R.string.navigation_recycle_bin)) },
+                    icon = { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.navigation_recycle_bin)) },
+                    selected = currentDestination is AppDestination.RecycleBin,
+                    onClick = { viewModel.navigateTo(AppDestination.RecycleBin.route, currentDestination.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
             }

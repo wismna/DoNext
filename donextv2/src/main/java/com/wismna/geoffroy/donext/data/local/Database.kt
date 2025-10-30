@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.data.Converters
 import com.wismna.geoffroy.donext.data.entities.TaskEntity
 import com.wismna.geoffroy.donext.data.entities.TaskListEntity
@@ -137,10 +138,11 @@ abstract class AppDatabase : RoomDatabase() {
                             super.onCreate(db)
                             // insert default lists
                             CoroutineScope(Dispatchers.IO).launch {
+                                val res = context.resources
                                 val dao = DB_INSTANCE?.taskListDao()
-                                dao?.insertTaskList(TaskListEntity(name = "Personal", order = 1))
-                                dao?.insertTaskList(TaskListEntity(name = "Work", order = 2))
-                                dao?.insertTaskList(TaskListEntity(name = "Shopping", order = 3))
+                                dao?.insertTaskList(TaskListEntity(name = res.getString(R.string.sample_list_personal), order = 1))
+                                dao?.insertTaskList(TaskListEntity(name = res.getString(R.string.sample_list_work), order = 2))
+                                dao?.insertTaskList(TaskListEntity(name = res.getString(R.string.sample_list_shopping), order = 3))
                             }
                         }
                     })

@@ -2,13 +2,19 @@ package com.wismna.geoffroy.donext.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -33,7 +39,14 @@ fun TaskListScreen(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(R.string.tasklist_no_tasks))
+            Column (modifier = Modifier.padding(start = 10.dp, end = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    Icons.Default.Checklist,
+                    contentDescription = "Due today background icon",
+                    modifier = Modifier.size(60.dp),
+                    tint = MaterialTheme.colorScheme.secondary)
+                Text(stringResource(R.string.tasklist_no_tasks), color = MaterialTheme.colorScheme.secondary)
+            }
         }
         return
     }

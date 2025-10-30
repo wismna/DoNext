@@ -50,6 +50,8 @@
     <string name="dialog_empty_task_cancel">Cancel</string>
     <string name="dialog_empty_task_delete">Empty</string>
 
+    <string name="tasklists_no_task_list">No task lists. Tap the + button to create one.</string>
+
     <string name="tasklist_new_title">New list</string>
     <string name="tasklist_new_name">Title</string>
     <string name="tasklist_new_create">Create</string>
@@ -60,4 +62,8 @@
     <string name="snackbar_message_task_list_recycle">Task list moved to recycle bin</string>
     <string name="snackbar_message_task_restore">Task restored</string>
     <string name="snackbar_action">Undo</string>
+
+    <string name="sample_list_personal">Personal</string>
+    <string name="sample_list_work">Work</string>
+    <string name="sample_list_shopping">Shopping</string>
 </resources>

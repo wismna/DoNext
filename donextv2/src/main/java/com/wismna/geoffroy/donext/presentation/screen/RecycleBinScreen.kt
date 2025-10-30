@@ -48,7 +48,7 @@ fun RecycleBinScreen(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     Icons.Default.DeleteOutline,
                     contentDescription = "Recycle bin background icon",

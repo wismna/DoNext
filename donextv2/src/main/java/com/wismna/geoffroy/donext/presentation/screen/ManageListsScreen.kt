@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -71,7 +73,14 @@ fun ManageListsScreen(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(R.string.tasklist_no_tasks))
+            Column (modifier = Modifier.padding(start = 10.dp, end = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    Icons.Default.EditNote,
+                    contentDescription = "Due today background icon",
+                    modifier = Modifier.size(60.dp),
+                    tint = MaterialTheme.colorScheme.secondary)
+                Text(stringResource(R.string.tasklists_no_task_list), color = MaterialTheme.colorScheme.secondary)
+            }
         }
         return
     }
