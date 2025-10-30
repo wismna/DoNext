@@ -1,4 +1,61 @@
 <resources>
     <string name="app_name">DoNext</string>
     <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_title">DoNext v2</string>
+    <string name="navigation_edit_lists">Edit lists</string>
+    <string name="navigation_recycle_bin">Recycle Bin</string>
+    <string name="navigation_due_today">Due Today</string>
+
+    <string name="action_create_list">Create a task</string>
+
+    <string name="tasklist_no_tasks">Tap + to create a new task.</string>
+    <string name="recycle_bin_no_tasks">Recycle Bin is empty</string>
+    <string name="today_no_tasks">Nothing due today!</string>
+
+    <string name="task_title_new">New Task</string>
+    <string name="task_title_edit">Edit Task</string>
+    <string name="task_name">Title</string>
+    <string name="task_description">Description</string>
+    <string name="task_priority">Priority</string>
+    <string name="task_priority_low">Low</string>
+    <string name="task_priority_normal">Normal</string>
+    <string name="task_priority_high">High</string>
+    <string name="task_due_date">Due Date</string>
+    <string name="task_save_new">Create</string>
+    <string name="task_save_edit">Save</string>
+    <string name="task_cancel">Cancel</string>
+
+    <string name="due_date_yesterday">Yesterday</string>
+    <string name="due_date_today">Today</string>
+    <string name="due_date_tomorrow">Tomorrow</string>
+
+    <string name="task_action_recycle">Recycle</string>
+    <string name="task_action_delete">Delete</string>
+    <string name="task_action_restore">Restore</string>
+    <string name="task_action_done">Done</string>
+    <string name="task_action_undone">Undone</string>
+
+    <string name="dialog_due_date_ok">OK</string>
+    <string name="dialog_due_date_cancel">Cancel</string>
+
+    <string name="dialog_delete_task_title">Delete task</string>
+    <string name="dialog_delete_task_description">Are you sure you want to permanently delete this task? This cannot be undone.</string>
+    <string name="dialog_delete_task_cancel">Cancel</string>
+    <string name="dialog_delete_task_delete">Delete</string>
+
+    <string name="dialog_empty_task_title">Empty Recycle Bin</string>
+    <string name="dialog_empty_task_description">Are you sure you want to permanently delete all tasks in the recycle bin? This cannot be undone.</string>
+    <string name="dialog_empty_task_cancel">Cancel</string>
+    <string name="dialog_empty_task_delete">Empty</string>
+
+    <string name="tasklist_new_title">New list</string>
+    <string name="tasklist_new_name">Title</string>
+    <string name="tasklist_new_create">Create</string>
+
+    <string name="snackbar_message_done">Task done</string>
+    <string name="snackbar_message_undone">Task undone</string>
+    <string name="snackbar_message_recycle">Task moved to recycle bin</string>
+    <string name="snackbar_message_restore">Task restored</string>
+    <string name="snackbar_action">Undo</string>
 </resources>

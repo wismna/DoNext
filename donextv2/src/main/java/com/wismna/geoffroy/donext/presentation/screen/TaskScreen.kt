@@ -36,8 +36,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
@@ -72,7 +74,7 @@ fun TaskScreen(
             singleLine = true,
             readOnly = viewModel.isDeleted,
             onValueChange = { viewModel.onTitleChanged(it) },
-            label = { Text("Title") },
+            label = { Text(stringResource(R.string.task_name)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(titleFocusRequester)
@@ -84,7 +86,7 @@ fun TaskScreen(
             value = viewModel.description,
             readOnly = viewModel.isDeleted,
             onValueChange = { viewModel.onDescriptionChanged(it) },
-            label = { Text("Description") },
+            label = { Text(stringResource(R.string.task_description)) },
             maxLines = 3,
             modifier = Modifier.fillMaxWidth()
         )
@@ -96,7 +98,7 @@ fun TaskScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Priority", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.task_priority), style = MaterialTheme.typography.labelLarge)
             SingleChoiceSegmentedButton(
                 value = viewModel.priority,
                 isEnabled = !viewModel.isDeleted,
@@ -116,7 +118,7 @@ fun TaskScreen(
             value = formattedDate,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Due Date") },
+            label = { Text(stringResource(R.string.task_due_date)) },
             trailingIcon = {
                 Row {
                     if (viewModel.dueDate != null) {
@@ -159,10 +161,10 @@ fun TaskScreen(
                         onClick = {
                             datePickerState.selectedDateMillis?.let { viewModel.onDueDateChanged(it) }
                             showDatePicker = false
-                        }) { Text("OK") }
+                        }) { Text(stringResource(R.string.dialog_due_date_ok)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                    TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.dialog_due_date_cancel)) }
                 }
             ) {
                 DatePicker(state = datePickerState)
@@ -191,7 +193,7 @@ fun TaskScreen(
                     },
                     enabled = viewModel.title.isNotBlank() && !viewModel.isDeleted,
                 ) {
-                    Text(if (viewModel.isEditing()) "Save" else "Create")
+                    Text(stringResource(if (viewModel.isEditing()) R.string.task_save_edit else R.string.task_save_new))
                 }
             }
         }
@@ -215,7 +217,7 @@ fun SingleChoiceSegmentedButton(
                 enabled = isEnabled,
                 onClick = { onValueChange(Priority.fromValue(index)) },
                 selected = index == value.value,
-                label = { Text(label) }
+                label = { Text(stringResource(label)) }
             )
         }
     }

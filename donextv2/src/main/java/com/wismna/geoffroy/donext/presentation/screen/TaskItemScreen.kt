@@ -32,11 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
@@ -57,7 +59,6 @@ fun TaskItemScreen(
             else if (it == SwipeToDismissBoxValue.EndToStart) onSwipeLeft()
             return@rememberSwipeToDismissBoxState false
         },
-        // positional threshold of 25%
         positionalThreshold = { it * .25f }
     )
 
@@ -184,12 +185,12 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean, isD
             Icon(
                 if (isDeleted) Icons.Default.DeleteForever else Icons.Default.DeleteOutline,
                 tint = Color.LightGray,
-                contentDescription = "Delete"
+                contentDescription = stringResource(R.string.task_action_delete)
             )
             Text(
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 10.sp,
-                text = if (isDeleted) "Delete" else "Recycle"
+                text = if (isDeleted) stringResource(R.string.task_action_delete) else stringResource(R.string.task_action_recycle)
             )
         }
         Spacer(modifier = Modifier)
@@ -198,12 +199,16 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState, isDone: Boolean, isD
                 if (isDeleted) Icons.Default.RestoreFromTrash else
                     if (isDone) Icons.Outlined.Unpublished else Icons.Outlined.CheckCircle,
                 tint = Color.LightGray,
-                contentDescription = "Archive"
+                contentDescription = stringResource(R.string.task_action_done)
             )
             Text(
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 10.sp,
-                text = if (isDeleted) "Restore" else if (isDone) "Undone" else "Done"
+                text = stringResource(
+                    if (isDeleted) R.string.task_action_restore
+                    else
+                        if (isDone) R.string.task_action_undone
+                        else R.string.task_action_done)
             )
         }
     }

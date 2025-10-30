@@ -26,10 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.presentation.viewmodel.RecycleBinViewModel
 
 @Composable
@@ -53,7 +55,7 @@ fun RecycleBinScreen(
                     modifier = Modifier.size(60.dp),
                     tint = MaterialTheme.colorScheme.secondary
                 )
-                Text("Recycle Bin is empty", color = MaterialTheme.colorScheme.secondary)
+                Text(stringResource(R.string.recycle_bin_no_tasks), color = MaterialTheme.colorScheme.secondary)
             }
         }
         return
@@ -65,9 +67,9 @@ fun RecycleBinScreen(
     if (taskToDelete != null) {
         AlertDialog(
             onDismissRequest = { viewModel.onCancelDelete() },
-            title = { Text("Delete task") },
+            title = { Text(stringResource(R.string.dialog_delete_task_title)) },
             text = {
-                Text("Are you sure you want to permanently delete this task? This cannot be undone.")
+                Text(stringResource(R.string.dialog_delete_task_description))
             },
             confirmButton = {
                 TextButton(
@@ -79,12 +81,12 @@ fun RecycleBinScreen(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.dialog_delete_task_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.onCancelDelete() }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.dialog_delete_task_cancel))
                 }
             }
         )
@@ -132,7 +134,7 @@ fun EmptyRecycleBinAction(viewModel: RecycleBinViewModel = hiltViewModel()) {
         Icon(
             Icons.Default.DeleteSweep,
             modifier = Modifier.alpha(if (isEmpty) 0.5f else 1.0f),
-            contentDescription = "Empty Recycle Bin",
+            contentDescription = stringResource(R.string.dialog_empty_task_title),
             tint = MaterialTheme.colorScheme.onPrimaryContainer
         )
     }
@@ -140,9 +142,9 @@ fun EmptyRecycleBinAction(viewModel: RecycleBinViewModel = hiltViewModel()) {
     if (emptyRecycleBin) {
         AlertDialog(
             onDismissRequest = { viewModel.onCancelEmptyRecycleBinRequest() },
-            title = { Text("Empty Recycle Bin") },
+            title = { Text(stringResource(R.string.dialog_empty_task_title)) },
             text = {
-                Text("Are you sure you want to permanently delete all tasks in the recycle bin? This cannot be undone.")
+                Text(stringResource(R.string.dialog_empty_task_description))
             },
             confirmButton = {
                 TextButton(
@@ -153,12 +155,12 @@ fun EmptyRecycleBinAction(viewModel: RecycleBinViewModel = hiltViewModel()) {
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.dialog_empty_task_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.onCancelEmptyRecycleBinRequest() }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.dialog_empty_task_cancel))
                 }
             }
         )

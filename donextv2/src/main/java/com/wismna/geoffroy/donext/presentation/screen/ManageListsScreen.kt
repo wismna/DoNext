@@ -45,12 +45,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.presentation.viewmodel.ManageListsViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -69,7 +71,7 @@ fun ManageListsScreen(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Tap + to create a new task list.")
+            Text(stringResource(R.string.tasklist_no_tasks))
         }
         return
     }
@@ -231,7 +233,7 @@ fun AddListScreen(
     //var description by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("New List", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.tasklist_new_title), style = MaterialTheme.typography.titleMedium)
 
         Spacer(Modifier.height(8.dp))
         /*TextField(
@@ -244,7 +246,7 @@ fun AddListScreen(
             value = name,
             singleLine = true,
             onValueChange = { name = it },
-            label = { Text("Title") },
+            label = { Text(stringResource(R.string.tasklist_new_name)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(titleFocusRequester)
@@ -272,7 +274,7 @@ fun AddListScreen(
                 },
                 enabled = name.isNotBlank()
             ) {
-                Text("Create")
+                Text(stringResource(R.string.tasklist_new_create))
             }
         }
     }

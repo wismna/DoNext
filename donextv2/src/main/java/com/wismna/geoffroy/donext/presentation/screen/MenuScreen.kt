@@ -21,9 +21,11 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.presentation.viewmodel.MenuViewModel
 
@@ -46,18 +48,18 @@ fun MenuScreen(
         ) {
             Column {
                 Text(
-                    text = "DoNext v2",
+                    text = stringResource(R.string.navigation_title),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(16.dp)
                 )
                 NavigationDrawerItem(
                     label = {
                         Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Due Today")
+                            Text(stringResource(R.string.navigation_due_today))
                             Text(viewModel.dueTodayTasksCount.toString())
                         }
                     },
-                    icon = { Icon(Icons.Default.Today, contentDescription = "Due Today") },
+                    icon = { Icon(Icons.Default.Today, contentDescription = stringResource(R.string.navigation_due_today)) },
                     selected = currentDestination is AppDestination.DueTodayList,
                     onClick = { viewModel.navigateTo(AppDestination.DueTodayList.route, currentDestination.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -89,15 +91,15 @@ fun MenuScreen(
             Column {
                 HorizontalDivider()
                 NavigationDrawerItem(
-                    label = { Text("Recycle Bin") },
-                    icon = { Icon(Icons.Default.Delete, contentDescription = "Recycle Bin") },
+                    label = { Text(stringResource(R.string.navigation_recycle_bin)) },
+                    icon = { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.navigation_recycle_bin)) },
                     selected = currentDestination is AppDestination.RecycleBin,
                     onClick = { viewModel.navigateTo(AppDestination.RecycleBin.route, currentDestination.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 NavigationDrawerItem(
-                    label = { Text("Edit Lists") },
-                    icon = { Icon(Icons.Default.EditNote, contentDescription = "Edit Lists") },
+                    label = { Text(stringResource(R.string.navigation_edit_lists)) },
+                    icon = { Icon(Icons.Default.EditNote, contentDescription = stringResource(R.string.navigation_edit_lists)) },
                     selected = currentDestination is AppDestination.ManageLists,
                     onClick = { viewModel.navigateTo(AppDestination.ManageLists.route, currentDestination.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

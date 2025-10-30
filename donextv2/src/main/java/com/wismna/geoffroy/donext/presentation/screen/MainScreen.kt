@@ -57,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -67,6 +68,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.viewmodel.MainViewModel
@@ -197,6 +199,7 @@ fun AppContent(
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarActionLabel = stringResource(R.string.snackbar_action)
 
     LaunchedEffect(Unit) {
         viewModel.uiEventBus.events.collectLatest { event ->
@@ -209,7 +212,7 @@ fun AppContent(
                 is UiEvent.ShowUndoSnackbar -> {
                     val result = snackbarHostState.showSnackbar(
                         message = event.message,
-                        actionLabel = "Undo",
+                        actionLabel = snackbarActionLabel,
                         duration = SnackbarDuration.Short
                     )
                     if (result == SnackbarResult.ActionPerformed) {
@@ -283,7 +286,7 @@ fun AppContent(
                     ExtendedFloatingActionButton(
                         onClick = { viewModel.onNewTaskButtonClicked(dest.taskListId) },
                         icon = { Icon(Icons.Filled.Add, "Create a task.") },
-                        text = { Text("Create a task") },
+                        text = { Text(stringResource(R.string.action_create_list)) },
                     )
                 }
                 else -> null
