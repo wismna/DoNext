@@ -9,7 +9,7 @@ sealed class UiEvent {
     data class CreateNewTask(val taskListId: Long) : UiEvent()
     data object CloseTask : UiEvent()
     data class ShowUndoSnackbar(
-        val message: String,
+        val message: Int,
         val undoAction: () -> Unit
     ) : UiEvent()
 }

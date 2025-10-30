@@ -55,7 +55,6 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    fun screenTitle(): String = if (isDeleted) "Task details" else if (isEditing()) "Edit Task" else "New Task"
     fun isEditing(): Boolean = editingTaskId != null
     fun onTitleChanged(value: String) { title = value }
     fun onDescriptionChanged(value: String) { description = value }

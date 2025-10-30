@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">DoNext</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="app_name" translatable="false">DoNext</string>
+    <string name="title_activity_main" translatable="false">MainActivity</string>
 
-    <string name="navigation_title">DoNext v2</string>
+    <string name="navigation_title" translatable="false">DoNext v2</string>
     <string name="navigation_edit_lists">Edit lists</string>
     <string name="navigation_recycle_bin">Recycle Bin</string>
     <string name="navigation_due_today">Due Today</string>
@@ -15,6 +15,7 @@
 
     <string name="task_title_new">New Task</string>
     <string name="task_title_edit">Edit Task</string>
+    <string name="task_title_deleted">Task Details</string>
     <string name="task_name">Title</string>
     <string name="task_description">Description</string>
     <string name="task_priority">Priority</string>
@@ -53,9 +54,10 @@
     <string name="tasklist_new_name">Title</string>
     <string name="tasklist_new_create">Create</string>
 
-    <string name="snackbar_message_done">Task done</string>
-    <string name="snackbar_message_undone">Task undone</string>
-    <string name="snackbar_message_recycle">Task moved to recycle bin</string>
-    <string name="snackbar_message_restore">Task restored</string>
+    <string name="snackbar_message_task_done">Task done</string>
+    <string name="snackbar_message_task_undone">Task undone</string>
+    <string name="snackbar_message_task_recycle">Task moved to recycle bin</string>
+    <string name="snackbar_message_task_list_recycle">Task list moved to recycle bin</string>
+    <string name="snackbar_message_task_restore">Task restored</string>
     <string name="snackbar_action">Undo</string>
 </resources>

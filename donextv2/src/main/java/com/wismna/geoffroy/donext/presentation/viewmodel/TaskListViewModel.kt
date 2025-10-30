@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.usecase.GetTasksForListUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
@@ -55,7 +56,7 @@ class TaskListViewModel @Inject constructor(
 
             uiEventBus.send(
                 UiEvent.ShowUndoSnackbar(
-                    message = "Task done",
+                    message = if (isDone) R.string.snackbar_message_task_done else R.string.snackbar_message_task_undone,
                     undoAction = {
                         viewModelScope.launch {
                             toggleTaskDoneUseCase(taskId, !isDone)
@@ -71,7 +72,7 @@ class TaskListViewModel @Inject constructor(
 
             uiEventBus.send(
                 UiEvent.ShowUndoSnackbar(
-                    message = "Task moved to recycle bin",
+                    message = R.string.snackbar_message_task_recycle,
                     undoAction = {
                         viewModelScope.launch {
                             toggleTaskDeletedUseCase(taskId, false)

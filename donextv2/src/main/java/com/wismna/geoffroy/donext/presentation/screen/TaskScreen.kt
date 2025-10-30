@@ -63,7 +63,11 @@ fun TaskScreen(
 
     Column(Modifier.padding(16.dp)) {
         Text(
-            viewModel.screenTitle(),
+            stringResource(
+                if (viewModel.isDeleted) R.string.task_title_deleted
+                else
+                    if (viewModel.isEditing()) R.string.task_title_edit
+                    else R.string.task_title_new),
             style = MaterialTheme.typography.titleLarge
         )
         Spacer(Modifier.height(8.dp))

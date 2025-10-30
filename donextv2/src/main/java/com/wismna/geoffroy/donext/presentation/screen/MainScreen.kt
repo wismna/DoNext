@@ -57,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -199,7 +200,7 @@ fun AppContent(
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val snackbarActionLabel = stringResource(R.string.snackbar_action)
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.uiEventBus.events.collectLatest { event ->
@@ -211,8 +212,8 @@ fun AppContent(
                 is UiEvent.NavigateBack -> navController.popBackStack()
                 is UiEvent.ShowUndoSnackbar -> {
                     val result = snackbarHostState.showSnackbar(
-                        message = event.message,
-                        actionLabel = snackbarActionLabel,
+                        message = context.getString(event.message),
+                        actionLabel = context.getString(R.string.snackbar_action),
                         duration = SnackbarDuration.Short
                     )
                     if (result == SnackbarResult.ActionPerformed) {
@@ -238,7 +239,14 @@ fun AppContent(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(viewModel.currentDestination.title) },
+                title = { Text(
+                    when (viewModel.currentDestination) {
+                        is AppDestination.DueTodayList -> stringResource(R.string.navigation_due_today)
+                        is AppDestination.ManageLists -> stringResource(R.string.navigation_edit_lists)
+                        is AppDestination.RecycleBin -> stringResource(R.string.navigation_recycle_bin)
+                        else -> viewModel.currentDestination.title
+                    }
+                )},
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,

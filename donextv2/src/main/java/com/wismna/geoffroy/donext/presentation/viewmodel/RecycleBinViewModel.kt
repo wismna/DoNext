@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.model.TaskWithListName
 import com.wismna.geoffroy.donext.domain.usecase.EmptyRecycleBinUseCase
@@ -64,7 +65,7 @@ class RecycleBinViewModel @Inject constructor(
 
             uiEventBus.send(
                 UiEvent.ShowUndoSnackbar(
-                    message = "Task restored",
+                    message = R.string.snackbar_message_task_restore,
                     undoAction = {
                         viewModelScope.launch {
                             toggleTaskDeletedUseCase(taskId, true)

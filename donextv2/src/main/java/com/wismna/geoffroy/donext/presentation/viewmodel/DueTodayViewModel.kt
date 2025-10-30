@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.usecase.GetDueTodayTasksUseCase
 import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDeletedUseCase
@@ -48,7 +49,7 @@ class DueTodayViewModel @Inject constructor(
 
             uiEventBus.send(
                 UiEvent.ShowUndoSnackbar(
-                    message = "Task done",
+                    message = R.string.snackbar_message_task_done,
                     undoAction = {
                         viewModelScope.launch {
                             toggleTaskDoneUseCase(taskId, false)
@@ -65,7 +66,7 @@ class DueTodayViewModel @Inject constructor(
 
             uiEventBus.send(
                 UiEvent.ShowUndoSnackbar(
-                    message = "Task moved to recycle bin",
+                    message = R.string.snackbar_message_task_recycle,
                     undoAction = {
                         viewModelScope.launch {
                             toggleTaskDeletedUseCase(taskId, false)

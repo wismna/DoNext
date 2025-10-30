@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.domain.usecase.AddTaskListUseCase
 import com.wismna.geoffroy.donext.domain.usecase.DeleteTaskListUseCase
@@ -58,7 +59,7 @@ class ManageListsViewModel @Inject constructor(
 
             uiEventBus.send(
                 UiEvent.ShowUndoSnackbar(
-                    message = "Task list moved to recycle bin",
+                    message = R.string.snackbar_message_task_list_recycle,
                     undoAction = {
                         viewModelScope.launch {
                             deleteTaskListUseCase(taskListId, false)
