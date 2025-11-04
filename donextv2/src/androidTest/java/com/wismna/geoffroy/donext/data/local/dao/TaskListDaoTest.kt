@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext.data.local.repository
+package com.wismna.geoffroy.donext.data.local.dao
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -6,10 +6,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.wismna.geoffroy.donext.data.entities.TaskEntity
 import com.wismna.geoffroy.donext.data.entities.TaskListEntity
 import com.wismna.geoffroy.donext.data.local.AppDatabase
-import com.wismna.geoffroy.donext.data.local.dao.TaskDao
-import com.wismna.geoffroy.donext.data.local.dao.TaskListDao
 import com.wismna.geoffroy.donext.domain.model.Priority
-import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 import java.time.Instant
 
 @RunWith(AndroidJUnit4::class)
-class TaskDaoTest {
+class TaskListDaoTest {
 
     private lateinit var db: AppDatabase
     private lateinit var taskDao: TaskDao
@@ -38,6 +38,73 @@ class TaskDaoTest {
     @After
     fun tearDown() {
         db.close()
+    }
+
+    @Test
+    fun insertTaskList_insertsSuccessfully() = runBlocking {
+        val taskList = TaskListEntity(name = "Personal", order = 1)
+        listDao.insertTaskList(taskList)
+
+        val lists = listDao.getTaskLists().first()
+        assertEquals(1, lists.size)
+        assertEquals("Personal", lists.first().name)
+    }
+
+    @Test
+    fun getTaskListById_returnsCorrectEntity() = runBlocking {
+        val taskList = TaskListEntity(name = "Groceries", order = 0)
+        listDao.insertTaskList(taskList)
+
+        val inserted = listDao.getTaskLists().first().first()
+        val fetched = listDao.getTaskListById(inserted.id)
+
+        assertNotNull(fetched)
+        assertEquals("Groceries", fetched!!.name)
+        assertEquals(inserted.id, fetched.id)
+    }
+
+    @Test
+    fun updateTaskList_updatesSuccessfully() = runBlocking {
+        val taskList = TaskListEntity(name = "Work", order = 0)
+        listDao.insertTaskList(taskList)
+
+        val inserted = listDao.getTaskLists().first().first()
+        val updated = inserted.copy(name = "Updated Work")
+        listDao.updateTaskList(updated)
+
+        val fetched = listDao.getTaskListById(inserted.id)
+        assertEquals("Updated Work", fetched!!.name)
+    }
+
+    @Test
+    fun deleteTaskList_marksAsDeleted() = runBlocking {
+        val taskList = TaskListEntity(name = "Errands", order = 0)
+        listDao.insertTaskList(taskList)
+
+        val inserted = listDao.getTaskLists().first().first()
+        listDao.deleteTaskList(inserted.id, true)
+
+        // getTaskLists() filters deleted = 0, so result should be empty
+        val activeLists = listDao.getTaskLists().first()
+        assertTrue(activeLists.isEmpty())
+
+        // But the entity still exists in DB
+        val softDeleted = listDao.getTaskListById(inserted.id)
+        assertNotNull(softDeleted)
+        assertTrue(softDeleted!!.isDeleted)
+    }
+
+    @Test
+    fun getTaskLists_returnsOrderedByDisplayOrder() = runBlocking {
+        val first = TaskListEntity(name = "Zeta", order = 2)
+        val second = TaskListEntity(name = "Alpha", order = 0)
+        val third = TaskListEntity(name = "Beta", order = 1)
+        listDao.insertTaskList(first)
+        listDao.insertTaskList(second)
+        listDao.insertTaskList(third)
+
+        val lists = listDao.getTaskLists().first()
+        assertEquals(listOf("Alpha", "Beta", "Zeta"), lists.map { it.name })
     }
 
     @Test
@@ -85,7 +152,7 @@ class TaskDaoTest {
 
         val lists = listDao.getTaskListsWithOverdue(now)
 
-        TestCase.assertEquals(1, lists.first().first().overdueCount)
+        assertEquals(1, lists.first().first().overdueCount)
     }
 
     @Test
@@ -94,7 +161,7 @@ class TaskDaoTest {
         val listId = listDao.getTaskLists().first().first().id
 
         val todayStart = Instant.parse("2025-09-15T00:00:00Z").toEpochMilli()
-        val todayEnd = Instant.parse("2025-09-15T23:59:99Z").toEpochMilli()
+        val todayEnd = Instant.parse("2025-09-15T23:59:59Z").toEpochMilli()
 
         // One task due yesterday
         taskDao.insertTask(
@@ -129,7 +196,7 @@ class TaskDaoTest {
                 priority = Priority.NORMAL
             )
         )
-        // One task due in the future
+        // One task due today but done
         taskDao.insertTask(
             TaskEntity(
                 name = "TodayDone",
@@ -140,7 +207,7 @@ class TaskDaoTest {
                 priority = Priority.NORMAL
             )
         )
-        // One task due in the future
+        // One task due today but deleted
         taskDao.insertTask(
             TaskEntity(
                 name = "TodayDeleted",
@@ -155,7 +222,7 @@ class TaskDaoTest {
 
         val tasks = taskDao.getDueTodayTasks(todayStart, todayEnd)
 
-        TestCase.assertEquals(1, tasks.first().count())
-        TestCase.assertEquals("Prepare slides", tasks.first().first().name)
+        assertEquals(1, tasks.first().count())
+        assertEquals("Today", tasks.first().first().name)
     }
 }
