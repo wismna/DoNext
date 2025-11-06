@@ -6,6 +6,10 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.wismna.geoffroy.donext"
     compileSdk = 36
@@ -18,6 +22,10 @@ android {
         versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    sourceSets {
+        getByName("debug").assets.srcDirs(files("$projectDir/schemas"))
     }
 
     buildTypes {
@@ -46,6 +54,17 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.1.1"
     }
+
+    configurations.all {
+        resolutionStrategy {
+            eachDependency {
+                when (requested.module.toString()) {
+                    // Required for forcing the serialization lib version used by MigrationTestHelper
+                    "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm" -> useVersion("1.8.0")
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -60,15 +79,17 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.navigation:navigation-compose:2.9.5")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
-    implementation("androidx.test.ext:junit-ktx:1.3.0")
     implementation("sh.calvin.reorderable:reorderable:3.0.0")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.3.0")
     androidTestImplementation(platform("androidx.compose:compose-bom:2025.10.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("com.google.truth:truth:1.4.4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     val roomVersion = "2.8.3"
     implementation("androidx.room:room-runtime:$roomVersion")
+    androidTestImplementation("androidx.room:room-testing:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
     val hiltVersion = "2.57.2"

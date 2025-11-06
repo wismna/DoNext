@@ -5,10 +5,13 @@
       <SelectionState runConfigName="donextv2">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="overdueCount_correctlyCalculated()">
+      <SelectionState runConfigName="donext">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="donext">
+      <SelectionState runConfigName="DatabaseMigrationTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="migrate_v6_to_v7_preserves_data_and_transforms_columns()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

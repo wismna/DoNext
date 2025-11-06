@@ -22,15 +22,6 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 }
-sonarqube {
-    properties {
-        property 'sonar.host.url', '#{sonar.host.url}'
-        property 'sonar.login', '#{sonar.login}'
-        property 'sonar.organization', '#{sonar.organization}'
-        property 'sonar.projectKey', '#{sonar.projectkey}'
-        property 'sonar.branch', 'master'
-    }
-}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

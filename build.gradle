@@ -14,7 +14,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.13.0'
-        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.3'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21'
         classpath 'org.jetbrains.kotlin:compose-compiler-gradle-plugin:2.0.21'
 
@@ -38,5 +37,3 @@ allprojects {
 tasks.register('clean', Delete) {
     delete rootProject.layout.buildDirectory
 }
-
-apply plugin: 'org.sonarqube'
