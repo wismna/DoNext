@@ -3,15 +3,11 @@ package com.wismna.geoffroy.donext.data.local.dao
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.wismna.geoffroy.donext.data.entities.TaskEntity
 import com.wismna.geoffroy.donext.data.entities.TaskListEntity
 import com.wismna.geoffroy.donext.data.local.AppDatabase
 import com.wismna.geoffroy.donext.domain.model.Priority
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertNotNull
-import junit.framework.TestCase.assertNull
-import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -19,6 +15,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.Instant
+import kotlin.collections.first
 
 @RunWith(AndroidJUnit4::class)
 class TaskDaoTest {
@@ -61,9 +58,9 @@ class TaskDaoTest {
         val inserted = taskDao.getTasksForList(listId).first().first()
         val fetched = taskDao.getTaskById(inserted.id)
 
-        assertNotNull(fetched)
-        assertEquals("Do laundry", fetched!!.name)
-        assertEquals(listId, fetched.taskListId)
+        assertThat(fetched).isNotNull()
+        assertThat(fetched!!.name).isEqualTo("Do laundry")
+        assertThat(fetched.taskListId).isEqualTo(listId)
     }
 
     @Test
@@ -77,8 +74,8 @@ class TaskDaoTest {
         taskDao.insertTask(done)
         taskDao.insertTask(high)
 
-        val tasks = taskDao.getTasksForList(listId).first()
-        assertEquals(listOf("High", "Normal", "Done"), tasks.map { it.name })
+        val taskPriorities = taskDao.getTasksForList(listId).first().map { it.name }
+        assertThat(taskPriorities).containsExactly("High", "Normal", "Done").inOrder()
     }
 
     @Test
@@ -92,7 +89,7 @@ class TaskDaoTest {
         taskDao.updateTask(updated)
 
         val fetched = taskDao.getTaskById(inserted.id)
-        assertEquals("Updated", fetched!!.name)
+        assertThat(fetched!!.name).isEqualTo("Updated")
     }
 
     @Test
@@ -103,10 +100,10 @@ class TaskDaoTest {
         val inserted = taskDao.getTasksForList(listId).first().first()
 
         taskDao.toggleTaskDone(inserted.id, true)
-        assertTrue(taskDao.getTaskById(inserted.id)!!.isDone)
+        assertThat(taskDao.getTaskById(inserted.id)!!.isDone).isTrue()
 
         taskDao.toggleTaskDone(inserted.id, false)
-        assertFalse(taskDao.getTaskById(inserted.id)!!.isDone)
+        assertThat(taskDao.getTaskById(inserted.id)!!.isDone).isFalse()
     }
 
     @Test
@@ -118,7 +115,7 @@ class TaskDaoTest {
 
         taskDao.toggleTaskDeleted(inserted.id, true)
         val deletedTask = taskDao.getTaskById(inserted.id)
-        assertTrue(deletedTask!!.isDeleted)
+        assertThat(deletedTask!!.isDeleted).isTrue()
     }
 
     @Test
@@ -132,11 +129,10 @@ class TaskDaoTest {
 
         taskDao.toggleAllTasksFromListDeleted(listId, true)
         val fetched = taskDao.getTasksForList(listId).first()
-        assertTrue(fetched.isEmpty()) // filtered by deleted = 0
+        assertThat(fetched).isEmpty()
 
         // confirm soft deletion
-        val softDeleted = fetched.size < 2
-        assertTrue(softDeleted)
+        assertThat(fetched).hasSize(0)
     }
 
     @Test
@@ -147,7 +143,7 @@ class TaskDaoTest {
         val inserted = taskDao.getTasksForList(listId).first().first()
 
         taskDao.permanentDeleteTask(inserted.id)
-        assertNull(taskDao.getTaskById(inserted.id))
+        assertThat(taskDao.getTaskById(inserted.id)).isNull()
     }
 
     @Test
@@ -160,8 +156,8 @@ class TaskDaoTest {
 
         taskDao.permanentDeleteAllDeletedTasks()
         val remaining = taskDao.getTasksForList(listId).first()
-        assertEquals(1, remaining.size)
-        assertEquals("Active", remaining.first().name)
+        assertThat(remaining).hasSize(1)
+        assertThat(remaining.first().name).isEqualTo("Active")
     }
 
     @Test
@@ -171,9 +167,9 @@ class TaskDaoTest {
         taskDao.insertTask(deleted)
 
         val results = taskDao.getDeletedTasksWithListName().first()
-        assertEquals(1, results.size)
-        assertEquals("Trash", results.first().task.name)
-        assertEquals("Work", results.first().listName)
+        assertThat(results).hasSize(1)
+        assertThat(results.first().task.name).isEqualTo("Trash")
+        assertThat(results.first().listName).isEqualTo("Work")
     }
 
     @Test
@@ -209,7 +205,7 @@ class TaskDaoTest {
         taskDao.insertTask(tomorrow)
 
         val tasks = taskDao.getDueTodayTasks(todayStart, todayEnd).first()
-        assertEquals(1, tasks.size)
-        assertEquals("Today", tasks.first().name)
+        assertThat(tasks).hasSize(1)
+        assertThat(tasks.first().name).isEqualTo("Today")
     }
 }

@@ -1,5 +1,6 @@
 package com.wismna.geoffroy.donext.presentation.viewmodel
 
+import com.google.common.truth.Truth.assertThat
 import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
@@ -9,7 +10,6 @@ import com.wismna.geoffroy.donext.domain.usecase.ToggleTaskDoneUseCase
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import io.mockk.*
-import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -60,7 +60,7 @@ class DueTodayViewModelTest {
         tasksFlow.emit(taskList)
         advanceUntilIdle()
 
-        assertEquals(taskList, viewModel.dueTodayTasks)
+        assertThat(viewModel.dueTodayTasks).isEqualTo(taskList)
     }
 
     @Test

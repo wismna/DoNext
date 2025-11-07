@@ -283,7 +283,7 @@ fun AppContent(
                         is AppDestination.RecycleBin -> {
                             EmptyRecycleBinAction()
                         }
-                        else -> null
+                        else -> Unit
                     }
                 }
             )
@@ -297,7 +297,7 @@ fun AppContent(
                         text = { Text(stringResource(R.string.action_create_list)) },
                     )
                 }
-                else -> null
+                else -> Unit
             }
         }
     ) { contentPadding ->
