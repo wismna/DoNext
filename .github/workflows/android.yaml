@@ -39,6 +39,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Run unit tests
+        run: ./gradlew :${{ env.MODULE }}:testDebugUnitTest --stacktrace
+        
       - name: Build AAB
         run: ./gradlew :${{ env.MODULE }}:bundleRelease
 
