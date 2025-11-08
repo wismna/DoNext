@@ -8,7 +8,8 @@ on:
   workflow_dispatch: 
 
 env:
-  BUILD_DIR: donext/build/outputs/bundle/release
+  MODULE: donextv2
+  BUILD_DIR: donextv2/build/outputs/bundle/release
 
 jobs:
   build:
@@ -39,7 +40,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build AAB
-        run: ./gradlew bundleRelease
+        run: ./gradlew :${{ env.MODULE }}:bundleRelease
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

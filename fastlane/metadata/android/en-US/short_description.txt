@@ -1,1 +1,1 @@
-A new way to manage your tasks!
+A simple and fast app to manage your tasks!
