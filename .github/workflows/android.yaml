@@ -9,7 +9,7 @@ on:
 
 env:
   MODULE: donextv2
-  BUILD_DIR: ${{ env.MODULE }}/build/outputs/bundle/release
+  BUILD_DIR: donextv2/build/outputs/bundle/release
 
 jobs:
   build:
