@@ -1,26 +1,23 @@
 default_platform(:android)
 
 platform :android do
-  desc "Run all unit tests"
-  lane :test do
+  desc "Build, test, and deploy the production version to Google Play"
+  lane :deploy do
     gradle(task: "testDebugUnitTest")
-  end
-
-  desc "Build a release APK or AAB for beta testing"
-  lane :beta do
-    gradle(task: "clean bundleRelease")
+    gradle(task: "clean :donextv2:bundleRelease")
     upload_to_play_store(
-      track: "beta",
-      aab: "app/build/outputs/bundle/release/app-release.aab"
+      track: "production",
+      aab: "donextv2/build/outputs/bundle/release/donextv2-release.aab"
     )
   end
 
-  desc "Deploy the production version to Google Play"
-  lane :deploy do
-    gradle(task: "clean bundleRelease")
+  desc "Build, test, and deploy to Google Play"
+  lane :internal do
+    gradle(task: "testDebugUnitTest")
+    gradle(task: "clean :donextv2:bundleRelease")
     upload_to_play_store(
-      track: "production",
-      aab: "app/build/outputs/bundle/release/app-release.aab"
+      track: "internal",
+      aab: "donextv2/build/outputs/bundle/release/donextv2-release.aab"
     )
   end
 end

@@ -1,2 +1,2 @@
-json_key_file("./fastlane/keys/donext-f9e67-5038064982b0")
+json_key_file(ENV["SUPPLY_JSON_KEY"] || "./fastlane/keys/donext-f9e67-5038064982b0")
 package_name("com.wismna.geoffroy.donext")

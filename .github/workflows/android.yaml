@@ -5,11 +5,6 @@ on:
     branches:
       - master
   pull_request:
-  workflow_dispatch: 
-
-env:
-  MODULE: donextv2
-  BUILD_DIR: donextv2/build/outputs/bundle/release
 
 jobs:
   build:
@@ -17,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -39,37 +34,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Run unit tests
-        run: ./gradlew :${{ env.MODULE }}:testDebugUnitTest --stacktrace
-
-      - name: Build AAB
-        run: ./gradlew :${{ env.MODULE }}:bundleRelease
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          name: release-aab
-          path: ${{ env.BUILD_DIR }}/*release*.aab
+          ruby-version: 3.1
 
-  deploy-google-play:
-    needs: build
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+      - name: Install Fastlane
+        run: gem install fastlane -NV
 
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: release-aab
-          path: release
+      - name: Configure Google credentials
+        run: echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > service-account.json
 
-      - name: Deploy to Google Play (production)
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: com.wismna.geoffroy.donext
-          releaseFiles: release/${{ env.MODULE }}-release.aab
-          track: beta
-          metadataRootDirectory: fastlane/metadata/android
-          whatsNewDirectory: fastlane/metadata/android/en-US/changelogs
-          status: completed
+      - name: Run Fastlane
+        env:
+          SUPPLY_JSON_KEY: service-account.json
+        run: fastlane internal
