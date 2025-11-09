@@ -24,6 +24,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("KEYSTORE_FILE") ?: "./upload.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("ALIAS_NAME")
+            keyPassword = System.getenv("ALIAS_PASSWORD")
+        }
+    }
+
     sourceSets {
         getByName("debug").assets.srcDirs(files("$projectDir/schemas"))
     }
@@ -38,6 +47,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs["release"]
         }
     }
     compileOptions {

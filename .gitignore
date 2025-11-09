@@ -1,5 +1,6 @@
 *.iml
 *.apk
+*.jks
 .gradle
 /local.properties
 /.idea/workspace.xml
@@ -8,3 +9,4 @@
 /build
 /captures
 /fastlane/keys/
+/donext*/release/
