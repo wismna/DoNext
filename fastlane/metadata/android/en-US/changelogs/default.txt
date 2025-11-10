@@ -2,10 +2,7 @@ Complete UI overhaul that gives DoNext a nice, modern look.
 Complete code rewrite to Kotlin and Android Jetpack, with a better architecture.
 
 Task lists are now displayed in a navigation menu
-Tasks are now ordered by priority and not cycles
+Tasks are now ordered by priority and not cycles which were removed
 All tasks can be Done or Removed instead of only the first one
-A Recycle Bin was added
-The whole Next and cycles mechanism was removed
-The History page was removed and its features split between the regular task lists and the Recycle Bin
-The Today view is not a separate concept now, it's based on the tasks due date
-No more Settings page as it's not needed anymore (but it may come back later if required)
+Removed History page and split its features between the regular task lists and the new Recycle Bin
+Today view is not a separate concept anymore and based on the tasks due date
