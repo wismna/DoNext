@@ -5,7 +5,10 @@ platform :android do
   lane :internal do
     module_name = ENV["MODULE"]
     # Read local versionCode
-    gradle_file = File.read("#{module_name}/build.gradle.kts")
+    project_root = File.expand_path("..", __dir__)
+    gradle_path = File.join(project_root, module_name, "build.gradle.kts")
+    UI.message("Gradle file resolved at: #{gradle_path}")
+    gradle_file = File.read(gradle_path)
     gradle_version = gradle_file[/versionCode\s*=\s*(\d+)/, 1].to_i
 
     # Read Play Store versionCode (track internal)
