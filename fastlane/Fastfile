@@ -1,23 +1,28 @@
 default_platform(:android)
 
 platform :android do
-  desc "Build, test, and deploy the production version to Google Play"
-  lane :deploy do
-    gradle(task: "testDebugUnitTest")
-    gradle(task: "clean :donextv2:bundleRelease")
-    upload_to_play_store(
-      track: "production",
-      aab: "donextv2/build/outputs/bundle/release/donextv2-release.aab"
-    )
-  end
-
   desc "Build, test, and deploy to Google Play"
   lane :internal do
+    module_name = ENV["MODULE"] || "donextv2"
+    # Read local versionCode
+    gradle_version = get_version_code(
+      gradle_file_path: "#{module_name}/build.gradle"
+    ).to_i
+
+    # Read Play Store versionCode (track internal)
+    play_version = google_play_track_version_codes(
+      track: "internal"
+    ).max.to_i
+
+    if gradle_version <= play_version
+      UI.user_error!("VersionCode #{gradle_version} should be higher than Play Store version (#{play_version}). Aborting upload.")
+    end
+
     gradle(task: "testDebugUnitTest")
-    gradle(task: "clean :donextv2:bundleRelease")
+    gradle(task: "clean :#{module_name}:bundleRelease")
     upload_to_play_store(
       track: "internal",
-      aab: "donextv2/build/outputs/bundle/release/donextv2-release.aab"
+      aab: "#{module_name}/build/outputs/bundle/release/#{module_name}-release.aab"
     )
   end
 end

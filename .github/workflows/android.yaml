@@ -49,6 +49,7 @@ jobs:
 
       - name: Run Fastlane
         env:
+          MODULE: ${{ github.event.inputs.module }}
           SUPPLY_JSON_KEY: service-account.json
           KEYSTORE_FILE: upload.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
