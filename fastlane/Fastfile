@@ -3,7 +3,7 @@ default_platform(:android)
 platform :android do
   desc "Build, test, and deploy to Google Play"
   lane :internal do
-    module_name = ENV["MODULE"] || "donextv2"
+    module_name = ENV["MODULE"]
     # Read local versionCode
     gradle_file = File.read("#{module_name}/build.gradle.kts")
     gradle_version = gradle_file[/versionCode\s*=\s*(\d+)/, 1].to_i
