@@ -5,8 +5,8 @@ platform :android do
   lane :internal do
     module_name = ENV["MODULE"] || "donextv2"
     # Read local versionCode
-    gradle_file = File.read("#{module_name}/build.gradle")
-    gradle_version = gradle_file[/versionCode\s+(\d+)/, 1].to_i
+    gradle_file = File.read("#{module_name}/build.gradle.kts")
+    gradle_version = gradle_file[/versionCode\s*=\s*(\d+)/, 1].to_i
 
     # Read Play Store versionCode (track internal)
     play_version = google_play_track_version_codes(
