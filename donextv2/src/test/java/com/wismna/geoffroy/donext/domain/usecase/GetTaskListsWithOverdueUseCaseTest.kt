@@ -2,7 +2,7 @@ package com.wismna.geoffroy.donext.domain.usecase
 
 import com.google.common.truth.Truth.assertThat
 import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
-import com.wismna.geoffroy.donext.domain.repository.TaskRepository
+import com.wismna.geoffroy.donext.domain.repository.TaskListRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -25,7 +25,7 @@ class GetTaskListsWithOverdueUseCaseTest {
         val today = LocalDate.of(2026, 7, 16)
         val clock = Clock.fixed(today.atStartOfDay(zone).plusHours(10).toInstant(), zone)
 
-        val repository = mockk<TaskRepository>()
+        val repository = mockk<TaskListRepository>()
         every { repository.getTaskListsWithOverdue(any()) } returns flowOf(emptyList())
 
         GetTaskListsWithOverdueUseCase(repository, clock).invoke()
@@ -40,7 +40,7 @@ class GetTaskListsWithOverdueUseCaseTest {
         val clock = Clock.fixed(LocalDate.of(2026, 1, 1).atStartOfDay(zone).toInstant(), zone)
         val lists = listOf(TaskListWithOverdue(id = 1L, name = "Work", overdueCount = 2))
 
-        val repository = mockk<TaskRepository>()
+        val repository = mockk<TaskListRepository>()
         every { repository.getTaskListsWithOverdue(any()) } returns flowOf(lists)
 
         val result = GetTaskListsWithOverdueUseCase(repository, clock).invoke().first()

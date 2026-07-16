@@ -34,6 +34,7 @@
     <string name="dialog_delete_task_description">Êtes-vous sûr de vouloir supprimer cette tâche ? Cette action ne peut être annulée.</string>
     <string name="dialog_delete_task_cancel">Annuler</string>
     <string name="dialog_delete_task_delete">Supprimer</string>
+    <string name="toast_task_permanently_deleted">Tâche supprimée</string>
     <string name="dialog_empty_task_title">Vider la corbeille</string>
     <string name="dialog_empty_task_description">Êtes-vous sûr de vider la corbeille ? Cette action ne peut être annulée.</string>
     <string name="dialog_empty_task_cancel">Annuler</string>

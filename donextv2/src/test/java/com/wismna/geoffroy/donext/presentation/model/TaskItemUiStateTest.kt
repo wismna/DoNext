@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext.presentation.viewmodel
+package com.wismna.geoffroy.donext.presentation.model
 
 import com.google.common.truth.Truth.assertThat
 import com.wismna.geoffroy.donext.domain.model.Priority
@@ -11,7 +11,7 @@ import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.util.*
 
-class TaskItemViewModelTest {
+class TaskItemUiStateTest {
 
     private val fixedClock: Clock = Clock.fixed(
         LocalDate.of(2025, 1, 10)
@@ -47,80 +47,80 @@ class TaskItemViewModelTest {
 
     @Test
     fun `initializes fields from Task`() {
-        val viewModel = TaskItemViewModel(baseTask)
+        val uiState = TaskItemUiState(baseTask)
 
-        assertThat(viewModel.id).isEqualTo(baseTask.id)
-        assertThat(viewModel.name).isEqualTo(baseTask.name)
-        assertThat(viewModel.description).isEqualTo(baseTask.description)
-        assertThat(viewModel.isDone).isFalse()
-        assertThat(viewModel.isDeleted).isFalse()
-        assertThat(viewModel.priority).isEqualTo(Priority.NORMAL)
+        assertThat(uiState.id).isEqualTo(baseTask.id)
+        assertThat(uiState.name).isEqualTo(baseTask.name)
+        assertThat(uiState.description).isEqualTo(baseTask.description)
+        assertThat(uiState.isDone).isFalse()
+        assertThat(uiState.isDeleted).isFalse()
+        assertThat(uiState.priority).isEqualTo(Priority.NORMAL)
     }
 
     @Test
     fun `isOverdue is true when due date is before today`() {
         val overdueTask = baseTask.copy(dueDate = millisForDaysFromFixedToday(-1))
-        val viewModel = TaskItemViewModel(overdueTask)
+        val uiState = TaskItemUiState(overdueTask)
 
-        assertThat(viewModel.isOverdue).isTrue()
+        assertThat(uiState.isOverdue).isTrue()
     }
 
     @Test
     fun `isOverdue is false when due date is today`() {
         val dueToday = baseTask.copy(dueDate = millisForDaysFromFixedToday(0))
-        val viewModel = TaskItemViewModel(dueToday, fixedClock)
+        val uiState = TaskItemUiState(dueToday, fixedClock)
 
-        assertThat(viewModel.isOverdue).isFalse()
+        assertThat(uiState.isOverdue).isFalse()
     }
 
     @Test
     fun `isOverdue is false when due date is null`() {
-        val viewModel = TaskItemViewModel(baseTask.copy(dueDate = null))
+        val uiState = TaskItemUiState(baseTask.copy(dueDate = null))
 
-        assertThat(viewModel.isOverdue).isFalse()
+        assertThat(uiState.isOverdue).isFalse()
     }
 
     @Test
     fun `dueDateText is Today when due date is today`() {
         val dueToday = baseTask.copy(dueDate = millisForDaysFromFixedToday(0))
-        val viewModel = TaskItemViewModel(dueToday, fixedClock)
+        val uiState = TaskItemUiState(dueToday, fixedClock)
 
-        assertThat(viewModel.dueDateText).isEqualTo("Today")
+        assertThat(uiState.dueDateText).isEqualTo("Today")
     }
 
     @Test
     fun `dueDateText is Tomorrow when due date is tomorrow`() {
         val dueTomorrow = baseTask.copy(dueDate = millisForDaysFromFixedToday(1))
-        val viewModel = TaskItemViewModel(dueTomorrow, fixedClock)
+        val uiState = TaskItemUiState(dueTomorrow, fixedClock)
 
-        assertThat(viewModel.dueDateText).isEqualTo("Tomorrow")
+        assertThat(uiState.dueDateText).isEqualTo("Tomorrow")
     }
 
     @Test
     fun `dueDateText is Yesterday when due date was yesterday`() {
         val dueYesterday = baseTask.copy(dueDate = millisForDaysFromFixedToday(-1))
-        val viewModel = TaskItemViewModel(dueYesterday, fixedClock)
+        val uiState = TaskItemUiState(dueYesterday, fixedClock)
 
-        assertThat(viewModel.dueDateText).isEqualTo("Yesterday")
+        assertThat(uiState.dueDateText).isEqualTo("Yesterday")
     }
 
     @Test
     fun `dueDateText is day of week when within next 7 days`() {
         val dueIn3Days = baseTask.copy(dueDate = millisForDaysFromFixedToday(3))
-        val viewModel = TaskItemViewModel(dueIn3Days, fixedClock)
+        val uiState = TaskItemUiState(dueIn3Days, fixedClock)
 
         val expected = today
             .plusDays(3)
             .dayOfWeek
             .getDisplayName(TextStyle.SHORT, Locale.getDefault())
 
-        assertThat(viewModel.dueDateText).isEqualTo(expected)
+        assertThat(uiState.dueDateText).isEqualTo(expected)
     }
 
     @Test
     fun `dueDateText is formatted date when more than 7 days away`() {
         val dueIn10Days = baseTask.copy(dueDate = millisForDaysFromFixedToday(10))
-        val viewModel = TaskItemViewModel(dueIn10Days)
+        val uiState = TaskItemUiState(dueIn10Days)
 
         val expected = today
             .plusDays(10)
@@ -129,6 +129,6 @@ class TaskItemViewModelTest {
                     .withLocale(Locale.getDefault())
             )
 
-        assertThat(viewModel.dueDateText).isEqualTo(expected)
+        assertThat(uiState.dueDateText).isEqualTo(expected)
     }
 }

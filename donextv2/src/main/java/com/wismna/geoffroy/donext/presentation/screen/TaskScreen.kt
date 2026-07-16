@@ -189,7 +189,7 @@ fun TaskScreen(
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
                     )
-                ) { Text("Cancel") }
+                ) { Text(stringResource(R.string.task_cancel)) }
 
                 // --- Save Button ---
                 Button(

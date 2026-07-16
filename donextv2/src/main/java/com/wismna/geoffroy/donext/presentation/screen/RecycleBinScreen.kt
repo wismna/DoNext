@@ -63,6 +63,7 @@ fun RecycleBinScreen(
 
     val grouped = tasks.groupBy { it.listName }
     val context = LocalContext.current
+    val taskDeletedMessage = stringResource(R.string.toast_task_permanently_deleted)
 
     if (taskToDelete != null) {
         AlertDialog(
@@ -75,7 +76,7 @@ fun RecycleBinScreen(
                 TextButton(
                     onClick = {
                         viewModel.onConfirmDelete()
-                        Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, taskDeletedMessage, Toast.LENGTH_SHORT).show()
                     },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error

@@ -1,4 +1,4 @@
-package com.wismna.geoffroy.donext.presentation.viewmodel
+package com.wismna.geoffroy.donext.presentation.model
 
 import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
@@ -10,7 +10,7 @@ import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.util.Locale
 
-class TaskItemViewModel(
+class TaskItemUiState(
     task: Task,
     private val clock: Clock = Clock.systemDefaultZone()) {
     val id: Long = task.id!!

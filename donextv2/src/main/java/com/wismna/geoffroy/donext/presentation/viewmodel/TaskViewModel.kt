@@ -71,12 +71,14 @@ class TaskViewModel @Inject constructor(
 
     fun save(onDone: (() -> Unit)? = null) {
         if (title.isBlank()) return
+        val listId = taskListId ?: return
 
         viewModelScope.launch {
-            if (isEditing()) {
-                updateTaskUseCase(editingTaskId!!, taskListId!!, title, description, priority, dueDate, isDone)
+            val currentEditingTaskId = editingTaskId
+            if (currentEditingTaskId != null) {
+                updateTaskUseCase(currentEditingTaskId, listId, title, description, priority, dueDate, isDone)
             } else {
-                createTaskUseCase(taskListId!!, title, description, priority, dueDate)
+                createTaskUseCase(listId, title, description, priority, dueDate)
             }
             onDone?.invoke()
         }

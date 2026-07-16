@@ -181,6 +181,16 @@ class TaskViewModelTest {
     }
 
     @Test
+    fun `save before taskListId is set does nothing`() = runTest {
+        viewModel.onTitleChanged("Task")
+        viewModel.save()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { createTaskUseCase(any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { updateTaskUseCase(any(), any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
     fun `save creates task when not editing`() = runTest {stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
         advanceUntilIdle()
         viewModel.onTitleChanged("New Task")

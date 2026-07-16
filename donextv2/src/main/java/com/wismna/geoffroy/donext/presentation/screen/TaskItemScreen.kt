@@ -28,6 +28,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -41,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.wismna.geoffroy.donext.R
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
-import com.wismna.geoffroy.donext.presentation.viewmodel.TaskItemViewModel
+import com.wismna.geoffroy.donext.presentation.model.TaskItemUiState
 
 @Composable
 fun TaskItemScreen(
@@ -51,7 +52,7 @@ fun TaskItemScreen(
     onSwipeRight: () -> Unit,
     onTaskClick: (task: Task) -> Unit
 ) {
-    val viewModel = TaskItemViewModel(task)
+    val uiState = remember(task) { TaskItemUiState(task) }
 
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
@@ -63,17 +64,17 @@ fun TaskItemScreen(
     )
 
     val baseStyle = MaterialTheme.typography.bodyLarge.copy(
-        fontWeight = when (viewModel.priority) {
+        fontWeight = when (uiState.priority) {
             Priority.HIGH -> FontWeight.Bold
             Priority.NORMAL -> FontWeight.Normal
             Priority.LOW -> FontWeight.Normal
         },
-        color = when (viewModel.priority) {
+        color = when (uiState.priority) {
             Priority.HIGH -> MaterialTheme.colorScheme.onSurface
             Priority.NORMAL -> MaterialTheme.colorScheme.onSurface
             Priority.LOW -> MaterialTheme.colorScheme.onSurfaceVariant
         },
-        textDecoration = if (viewModel.isDone) TextDecoration.LineThrough else TextDecoration.None
+        textDecoration = if (uiState.isDone) TextDecoration.LineThrough else TextDecoration.None
     )
     Card(
         modifier = modifier,
@@ -87,8 +88,8 @@ fun TaskItemScreen(
             backgroundContent = {
                 DismissBackground(
                     dismissState,
-                    viewModel.isDone,
-                    viewModel.isDeleted
+                    uiState.isDone,
+                    uiState.isDeleted
                 )
             },
             content = {
@@ -97,7 +98,7 @@ fun TaskItemScreen(
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surfaceContainer)
                         .padding(8.dp)
-                        .alpha(if (viewModel.isDone || viewModel.priority == Priority.LOW) 0.5f else 1f),
+                        .alpha(if (uiState.isDone || uiState.priority == Priority.LOW) 0.5f else 1f),
                     verticalAlignment = Alignment.CenterVertically // centers checkbox + content
                 ) {
                     Box(
@@ -108,12 +109,12 @@ fun TaskItemScreen(
                     ) {
                         // Title
                         Text(
-                            text = viewModel.name,
+                            text = uiState.name,
                             fontSize = 18.sp,
                             style = baseStyle,
                             modifier = Modifier
                                 .align(
-                                    if (viewModel.description.isNullOrBlank()) Alignment.CenterStart
+                                    if (uiState.description.isNullOrBlank()) Alignment.CenterStart
                                     else Alignment.TopStart
                                 ),
                             overflow = TextOverflow.Ellipsis,
@@ -121,19 +122,19 @@ fun TaskItemScreen(
                         )
 
                         // Due date badge
-                        viewModel.dueDateText?.let { dueMillis ->
+                        uiState.dueDateText?.let { dueMillis ->
                             Badge(
                                 modifier = Modifier
                                     .align(
-                                        if (viewModel.description.isNullOrBlank()) Alignment.CenterEnd
+                                        if (uiState.description.isNullOrBlank()) Alignment.CenterEnd
                                         else Alignment.TopEnd
                                     ),
-                                containerColor = if (viewModel.isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primaryContainer
+                                containerColor = if (uiState.isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primaryContainer
                             ) {
                                 Text(
                                     modifier = Modifier.padding(start = 1.dp, end = 1.dp),
-                                    text = viewModel.dueDateText,
-                                    color = if (viewModel.isOverdue) Color.White else MaterialTheme.colorScheme.onPrimaryContainer,
+                                    text = uiState.dueDateText,
+                                    color = if (uiState.isOverdue) Color.White else MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
@@ -147,9 +148,9 @@ fun TaskItemScreen(
                                 .padding(top = 24.dp),
                             contentAlignment = Alignment.TopStart
                         ) {
-                            if (!viewModel.description.isNullOrBlank()) {
+                            if (!uiState.description.isNullOrBlank()) {
                                 Text(
-                                    text = viewModel.description,
+                                    text = uiState.description,
                                     color = MaterialTheme.colorScheme.tertiary,
                                     style = baseStyle.copy(
                                         fontSize = MaterialTheme.typography.bodyMedium.fontSize,

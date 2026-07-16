@@ -20,8 +20,8 @@ android {
         applicationId = "com.wismna.geoffroy.donext"
         minSdk = 26
         targetSdk = 36
-        versionCode = 35
-        versionName = "2.0.1"
+        versionCode = 36
+        versionName = "2.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,9 +64,6 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.1"
     }
 
     configurations.all {

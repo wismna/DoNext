@@ -1,6 +1,8 @@
 package com.wismna.geoffroy.donext.data.injection
 
+import com.wismna.geoffroy.donext.data.local.repository.TaskListRepositoryImpl
 import com.wismna.geoffroy.donext.data.local.repository.TaskRepositoryImpl
+import com.wismna.geoffroy.donext.domain.repository.TaskListRepository
 import com.wismna.geoffroy.donext.domain.repository.TaskRepository
 import dagger.Binds
 import dagger.Module
@@ -15,4 +17,9 @@ abstract class RepositoryModule {
     abstract fun bindTaskRepository(
         impl: TaskRepositoryImpl
     ): TaskRepository
+
+    @Binds
+    abstract fun bindTaskListRepository(
+        impl: TaskListRepositoryImpl
+    ): TaskListRepository
 }
