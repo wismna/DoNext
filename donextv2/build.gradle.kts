@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
@@ -36,7 +35,7 @@ android {
     }
 
     sourceSets {
-        getByName("debug").assets.srcDirs(files("$projectDir/schemas"))
+        getByName("debug").assets.directories.add("$projectDir/schemas")
     }
 
     buildTypes {
@@ -56,11 +55,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_11
-        }
-    }
     buildFeatures {
         compose = true
         viewBinding = true
@@ -75,6 +69,12 @@ android {
                 }
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
     }
 }
 
