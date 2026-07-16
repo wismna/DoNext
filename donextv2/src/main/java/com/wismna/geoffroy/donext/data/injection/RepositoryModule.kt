@@ -1,7 +1,9 @@
 package com.wismna.geoffroy.donext.data.injection
 
+import com.wismna.geoffroy.donext.data.local.preferences.SettingsRepositoryImpl
 import com.wismna.geoffroy.donext.data.local.repository.TaskListRepositoryImpl
 import com.wismna.geoffroy.donext.data.local.repository.TaskRepositoryImpl
+import com.wismna.geoffroy.donext.domain.repository.SettingsRepository
 import com.wismna.geoffroy.donext.domain.repository.TaskListRepository
 import com.wismna.geoffroy.donext.domain.repository.TaskRepository
 import dagger.Binds
@@ -22,4 +24,9 @@ abstract class RepositoryModule {
     abstract fun bindTaskListRepository(
         impl: TaskListRepositoryImpl
     ): TaskListRepository
+
+    @Binds
+    abstract fun bindSettingsRepository(
+        impl: SettingsRepositoryImpl
+    ): SettingsRepository
 }

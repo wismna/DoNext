@@ -7,18 +7,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import com.wismna.geoffroy.donext.domain.model.AppDestination
+import com.wismna.geoffroy.donext.domain.usecase.GetLastOpenedTaskListIdUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
+import com.wismna.geoffroy.donext.domain.usecase.SaveLastOpenedTaskListUseCase
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     getTaskListsUseCase: GetTaskListsUseCase,
+    private val getLastOpenedTaskListIdUseCase: GetLastOpenedTaskListIdUseCase,
+    private val saveLastOpenedTaskListUseCase: SaveLastOpenedTaskListUseCase,
     val uiEventBus: UiEventBus
 ) : ViewModel() {
 
@@ -38,8 +40,9 @@ class MainViewModel @Inject constructor(
     var showAddListSheet by mutableStateOf(false)
 
     init {
-        getTaskListsUseCase()
-            .onEach { lists ->
+        viewModelScope.launch {
+            val lastOpenedTaskListId = getLastOpenedTaskListIdUseCase()
+            getTaskListsUseCase().collect { lists ->
                 destinations = lists.map { taskList ->
                     AppDestination.TaskList(taskList.id!!, taskList.name)
                 } +
@@ -47,11 +50,14 @@ class MainViewModel @Inject constructor(
                     AppDestination.RecycleBin +
                     AppDestination.DueTodayList
                 if (startDestination == AppDestination.ManageLists && destinations.isNotEmpty()) {
-                    startDestination = destinations.first()
+                    startDestination = destinations
+                        .filterIsInstance<AppDestination.TaskList>()
+                        .firstOrNull { it.taskListId == lastOpenedTaskListId }
+                        ?: destinations.first()
                 }
                 isLoading = false
             }
-            .launchIn(viewModelScope)
+        }
     }
 
     fun navigateBack() {
@@ -79,12 +85,21 @@ class MainViewModel @Inject constructor(
         val route = navBackStackEntry?.destination?.route
         val taskListId = navBackStackEntry?.arguments?.getLong("taskListId")
 
-        currentDestination = destinations.firstOrNull { dest ->
+        val resolved = destinations.firstOrNull { dest ->
             when (dest) {
                 is AppDestination.TaskList -> taskListId != null && dest.taskListId == taskListId
                 else -> dest.route == route
             }
         } ?: startDestination
+
+        if (resolved != currentDestination) {
+            currentDestination = resolved
+            (resolved as? AppDestination.TaskList)?.let { taskList ->
+                viewModelScope.launch {
+                    saveLastOpenedTaskListUseCase(taskList.taskListId)
+                }
+            }
+        }
     }
 
     fun doesListExist(taskListId: Long): Boolean {
