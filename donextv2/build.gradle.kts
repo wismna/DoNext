@@ -14,7 +14,7 @@ ksp {
 
 android {
     namespace = "com.wismna.geoffroy.donext"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.wismna.geoffroy.donext"
@@ -82,35 +82,35 @@ android {
 }
 
 dependencies {
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.4")
-    implementation("androidx.activity:activity-compose:1.11.0")
-    implementation(platform("androidx.compose:compose-bom:2025.11.00"))
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation(platform("androidx.compose:compose-bom:2026.06.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material3:material3-window-size-class:1.4.0")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
-    implementation("androidx.navigation:navigation-compose:2.9.6")
-    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
-    implementation("sh.calvin.reorderable:reorderable:3.0.0")
+    implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation("androidx.hilt:hilt-navigation-compose:1.4.0")
+    implementation("sh.calvin.reorderable:reorderable:3.1.0")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.14.6")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("io.mockk:mockk:1.14.11")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     testImplementation("com.google.truth:truth:1.4.5")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.3.0")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2025.11.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2026.06.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("com.google.truth:truth:1.4.5")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    val roomVersion = "2.8.3"
+    val roomVersion = "2.8.4"
     implementation("androidx.room:room-runtime:$roomVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
-    val hiltVersion = "2.57.2"
+    val hiltVersion = "2.60.1"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     ksp("com.google.dagger:hilt-android-compiler:$hiltVersion")
 }

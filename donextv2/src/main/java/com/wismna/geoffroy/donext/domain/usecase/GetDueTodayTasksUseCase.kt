@@ -3,20 +3,24 @@ package com.wismna.geoffroy.donext.domain.usecase
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow
+import java.time.Clock
 import java.time.LocalDate
-import java.time.ZoneOffset
 import javax.inject.Inject
 
-class GetDueTodayTasksUseCase @Inject constructor(private val repository: TaskRepository) {
+class GetDueTodayTasksUseCase @Inject constructor(
+    private val repository: TaskRepository,
+    private val clock: Clock
+) {
     operator fun invoke(): Flow<List<Task>> {
-        val todayStart = LocalDate.now()
-            .atStartOfDay(ZoneOffset.UTC)
+        val today = LocalDate.now(clock)
+        val todayStart = today
+            .atStartOfDay(clock.zone)
             .toInstant()
             .toEpochMilli()
 
-        val todayEnd = LocalDate.now()
+        val todayEnd = today
             .plusDays(1)
-            .atStartOfDay(ZoneOffset.UTC)
+            .atStartOfDay(clock.zone)
             .toInstant()
             .toEpochMilli() - 1
         return repository.getDueTodayTasks(

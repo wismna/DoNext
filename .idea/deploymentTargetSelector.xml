@@ -4,6 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="donextv2">
         <option name="selectionMode" value="DROPDOWN" />
+        <DialogSelection />
       </SelectionState>
       <SelectionState runConfigName="donext">
         <option name="selectionMode" value="DROPDOWN" />
