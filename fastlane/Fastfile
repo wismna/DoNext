@@ -20,7 +20,7 @@ platform :android do
       UI.user_error!("VersionCode #{gradle_version} should be higher than Play Store version (#{play_version}). Aborting upload.")
     end
 
-    gradle(task: "testDebugUnitTest")
+    gradle(task: ":#{module_name}:testDebugUnitTest")
     gradle(task: "clean :#{module_name}:bundleRelease")
     upload_to_play_store(
       track: "internal",
