@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.wismna.geoffroy.donext.domain.model.Priority
+import java.time.LocalDate
 
 @Entity(tableName = "tasks")
 data class TaskEntity(
@@ -19,5 +20,13 @@ data class TaskEntity(
     @ColumnInfo(name = "task_list_id")
     val taskListId: Long,
     @ColumnInfo(name = "due_date")
-    val dueDate: Long? = null
+    val dueDate: LocalDate? = null,
+    @ColumnInfo(name = "due_time_minutes")
+    val dueTimeMinutes: Int? = null,
+    @ColumnInfo(name = "created_at")
+    val createdAt: Long? = null,
+    @ColumnInfo(name = "completed_at")
+    val completedAt: Long? = null,
+    @ColumnInfo(name = "reminder_shown", defaultValue = "0")
+    val isReminderShown: Boolean = false
 )

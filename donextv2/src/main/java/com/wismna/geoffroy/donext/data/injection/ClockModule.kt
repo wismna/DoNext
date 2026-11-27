@@ -13,5 +13,5 @@ object ClockModule {
 
     @Provides
     @Singleton
-    fun provideClock(): Clock = Clock.systemDefaultZone()
+    fun provideClock(): Clock = SystemDefaultZoneClock()
 }

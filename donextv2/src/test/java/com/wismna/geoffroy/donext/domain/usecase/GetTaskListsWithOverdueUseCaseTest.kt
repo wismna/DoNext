@@ -17,21 +17,18 @@ import java.time.ZoneId
 class GetTaskListsWithOverdueUseCaseTest {
 
     @Test
-    fun `computes the overdue cutoff at local midnight, not UTC midnight`() {
-        // Paris in summer is UTC+2: local midnight for this date is 22:00 UTC
-        // the *previous* day. A cutoff anchored to UTC midnight would flag
-        // today's tasks as overdue a full day too early.
+    fun `uses the local calendar day as the overdue cutoff`() {
+        // 00:30 in Paris is still the previous day in UTC
         val zone = ZoneId.of("Europe/Paris")
         val today = LocalDate.of(2026, 7, 16)
-        val clock = Clock.fixed(today.atStartOfDay(zone).plusHours(10).toInstant(), zone)
+        val clock = Clock.fixed(today.atTime(0, 30).atZone(zone).toInstant(), zone)
 
         val repository = mockk<TaskListRepository>()
         every { repository.getTaskListsWithOverdue(any()) } returns flowOf(emptyList())
 
         GetTaskListsWithOverdueUseCase(repository, clock).invoke()
 
-        val expectedCutoff = today.atStartOfDay(zone).toInstant().toEpochMilli()
-        verify { repository.getTaskListsWithOverdue(expectedCutoff) }
+        verify { repository.getTaskListsWithOverdue(today) }
     }
 
     @Test

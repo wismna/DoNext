@@ -22,7 +22,10 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 
@@ -35,6 +38,12 @@ class TaskViewModelTest {
     private lateinit var stickyEventsFlow: MutableSharedFlow<UiEvent>
 
     private lateinit var viewModel: TaskViewModel
+
+    private val zone = ZoneId.of("UTC")
+    private val today = LocalDate.of(2025, 9, 1)
+    private val clock = Clock.fixed(today.atTime(10, 0).atZone(zone).toInstant(), zone)
+
+    private fun pickerMillis(date: LocalDate) = date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
     @Before
     fun setUp() {
@@ -51,7 +60,8 @@ class TaskViewModelTest {
         viewModel = TaskViewModel(
             createTaskUseCase,
             updateTaskUseCase,
-            uiEventBus
+            uiEventBus,
+            clock
         )
     }
 
@@ -96,7 +106,7 @@ class TaskViewModelTest {
             name = "Fix bug",
             description = "Null pointer issue",
             priority = Priority.HIGH,
-            dueDate = Instant.parse("2025-10-01T12:00:00Z").toEpochMilli(),
+            dueDate = LocalDate.of(2025, 10, 1),
             isDone = true,
             isDeleted = false
         )
@@ -154,19 +164,12 @@ class TaskViewModelTest {
     }
 
     @Test
-    fun `onDueDateChanged normalizes date to start of day in system timezone`() {
-        val utcMidday = Instant.parse("2025-10-01T12:00:00Z").toEpochMilli()
-        viewModel.onDueDateChanged(utcMidday)
+    fun `onDueDateChanged keeps the picked calendar day whatever the device time zone`() {
+        val pickerSelection = Instant.parse("2025-10-01T00:00:00Z").toEpochMilli()
 
-        val expectedStartOfDay =
-            Instant.ofEpochMilli(utcMidday)
-                .atZone(ZoneOffset.UTC)
-                .toLocalDate()
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
+        viewModel.onDueDateChanged(pickerSelection)
 
-        assertThat(viewModel.dueDate).isEqualTo(expectedStartOfDay)
+        assertThat(viewModel.dueDate).isEqualTo(LocalDate.of(2025, 10, 1))
     }
 
     @Test
@@ -176,7 +179,7 @@ class TaskViewModelTest {
         viewModel.save()
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { createTaskUseCase(any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { createTaskUseCase(any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 0) { updateTaskUseCase(any(), any(), any(), any(), any(), any(), any()) }
     }
 
@@ -186,7 +189,7 @@ class TaskViewModelTest {
         viewModel.save()
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { createTaskUseCase(any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { createTaskUseCase(any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 0) { updateTaskUseCase(any(), any(), any(), any(), any(), any(), any()) }
     }
 
@@ -208,7 +211,8 @@ class TaskViewModelTest {
                 "New Task",
                 "Description",
                 Priority.HIGH,
-                viewModel.dueDate
+                viewModel.dueDate,
+                null
             )
         }
     }
@@ -243,7 +247,7 @@ class TaskViewModelTest {
                 "Updated desc",
                 Priority.NORMAL,
                 null,
-                false
+                null
             )
         }
     }
@@ -260,5 +264,127 @@ class TaskViewModelTest {
         advanceUntilIdle()
 
         assertThat(doneCalled).isTrue()
+    }
+
+    @Test
+    fun `onDueTimeChanged updates due time`() {
+        viewModel.onDueTimeChanged(LocalTime.of(14, 30))
+        assertThat(viewModel.dueTime).isEqualTo(LocalTime.of(14, 30))
+    }
+
+    @Test
+    fun `clearing the due date also clears the due time`() {
+        viewModel.onDueDateChanged(Instant.parse("2025-10-01T12:00:00Z").toEpochMilli())
+        viewModel.onDueTimeChanged(LocalTime.of(14, 30))
+
+        viewModel.onDueDateChanged(null)
+
+        assertThat(viewModel.dueDate).isNull()
+        assertThat(viewModel.dueTime).isNull()
+    }
+
+    @Test
+    fun `EditTask event populates due time`() = runTest {
+        val task = Task(
+            id = 7L, taskListId = 9L, name = "Call", description = "", priority = Priority.NORMAL,
+            dueDate = LocalDate.of(2025, 10, 1), dueTime = LocalTime.of(9, 15),
+            isDone = false, isDeleted = false
+        )
+
+        stickyEventsFlow.emit(UiEvent.EditTask(task))
+        advanceUntilIdle()
+
+        assertThat(viewModel.dueTime).isEqualTo(LocalTime.of(9, 15))
+    }
+
+    @Test
+    fun `CreateNewTask event resets due time`() = runTest {
+        viewModel.onDueTimeChanged(LocalTime.of(9, 15))
+
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(1L))
+        advanceUntilIdle()
+
+        assertThat(viewModel.dueTime).isNull()
+    }
+
+    @Test
+    fun `save passes the due time to the create use case`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+        viewModel.onTitleChanged("Call")
+        viewModel.onDueDateChanged(Instant.parse("2025-10-01T12:00:00Z").toEpochMilli())
+        viewModel.onDueTimeChanged(LocalTime.of(16, 0))
+
+        viewModel.save()
+        advanceUntilIdle()
+
+        coVerify { createTaskUseCase(3L, "Call", "", Priority.NORMAL, viewModel.dueDate, LocalTime.of(16, 0)) }
+    }
+
+    @Test
+    fun `a past time cannot be picked for a task due today`() {
+        viewModel.onDueDateChanged(pickerMillis(today))
+
+        assertThat(viewModel.isDueTimeAllowed(LocalTime.of(9, 0))).isFalse()
+        assertThat(viewModel.isDueTimeAllowed(LocalTime.of(11, 0))).isTrue()
+
+        viewModel.onDueTimeChanged(LocalTime.of(9, 0))
+        assertThat(viewModel.dueTime).isNull()
+    }
+
+    @Test
+    fun `any time can be picked for a future day`() {
+        viewModel.onDueDateChanged(pickerMillis(today.plusDays(1)))
+
+        assertThat(viewModel.isDueTimeAllowed(LocalTime.of(6, 0))).isTrue()
+    }
+
+    @Test
+    fun `moving a task to today clears a due time that already passed`() {
+        viewModel.onDueDateChanged(pickerMillis(today.plusDays(1)))
+        viewModel.onDueTimeChanged(LocalTime.of(8, 0))
+
+        viewModel.onDueDateChanged(pickerMillis(today))
+
+        assertThat(viewModel.dueTime).isNull()
+    }
+
+    @Test
+    fun `suggests the next full hour today and 9 AM on other days`() {
+        viewModel.onDueDateChanged(pickerMillis(today))
+        assertThat(viewModel.suggestedDueTime()).isEqualTo(LocalTime.of(11, 0))
+
+        viewModel.onDueDateChanged(pickerMillis(today.plusDays(2)))
+        assertThat(viewModel.suggestedDueTime()).isEqualTo(LocalTime.of(9, 0))
+    }
+
+    @Test
+    fun `the suggested time does not wrap past midnight late in the evening`() {
+        val lateClock = Clock.fixed(today.atTime(23, 20).atZone(zone).toInstant(), zone)
+        val lateViewModel = TaskViewModel(createTaskUseCase, updateTaskUseCase, uiEventBus, lateClock)
+        lateViewModel.onDueDateChanged(pickerMillis(today))
+
+        assertThat(lateViewModel.suggestedDueTime()).isEqualTo(LocalTime.of(23, 59))
+    }
+
+    @Test
+    fun `CloseTask event clears the due date and the done and deleted flags`() = runTest {
+        stickyEventsFlow.emit(
+            UiEvent.EditTask(
+                Task(
+                    id = 1L, taskListId = 2L, name = "T", description = "", priority = Priority.HIGH,
+                    isDone = true, isDeleted = true, dueDate = today.plusDays(3), dueTime = LocalTime.of(9, 0)
+                )
+            )
+        )
+        advanceUntilIdle()
+
+        stickyEventsFlow.emit(UiEvent.CloseTask)
+        advanceUntilIdle()
+
+        assertThat(viewModel.dueDate).isNull()
+        assertThat(viewModel.dueTime).isNull()
+        assertThat(viewModel.isDone).isFalse()
+        assertThat(viewModel.isDeleted).isFalse()
     }
 }

@@ -14,6 +14,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
+import java.time.LocalDate
+import java.time.ZoneId
 
 @RunWith(AndroidJUnit4::class)
 class DatabaseMigrationTest {
@@ -68,10 +70,10 @@ class DatabaseMigrationTest {
         db.close()
 
         // Act
-        helper.runMigrationsAndValidate(TEST_DB, 7, true, AppDatabase.MIGRATION_6_7)
+        helper.runMigrationsAndValidate(TEST_DB, 8, true, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8)
 
         val migratedRoom = Room.databaseBuilder(context, AppDatabase::class.java, TEST_DB)
-            .addMigrations(AppDatabase.MIGRATION_6_7)
+            .addMigrations(AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8)
             .build()
 
         // Assert
@@ -96,12 +98,39 @@ class DatabaseMigrationTest {
                 assertThat(migratedTask.priority).isEqualTo(Priority.HIGH)
                 assertThat(migratedTask.isDone).isEqualTo(false)
                 assertThat(migratedTask.isDeleted).isEqualTo(false)
-                assertThat(migratedTask.dueDate).isNotNull()
-                assertThat(migratedTask.dueDate!!).isGreaterThan(0L)
+                assertThat(migratedTask.dueDate).isEqualTo(LocalDate.of(2025, 9, 15))
                 assertThat(migratedTask.taskListId).isEqualTo(1L)
             }
         } finally {
             migratedRoom.close()
         }
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun migrate_v7_to_v8_adds_reminder_and_timestamp_columns() {
+        val dueDate = LocalDate.of(2026, 3, 10)
+        val localMidnightMillis = dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val db = helper.createDatabase(TEST_DB, 7)
+        db.execSQL("INSERT INTO task_lists (id, name, deleted, display_order) VALUES (1, 'List', 0, 1)")
+        db.execSQL(
+            "INSERT INTO tasks (id, name, description, priority, done, deleted, task_list_id, due_date) " +
+                "VALUES (1, 'Task', NULL, 1, 1, 0, 1, $localMidnightMillis)"
+        )
+        db.close()
+
+        val beforeMigration = System.currentTimeMillis() - 1_000
+        val migrated = helper.runMigrationsAndValidate(TEST_DB, 8, true, AppDatabase.MIGRATION_7_8)
+
+        migrated.query("SELECT due_date, due_time_minutes, created_at, completed_at, done, reminder_shown FROM tasks WHERE id = 1").use { cursor ->
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getLong(0)).isEqualTo(dueDate.toEpochDay())
+            assertThat(cursor.isNull(1)).isTrue()
+            assertThat(cursor.getLong(2)).isAtLeast(beforeMigration)
+            assertThat(cursor.isNull(3)).isTrue()
+            assertThat(cursor.getInt(4)).isEqualTo(1)
+            assertThat(cursor.getInt(5)).isEqualTo(0)
+        }
+        migrated.close()
     }
 }

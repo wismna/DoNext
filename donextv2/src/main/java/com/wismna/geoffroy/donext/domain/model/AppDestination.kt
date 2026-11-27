@@ -22,4 +22,8 @@ sealed class AppDestination(
         route = "recycleBin",
         title = "Recycle Bin",
     )
+    object Settings : AppDestination(
+        route = "settings",
+        title = "Settings",
+    )
 }

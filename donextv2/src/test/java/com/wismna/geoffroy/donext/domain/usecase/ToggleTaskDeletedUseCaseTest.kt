@@ -7,6 +7,7 @@ import com.wismna.geoffroy.donext.domain.repository.TaskListRepository
 import com.wismna.geoffroy.donext.domain.repository.TaskRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -15,7 +16,9 @@ class ToggleTaskDeletedUseCaseTest {
 
     private val taskRepository = mockk<TaskRepository>(relaxed = true)
     private val taskListRepository = mockk<TaskListRepository>(relaxed = true)
-    private val useCase = ToggleTaskDeletedUseCase(taskRepository, taskListRepository)
+    private val syncTaskReminder = mockk<SyncTaskReminderUseCase>(relaxed = true)
+    private val resetTaskReminder = mockk<ResetTaskReminderUseCase>(relaxed = true)
+    private val useCase = ToggleTaskDeletedUseCase(taskRepository, taskListRepository, syncTaskReminder, resetTaskReminder)
 
     private val task = Task(
         id = 1L,
@@ -58,5 +61,28 @@ class ToggleTaskDeletedUseCaseTest {
         coVerify(exactly = 0) { taskRepository.getTaskById(any()) }
         coVerify(exactly = 0) { taskListRepository.getTaskListById(any()) }
         coVerify { taskRepository.toggleTaskDeleted(1L, true) }
+    }
+
+    @Test
+    fun `deleting a task syncs its reminder after the change`() = runTest {
+        useCase(1L, true)
+
+        coVerifyOrder {
+            taskRepository.toggleTaskDeleted(1L, true)
+            syncTaskReminder(1L)
+        }
+    }
+
+    @Test
+    fun `restoring a task resets its reminder after the change`() = runTest {
+        coEvery { taskRepository.getTaskById(1L) } returns task
+
+        useCase(1L, false)
+
+        coVerifyOrder {
+            taskRepository.toggleTaskDeleted(1L, false)
+            resetTaskReminder(1L)
+        }
+        coVerify(exactly = 0) { syncTaskReminder(any()) }
     }
 }

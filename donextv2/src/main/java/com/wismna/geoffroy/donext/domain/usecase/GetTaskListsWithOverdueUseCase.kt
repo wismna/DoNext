@@ -12,11 +12,6 @@ class GetTaskListsWithOverdueUseCase @Inject constructor(
     private val clock: Clock
 ) {
     operator fun invoke(): Flow<List<TaskListWithOverdue>> {
-        return taskListRepository.getTaskListsWithOverdue(
-            LocalDate.now(clock)
-                .atStartOfDay(clock.zone)
-                .toInstant()
-                .toEpochMilli()
-        )
+        return taskListRepository.getTaskListsWithOverdue(LocalDate.now(clock))
     }
 }

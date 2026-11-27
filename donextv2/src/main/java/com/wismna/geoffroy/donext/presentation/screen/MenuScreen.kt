@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Badge
 import androidx.compose.material3.HorizontalDivider
@@ -105,6 +106,13 @@ fun MenuScreen(
                     icon = { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.navigation_recycle_bin)) },
                     selected = currentDestination is AppDestination.RecycleBin,
                     onClick = { viewModel.navigateTo(AppDestination.RecycleBin.route, currentDestination.route) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
+                    label = { Text(stringResource(R.string.navigation_settings)) },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.navigation_settings)) },
+                    selected = currentDestination is AppDestination.Settings,
+                    onClick = { viewModel.navigateTo(AppDestination.Settings.route, currentDestination.route) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
             }

@@ -3,12 +3,15 @@ package com.wismna.geoffroy.donext.data.local.preferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.time.LocalDate
+import java.time.LocalTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsRepositoryImplTest {
@@ -39,5 +42,36 @@ class SettingsRepositoryImplTest {
         val repo = createRepository()
         repo.setLastOpenedTaskListId(42L)
         assertThat(repo.getLastOpenedTaskListId()).isEqualTo(42L)
+    }
+
+    @Test
+    fun `daily reminder defaults to 9 AM when nothing saved`() = runTest {
+        assertThat(createRepository().getDailyReminderTime().first()).isEqualTo(LocalTime.of(9, 0))
+    }
+
+    @Test
+    fun `setDailyReminderTime then get returns saved time`() = runTest {
+        val repo = createRepository()
+        repo.setDailyReminderTime(LocalTime.of(18, 45))
+        assertThat(repo.getDailyReminderTime().first()).isEqualTo(LocalTime.of(18, 45))
+    }
+
+    @Test
+    fun `disabling the daily reminder returns null`() = runTest {
+        val repo = createRepository()
+        repo.setDailyReminderTime(null)
+        assertThat(repo.getDailyReminderTime().first()).isNull()
+    }
+
+    @Test
+    fun `pending digest date round-trips and can be cleared`() = runTest {
+        val repo = createRepository()
+        assertThat(repo.getPendingDigestDate()).isNull()
+
+        repo.setPendingDigestDate(LocalDate.of(2026, 3, 10))
+        assertThat(repo.getPendingDigestDate()).isEqualTo(LocalDate.of(2026, 3, 10))
+
+        repo.setPendingDigestDate(null)
+        assertThat(repo.getPendingDigestDate()).isNull()
     }
 }

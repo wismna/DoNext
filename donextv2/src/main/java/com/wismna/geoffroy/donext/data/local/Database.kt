@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 @Database(
     entities = [TaskEntity::class, TaskListEntity::class],
-    version = 7
+    version = 8
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -124,6 +124,25 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE tasks ADD COLUMN due_time_minutes INTEGER")
+                db.execSQL("ALTER TABLE tasks ADD COLUMN created_at INTEGER")
+                db.execSQL("ALTER TABLE tasks ADD COLUMN completed_at INTEGER")
+                db.execSQL("ALTER TABLE tasks ADD COLUMN reminder_shown INTEGER NOT NULL DEFAULT 0")
+                // Due dates were local midnight in epoch millis: store the calendar date itself (epoch day) so it
+                // no longer shifts with time zone changes. The device zone is the best guess for where it was picked.
+                // Shifting to midday absorbs the up-to-one-hour DST error MIGRATION_6_7 could introduce.
+                db.execSQL(
+                    "UPDATE tasks SET due_date = " +
+                        "CAST(julianday(date(due_date / 1000 + 43200, 'unixepoch', 'localtime')) - 2440587.5 AS INTEGER) " +
+                        "WHERE due_date IS NOT NULL"
+                )
+                // Real creation dates are unknown for existing tasks: use the upgrade time as the best approximation
+                db.execSQL("UPDATE tasks SET created_at = CAST(strftime('%s', 'now') AS INTEGER) * 1000")
+            }
+        }
+
         fun buildDatabase(context: Context): AppDatabase {
             return DB_INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -131,7 +150,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "donext.db"
                 )
-                    .addMigrations(MIGRATION_6_7)
+                    .addMigrations(MIGRATION_6_7, MIGRATION_7_8)
                     .fallbackToDestructiveMigration(false)
                     .addCallback(object : Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {

@@ -1,6 +1,5 @@
 package com.wismna.geoffroy.donext.presentation.model
 
-import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
 import java.time.Clock
@@ -22,16 +21,15 @@ class TaskItemUiState(
 
     val today: LocalDate = LocalDate.now(clock)
 
-    val isOverdue: Boolean = task.dueDate?.let { millis ->
-        val dueDate = millis.toLocalDate(clock)
-        dueDate.isBefore(today)
-    } ?: false
+    val isOverdue: Boolean = task.dueDate?.isBefore(today) ?: false
 
-    val dueDateText: String? = task.dueDate?.let { formatDueDate(it) }
+    val dueDateText: String? = task.dueDate?.let { dueDate ->
+        val dateText = formatDueDate(dueDate)
+        val timeText = task.dueTime?.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+        if (timeText == null) dateText else "$dateText · $timeText"
+    }
 
-    private fun formatDueDate(dueMillis: Long): String {
-        val dueDate = dueMillis.toLocalDate(clock)
-
+    private fun formatDueDate(dueDate: LocalDate): String {
         return when {
             dueDate.isEqual(today) -> "Today"
             dueDate.isEqual(today.plusDays(1)) -> "Tomorrow"

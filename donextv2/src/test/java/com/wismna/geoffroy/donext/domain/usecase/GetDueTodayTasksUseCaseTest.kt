@@ -13,45 +13,24 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.time.Clock
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 class GetDueTodayTasksUseCaseTest {
 
     @Test
-    fun `computes today's window using the clock's own zone, not UTC`() {
-        // Paris in summer is UTC+2: local midnight for this date is 22:00 UTC
-        // the *previous* day. A window anchored to UTC midnight would miss it.
+    fun `asks for the local calendar day, not the UTC one`() {
+        // 00:30 in Paris is still the previous day in UTC
         val zone = ZoneId.of("Europe/Paris")
         val today = LocalDate.of(2026, 7, 16)
-        val clock = Clock.fixed(today.atStartOfDay(zone).plusHours(10).toInstant(), zone)
+        val clock = Clock.fixed(today.atTime(0, 30).atZone(zone).toInstant(), zone)
 
         val repository = mockk<TaskRepository>()
-        every { repository.getDueTodayTasks(any(), any()) } returns flowOf(emptyList())
+        every { repository.getDueTodayTasks(any()) } returns flowOf(emptyList())
 
         GetDueTodayTasksUseCase(repository, clock).invoke()
 
-        val expectedStart = today.atStartOfDay(zone).toInstant().toEpochMilli()
-        val expectedEnd = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1
-
-        verify { repository.getDueTodayTasks(expectedStart, expectedEnd) }
-    }
-
-    @Test
-    fun `window covers exactly local midnight to the millisecond before the next local midnight`() {
-        val zone = ZoneId.of("America/Montreal")
-        val today = LocalDate.of(2026, 1, 5)
-        val clock = Clock.fixed(today.atStartOfDay(zone).plusHours(6).toInstant(), zone)
-
-        val repository = mockk<TaskRepository>()
-        every { repository.getDueTodayTasks(any(), any()) } returns flowOf(emptyList())
-
-        GetDueTodayTasksUseCase(repository, clock).invoke()
-
-        val expectedStart = today.atStartOfDay(zone).toInstant().toEpochMilli()
-        val expectedEnd = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1
-        assertThat(expectedEnd - expectedStart).isEqualTo(24L * 60 * 60 * 1000 - 1)
-
-        verify { repository.getDueTodayTasks(expectedStart, expectedEnd) }
+        verify { repository.getDueTodayTasks(today) }
     }
 
     @Test
@@ -71,10 +50,33 @@ class GetDueTodayTasksUseCaseTest {
         )
 
         val repository = mockk<TaskRepository>()
-        every { repository.getDueTodayTasks(any(), any()) } returns flowOf(tasks)
+        every { repository.getDueTodayTasks(any()) } returns flowOf(tasks)
 
         val result = GetDueTodayTasksUseCase(repository, clock).invoke().first()
 
         assertThat(result).isEqualTo(tasks)
+    }
+
+    @Test
+    fun `orders due today tasks by priority then due time`() = runTest {
+        val zone = ZoneId.systemDefault()
+        val today = LocalDate.of(2026, 1, 1)
+        val clock = Clock.fixed(today.atStartOfDay(zone).toInstant(), zone)
+        fun task(name: String, priority: Priority, time: LocalTime?) = Task(
+            id = name.hashCode().toLong(), taskListId = 1L, name = name, description = "",
+            priority = priority, isDone = false, isDeleted = false, dueDate = today, dueTime = time
+        )
+        val repository = mockk<TaskRepository>()
+        every { repository.getDueTodayTasks(any()) } returns flowOf(
+            listOf(
+                task("Normal late", Priority.NORMAL, LocalTime.of(18, 0)),
+                task("Normal early", Priority.NORMAL, LocalTime.of(8, 0)),
+                task("High", Priority.HIGH, null)
+            )
+        )
+
+        val names = GetDueTodayTasksUseCase(repository, clock).invoke().first().map { it.name }
+
+        assertThat(names).containsExactly("High", "Normal early", "Normal late").inOrder()
     }
 }

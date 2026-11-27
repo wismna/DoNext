@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -42,7 +43,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.wismna.geoffroy.donext.R
-import com.wismna.geoffroy.donext.domain.extension.toLocalDate
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.presentation.viewmodel.TaskViewModel
 import java.time.LocalDate
@@ -115,7 +115,7 @@ fun TaskScreen(
 
         // --- Due Date ---
         var showDatePicker by remember { mutableStateOf(false) }
-        val formattedDate = viewModel.dueDate?.toLocalDate()?.format(
+        val formattedDate = viewModel.dueDate?.format(
             DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
         )
             ?: ""
@@ -148,7 +148,7 @@ fun TaskScreen(
 
         if (showDatePicker) {
             val datePickerState = rememberDatePickerState(
-                initialSelectedDateMillis = viewModel.dueDate,
+                initialSelectedDateMillis = viewModel.dueDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
                 selectableDates = object : SelectableDates {
                     override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                         val todayStartUtcMillis = LocalDate.now(ZoneId.systemDefault())
@@ -176,7 +176,13 @@ fun TaskScreen(
                 DatePicker(state = datePickerState)
             }
         }
+        if (viewModel.dueDate != null) {
+            Spacer(Modifier.height(12.dp))
+            DueTimeField(viewModel)
+        }
+
         if (!viewModel.isDeleted) {
+            val requestNotificationPermission = rememberNotificationPermissionRequester()
             Spacer(Modifier.height(16.dp))
 
             Row(
@@ -194,6 +200,7 @@ fun TaskScreen(
                 // --- Save Button ---
                 Button(
                     onClick = {
+                        if (viewModel.dueDate != null) requestNotificationPermission()
                         viewModel.save()
                         onDismiss()
                     },
@@ -203,6 +210,52 @@ fun TaskScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DueTimeField(viewModel: TaskViewModel) {
+    var showTimePicker by remember { mutableStateOf(false) }
+    val formattedTime = viewModel.dueTime
+        ?.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+        ?: ""
+
+    OutlinedTextField(
+        value = formattedTime,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(stringResource(R.string.task_due_time)) },
+        trailingIcon = {
+            Row {
+                if (viewModel.dueTime != null) {
+                    IconButton(
+                        onClick = { viewModel.onDueTimeChanged(null) },
+                        enabled = !viewModel.isDeleted
+                    ) {
+                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.task_due_time_clear))
+                    }
+                }
+                IconButton(
+                    onClick = { showTimePicker = true },
+                    enabled = !viewModel.isDeleted
+                ) {
+                    Icon(Icons.Default.Schedule, contentDescription = stringResource(R.string.task_due_time_pick))
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    if (showTimePicker) {
+        TimePickerDialog(
+            initialTime = viewModel.suggestedDueTime(),
+            isTimeAllowed = viewModel::isDueTimeAllowed,
+            onConfirm = {
+                viewModel.onDueTimeChanged(it)
+                showTimePicker = false
+            },
+            onDismiss = { showTimePicker = false }
+        )
     }
 }
 

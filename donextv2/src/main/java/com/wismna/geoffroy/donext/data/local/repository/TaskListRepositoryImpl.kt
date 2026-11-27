@@ -8,6 +8,7 @@ import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
 import com.wismna.geoffroy.donext.domain.repository.TaskListRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 import javax.inject.Inject
 
 class TaskListRepositoryImpl @Inject constructor(
@@ -33,7 +34,7 @@ class TaskListRepositoryImpl @Inject constructor(
         taskListDao.deleteTaskList(taskListId, isDeleted)
     }
 
-    override fun getTaskListsWithOverdue(nowMillis: Long): Flow<List<TaskListWithOverdue>> {
-        return taskListDao.getTaskListsWithOverdue(nowMillis)
+    override fun getTaskListsWithOverdue(today: LocalDate): Flow<List<TaskListWithOverdue>> {
+        return taskListDao.getTaskListsWithOverdue(today)
     }
 }

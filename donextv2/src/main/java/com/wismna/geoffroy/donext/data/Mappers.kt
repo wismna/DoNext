@@ -6,6 +6,9 @@ import com.wismna.geoffroy.donext.data.entities.TaskWithListNameEntity
 import com.wismna.geoffroy.donext.domain.model.Task
 import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.domain.model.TaskWithListName
+import java.time.LocalTime
+
+private const val MINUTES_PER_HOUR = 60
 
 fun TaskEntity.toDomain() = Task(
     id = id,
@@ -15,7 +18,11 @@ fun TaskEntity.toDomain() = Task(
     isDone = isDone,
     isDeleted = isDeleted,
     dueDate = dueDate,
+    dueTime = dueTimeMinutes?.toLocalTime(),
     priority = priority,
+    createdAt = createdAt,
+    completedAt = completedAt,
+    isReminderShown = isReminderShown
 )
 fun TaskWithListNameEntity.toDomain(): TaskWithListName {
     return TaskWithListName(
@@ -32,7 +39,11 @@ fun Task.toEntity() = TaskEntity(
     priority = priority,
     isDone = isDone,
     isDeleted = isDeleted,
-    dueDate = dueDate
+    dueDate = dueDate,
+    dueTimeMinutes = dueTime?.toMinutesOfDay(),
+    createdAt = createdAt,
+    completedAt = completedAt,
+    isReminderShown = isReminderShown
 )
 
 fun TaskListEntity.toDomain() = TaskList(
@@ -48,3 +59,7 @@ fun TaskList.toEntity() = TaskListEntity(
     isDeleted = isDeleted,
     order = order
 )
+
+fun LocalTime.toMinutesOfDay(): Int = hour * MINUTES_PER_HOUR + minute
+
+fun Int.toLocalTime(): LocalTime = LocalTime.of(this / MINUTES_PER_HOUR, this % MINUTES_PER_HOUR)

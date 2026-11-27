@@ -14,7 +14,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.Instant
+import java.time.LocalDate
 import kotlin.collections.first
 
 @RunWith(AndroidJUnit4::class)
@@ -79,17 +79,27 @@ class TaskDaoTest {
     }
 
     @Test
-    fun updateTask_updatesFields() = runBlocking {
+    fun updateTaskDetails_updatesEditableFieldsOnly() = runBlocking {
         val listId = insertListAndReturnId()
-        val task = TaskEntity(name = "Old", description = null, priority = Priority.NORMAL, taskListId = listId)
-        taskDao.insertTask(task)
-        val inserted = taskDao.getTasksForList(listId).first().first()
+        val id = taskDao.insertTask(
+            TaskEntity(
+                name = "Old", description = null, priority = Priority.NORMAL, taskListId = listId,
+                isDone = true, createdAt = 42L, completedAt = 43L, isReminderShown = true
+            )
+        )
 
-        val updated = inserted.copy(name = "Updated")
-        taskDao.updateTask(updated)
+        taskDao.updateTaskDetails(id, listId, "Updated", "Desc", Priority.HIGH, LocalDate.of(2026, 3, 10), 600)
 
-        val fetched = taskDao.getTaskById(inserted.id)
-        assertThat(fetched!!.name).isEqualTo("Updated")
+        val fetched = taskDao.getTaskById(id)!!
+        assertThat(fetched.name).isEqualTo("Updated")
+        assertThat(fetched.description).isEqualTo("Desc")
+        assertThat(fetched.priority).isEqualTo(Priority.HIGH)
+        assertThat(fetched.dueDate).isEqualTo(LocalDate.of(2026, 3, 10))
+        assertThat(fetched.dueTimeMinutes).isEqualTo(600)
+        assertThat(fetched.isDone).isTrue()
+        assertThat(fetched.createdAt).isEqualTo(42L)
+        assertThat(fetched.completedAt).isEqualTo(43L)
+        assertThat(fetched.isReminderShown).isTrue()
     }
 
     @Test
@@ -99,11 +109,13 @@ class TaskDaoTest {
         taskDao.insertTask(task)
         val inserted = taskDao.getTasksForList(listId).first().first()
 
-        taskDao.toggleTaskDone(inserted.id, true)
+        taskDao.toggleTaskDone(inserted.id, true, 500L)
         assertThat(taskDao.getTaskById(inserted.id)!!.isDone).isTrue()
+        assertThat(taskDao.getTaskById(inserted.id)!!.completedAt).isEqualTo(500L)
 
-        taskDao.toggleTaskDone(inserted.id, false)
+        taskDao.toggleTaskDone(inserted.id, false, null)
         assertThat(taskDao.getTaskById(inserted.id)!!.isDone).isFalse()
+        assertThat(taskDao.getTaskById(inserted.id)!!.completedAt).isNull()
     }
 
     @Test
@@ -175,37 +187,107 @@ class TaskDaoTest {
     @Test
     fun getDueTodayTasks_returnsTasksWithinRange() = runBlocking {
         val listId = insertListAndReturnId()
-        val todayStart = Instant.parse("2025-09-15T00:00:00Z").toEpochMilli()
-        val todayEnd = Instant.parse("2025-09-15T23:59:59Z").toEpochMilli()
 
         val yesterday = TaskEntity(
             name = "Yesterday",
             description = null,
             priority = Priority.NORMAL,
             taskListId = listId,
-            dueDate = Instant.parse("2025-09-14T12:00:00Z").toEpochMilli()
+            dueDate = LocalDate.of(2025, 9, 14)
         )
         val today = TaskEntity(
             name = "Today",
             description = null,
             priority = Priority.NORMAL,
             taskListId = listId,
-            dueDate = Instant.parse("2025-09-15T12:00:00Z").toEpochMilli()
+            dueDate = LocalDate.of(2025, 9, 15)
         )
         val tomorrow = TaskEntity(
             name = "Tomorrow",
             description = null,
             priority = Priority.NORMAL,
             taskListId = listId,
-            dueDate = Instant.parse("2025-09-16T12:00:00Z").toEpochMilli()
+            dueDate = LocalDate.of(2025, 9, 16)
         )
 
         taskDao.insertTask(yesterday)
         taskDao.insertTask(today)
         taskDao.insertTask(tomorrow)
 
-        val tasks = taskDao.getDueTodayTasks(todayStart, todayEnd).first()
+        val tasks = taskDao.getDueTodayTasks(LocalDate.of(2025, 9, 15)).first()
         assertThat(tasks).hasSize(1)
         assertThat(tasks.first().name).isEqualTo("Today")
+    }
+
+    @Test
+    fun insertTask_returnsGeneratedIdAndPersistsNewColumns() = runBlocking {
+        val listId = insertListAndReturnId()
+        val id = taskDao.insertTask(
+            TaskEntity(name = "Call", description = null, priority = Priority.NORMAL, taskListId = listId,
+                dueDate = LocalDate.of(2026, 3, 10), dueTimeMinutes = 870, createdAt = 42L)
+        )
+
+        val fetched = taskDao.getTaskById(id)!!
+        assertThat(fetched.dueTimeMinutes).isEqualTo(870)
+        assertThat(fetched.createdAt).isEqualTo(42L)
+    }
+
+    @Test
+    fun getOpenTasksDueBy_returnsOnlyOpenTasksDueUpToTheLimit() = runBlocking<Unit> {
+        val listId = insertListAndReturnId()
+        fun task(name: String, dueDate: LocalDate?, isDone: Boolean = false, isDeleted: Boolean = false) = TaskEntity(
+            name = name, description = null, priority = Priority.NORMAL, taskListId = listId,
+            dueDate = dueDate, isDone = isDone, isDeleted = isDeleted
+        )
+        taskDao.insertTask(task("Before", LocalDate.of(2026, 3, 9)))
+        taskDao.insertTask(task("AtLimit", LocalDate.of(2026, 3, 10)))
+        taskDao.insertTask(task("After", LocalDate.of(2026, 3, 11)))
+        taskDao.insertTask(task("Undated", null))
+        taskDao.insertTask(task("Done", LocalDate.of(2026, 3, 9), isDone = true))
+        taskDao.insertTask(task("Deleted", LocalDate.of(2026, 3, 9), isDeleted = true))
+
+        val names = taskDao.getOpenTasksDueBy(LocalDate.of(2026, 3, 10)).map { it.name }
+        assertThat(names).containsExactly("Before", "AtLimit")
+    }
+
+    @Test
+    fun getOpenTasksWithDueTime_skipsUntimedDoneAndDeletedTasks() = runBlocking<Unit> {
+        val listId = insertListAndReturnId()
+        fun task(name: String, time: Int?, isDone: Boolean = false, isDeleted: Boolean = false) = TaskEntity(
+            name = name, description = null, priority = Priority.NORMAL, taskListId = listId,
+            dueDate = LocalDate.of(2026, 3, 10), dueTimeMinutes = time, isDone = isDone, isDeleted = isDeleted
+        )
+        taskDao.insertTask(task("Timed", 600))
+        taskDao.insertTask(task("Untimed", null))
+        taskDao.insertTask(task("Done", 600, isDone = true))
+        taskDao.insertTask(task("Deleted", 600, isDeleted = true))
+
+        val names = taskDao.getOpenTasksWithDueTime().map { it.name }
+        assertThat(names).containsExactly("Timed")
+    }
+
+    @Test
+    fun getTaskIdsForList_includesDeletedTasksOfThatListOnly() = runBlocking<Unit> {
+        val listId = insertListAndReturnId(name = "A", order = 0)
+        listDao.insertTaskList(TaskListEntity(name = "B", order = 1))
+        val otherListId = listDao.getTaskLists().first().first { it.name == "B" }.id
+        val id1 = taskDao.insertTask(TaskEntity(name = "1", description = null, priority = Priority.NORMAL, taskListId = listId))
+        val id2 = taskDao.insertTask(TaskEntity(name = "2", description = null, priority = Priority.NORMAL, taskListId = listId, isDeleted = true))
+        taskDao.insertTask(TaskEntity(name = "3", description = null, priority = Priority.NORMAL, taskListId = otherListId))
+
+        assertThat(taskDao.getTaskIdsForList(listId)).containsExactly(id1, id2)
+    }
+
+    @Test
+    fun setReminderShown_setsAndClearsTheFlag() = runBlocking {
+        val listId = insertListAndReturnId()
+        val id = taskDao.insertTask(TaskEntity(name = "Call", description = null, priority = Priority.NORMAL, taskListId = listId))
+        assertThat(taskDao.getTaskById(id)!!.isReminderShown).isFalse()
+
+        taskDao.setReminderShown(id, true)
+        assertThat(taskDao.getTaskById(id)!!.isReminderShown).isTrue()
+
+        taskDao.setReminderShown(id, false)
+        assertThat(taskDao.getTaskById(id)!!.isReminderShown).isFalse()
     }
 }

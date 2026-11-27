@@ -6,7 +6,9 @@ import javax.inject.Inject
 
 class ToggleTaskDeletedUseCase @Inject constructor(
     private val taskRepository: TaskRepository,
-    private val taskListRepository: TaskListRepository
+    private val taskListRepository: TaskListRepository,
+    private val syncTaskReminder: SyncTaskReminderUseCase,
+    private val resetTaskReminder: ResetTaskReminderUseCase
 ) {
     suspend operator fun invoke(taskId: Long, isDeleted: Boolean) {
         if (!isDeleted) {
@@ -21,5 +23,6 @@ class ToggleTaskDeletedUseCase @Inject constructor(
         }
 
         taskRepository.toggleTaskDeleted(taskId, isDeleted)
+        if (isDeleted) syncTaskReminder(taskId) else resetTaskReminder(taskId)
     }
 }

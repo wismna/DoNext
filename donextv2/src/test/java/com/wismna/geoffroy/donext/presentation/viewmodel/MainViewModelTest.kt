@@ -6,6 +6,7 @@ import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.domain.model.TaskList
 import com.wismna.geoffroy.donext.domain.usecase.GetLastOpenedTaskListIdUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
+import com.wismna.geoffroy.donext.domain.usecase.RescheduleAllRemindersUseCase
 import com.wismna.geoffroy.donext.domain.usecase.SaveLastOpenedTaskListUseCase
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
@@ -28,11 +29,13 @@ class MainViewModelTest {
     private lateinit var getLastOpenedTaskListIdUseCase: GetLastOpenedTaskListIdUseCase
     private val saveLastOpenedTaskListUseCase: SaveLastOpenedTaskListUseCase = mockk(relaxUnitFun = true)
     private lateinit var viewModel: MainViewModel
+    private val rescheduleAllRemindersUseCase: RescheduleAllRemindersUseCase = mockk(relaxed = true)
 
     private fun createViewModel() = MainViewModel(
         getTaskListsUseCase,
         getLastOpenedTaskListIdUseCase,
         saveLastOpenedTaskListUseCase,
+        rescheduleAllRemindersUseCase,
         uiEventBus
     )
 
@@ -81,7 +84,8 @@ class MainViewModelTest {
         assertThat(viewModel.destinations).containsAtLeast(
             AppDestination.ManageLists,
             AppDestination.RecycleBin,
-            AppDestination.DueTodayList
+            AppDestination.DueTodayList,
+            AppDestination.Settings
         )
         assertThat(viewModel.isLoading).isFalse()
     }
@@ -242,5 +246,13 @@ class MainViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { saveLastOpenedTaskListUseCase(any()) }
+    }
+
+    @Test
+    fun `reschedules all reminders when created`() = runTest {
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { rescheduleAllRemindersUseCase() }
     }
 }

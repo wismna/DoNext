@@ -14,7 +14,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.Instant
+import java.time.LocalDate
 import kotlin.collections.first
 
 @RunWith(AndroidJUnit4::class)
@@ -111,14 +111,13 @@ class TaskListDaoTest {
         listDao.insertTaskList(TaskListEntity(name = "Work", order = 0))
         val listId = listDao.getTaskLists().first().first().id
 
-        val now = Instant.parse("2025-09-15T12:00:00Z").toEpochMilli()
 
         // One overdue task (yesterday)
         taskDao.insertTask(
             TaskEntity(
                 name = "Finish report",
                 taskListId = listId,
-                dueDate = Instant.parse("2025-09-14T12:00:00Z").toEpochMilli(),
+                dueDate = LocalDate.of(2025, 9, 14),
                 isDone = false,
                 description = null,
                 priority = Priority.NORMAL
@@ -130,7 +129,7 @@ class TaskListDaoTest {
             TaskEntity(
                 name = "Prepare slides",
                 taskListId = listId,
-                dueDate = Instant.parse("2025-09-16T12:00:00Z").toEpochMilli(),
+                dueDate = LocalDate.of(2025, 9, 16),
                 isDone = false,
                 description = null,
                 priority = Priority.NORMAL
@@ -142,14 +141,14 @@ class TaskListDaoTest {
             TaskEntity(
                 name = "Old task",
                 taskListId = listId,
-                dueDate = Instant.parse("2025-09-14T12:00:00Z").toEpochMilli(),
+                dueDate = LocalDate.of(2025, 9, 14),
                 isDone = true,
                 description = null,
                 priority = Priority.NORMAL
             )
         )
 
-        val lists = listDao.getTaskListsWithOverdue(now)
+        val lists = listDao.getTaskListsWithOverdue(LocalDate.of(2025, 9, 15))
 
         assertThat(lists.first().first().overdueCount).isEqualTo(1)
     }
@@ -159,15 +158,13 @@ class TaskListDaoTest {
         listDao.insertTaskList(TaskListEntity(name = "Tasks", order = 0))
         val listId = listDao.getTaskLists().first().first().id
 
-        val todayStart = Instant.parse("2025-09-15T00:00:00Z").toEpochMilli()
-        val todayEnd = Instant.parse("2025-09-15T23:59:59Z").toEpochMilli()
 
         // One task due yesterday
         taskDao.insertTask(
             TaskEntity(
                 name = "Yesterday",
                 taskListId = listId,
-                dueDate = Instant.parse("2025-09-14T12:00:00Z").toEpochMilli(),
+                dueDate = LocalDate.of(2025, 9, 14),
                 isDone = false,
                 description = null,
                 priority = Priority.NORMAL
@@ -178,7 +175,7 @@ class TaskListDaoTest {
             TaskEntity(
                 name = "Today",
                 taskListId = listId,
-                dueDate = Instant.parse("2025-09-15T12:00:00Z").toEpochMilli(),
+                dueDate = LocalDate.of(2025, 9, 15),
                 isDone = false,
                 description = null,
                 priority = Priority.NORMAL
@@ -189,7 +186,7 @@ class TaskListDaoTest {
             TaskEntity(
                 name = "Tomorrow",
                 taskListId = listId,
-                dueDate = Instant.parse("2025-09-16T12:00:00Z").toEpochMilli(),
+                dueDate = LocalDate.of(2025, 9, 16),
                 isDone = false,
                 description = null,
                 priority = Priority.NORMAL
@@ -200,7 +197,7 @@ class TaskListDaoTest {
             TaskEntity(
                 name = "TodayDone",
                 taskListId = listId,
-                dueDate = Instant.parse("2025-09-15T12:00:00Z").toEpochMilli(),
+                dueDate = LocalDate.of(2025, 9, 15),
                 isDone = true,
                 description = null,
                 priority = Priority.NORMAL
@@ -211,7 +208,7 @@ class TaskListDaoTest {
             TaskEntity(
                 name = "TodayDeleted",
                 taskListId = listId,
-                dueDate = Instant.parse("2025-09-15T12:00:00Z").toEpochMilli(),
+                dueDate = LocalDate.of(2025, 9, 15),
                 isDone = false,
                 isDeleted = true,
                 description = null,
@@ -219,7 +216,7 @@ class TaskListDaoTest {
             )
         )
 
-        val tasks = taskDao.getDueTodayTasks(todayStart, todayEnd)
+        val tasks = taskDao.getDueTodayTasks(LocalDate.of(2025, 9, 15))
 
         assertThat(tasks.first()).hasSize(1)
         assertThat(tasks.first().first().name).isEqualTo("Today")

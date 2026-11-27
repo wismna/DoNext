@@ -244,6 +244,7 @@ fun AppContent(
                         is AppDestination.DueTodayList -> stringResource(R.string.navigation_due_today)
                         is AppDestination.ManageLists -> stringResource(R.string.navigation_edit_lists)
                         is AppDestination.RecycleBin -> stringResource(R.string.navigation_recycle_bin)
+                        is AppDestination.Settings -> stringResource(R.string.navigation_settings)
                         else -> viewModel.currentDestination.title
                     }
                 )},
@@ -352,6 +353,9 @@ fun AppContent(
                 }
                 composable(AppDestination.RecycleBin.route) {
                     RecycleBinScreen(modifier = Modifier)
+                }
+                composable(AppDestination.Settings.route) {
+                    SettingsScreen(modifier = Modifier)
                 }
             }
         }

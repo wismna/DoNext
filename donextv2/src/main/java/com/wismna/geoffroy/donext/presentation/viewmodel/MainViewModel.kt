@@ -9,6 +9,7 @@ import androidx.navigation.NavBackStackEntry
 import com.wismna.geoffroy.donext.domain.model.AppDestination
 import com.wismna.geoffroy.donext.domain.usecase.GetLastOpenedTaskListIdUseCase
 import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
+import com.wismna.geoffroy.donext.domain.usecase.RescheduleAllRemindersUseCase
 import com.wismna.geoffroy.donext.domain.usecase.SaveLastOpenedTaskListUseCase
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
@@ -21,6 +22,7 @@ class MainViewModel @Inject constructor(
     getTaskListsUseCase: GetTaskListsUseCase,
     private val getLastOpenedTaskListIdUseCase: GetLastOpenedTaskListIdUseCase,
     private val saveLastOpenedTaskListUseCase: SaveLastOpenedTaskListUseCase,
+    rescheduleAllRemindersUseCase: RescheduleAllRemindersUseCase,
     val uiEventBus: UiEventBus
 ) : ViewModel() {
 
@@ -40,6 +42,7 @@ class MainViewModel @Inject constructor(
     var showAddListSheet by mutableStateOf(false)
 
     init {
+        viewModelScope.launch { rescheduleAllRemindersUseCase() }
         viewModelScope.launch {
             val lastOpenedTaskListId = getLastOpenedTaskListIdUseCase()
             getTaskListsUseCase().collect { lists ->
@@ -48,7 +51,8 @@ class MainViewModel @Inject constructor(
                 } +
                     AppDestination.ManageLists +
                     AppDestination.RecycleBin +
-                    AppDestination.DueTodayList
+                    AppDestination.DueTodayList +
+                    AppDestination.Settings
                 if (startDestination == AppDestination.ManageLists && destinations.isNotEmpty()) {
                     startDestination = destinations
                         .filterIsInstance<AppDestination.TaskList>()

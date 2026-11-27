@@ -37,13 +37,6 @@ class TaskItemUiStateTest {
         )
     }
 
-    private fun millisForDaysFromFixedToday(daysOffset: Long): Long {
-        val targetDate = today.plusDays(daysOffset)
-        return targetDate
-            .atStartOfDay(fixedClock.zone)
-            .toInstant()
-            .toEpochMilli()
-    }
 
     @Test
     fun `initializes fields from Task`() {
@@ -59,7 +52,7 @@ class TaskItemUiStateTest {
 
     @Test
     fun `isOverdue is true when due date is before today`() {
-        val overdueTask = baseTask.copy(dueDate = millisForDaysFromFixedToday(-1))
+        val overdueTask = baseTask.copy(dueDate = today.plusDays(-1))
         val uiState = TaskItemUiState(overdueTask)
 
         assertThat(uiState.isOverdue).isTrue()
@@ -67,7 +60,7 @@ class TaskItemUiStateTest {
 
     @Test
     fun `isOverdue is false when due date is today`() {
-        val dueToday = baseTask.copy(dueDate = millisForDaysFromFixedToday(0))
+        val dueToday = baseTask.copy(dueDate = today.plusDays(0))
         val uiState = TaskItemUiState(dueToday, fixedClock)
 
         assertThat(uiState.isOverdue).isFalse()
@@ -82,7 +75,7 @@ class TaskItemUiStateTest {
 
     @Test
     fun `dueDateText is Today when due date is today`() {
-        val dueToday = baseTask.copy(dueDate = millisForDaysFromFixedToday(0))
+        val dueToday = baseTask.copy(dueDate = today.plusDays(0))
         val uiState = TaskItemUiState(dueToday, fixedClock)
 
         assertThat(uiState.dueDateText).isEqualTo("Today")
@@ -90,7 +83,7 @@ class TaskItemUiStateTest {
 
     @Test
     fun `dueDateText is Tomorrow when due date is tomorrow`() {
-        val dueTomorrow = baseTask.copy(dueDate = millisForDaysFromFixedToday(1))
+        val dueTomorrow = baseTask.copy(dueDate = today.plusDays(1))
         val uiState = TaskItemUiState(dueTomorrow, fixedClock)
 
         assertThat(uiState.dueDateText).isEqualTo("Tomorrow")
@@ -98,7 +91,7 @@ class TaskItemUiStateTest {
 
     @Test
     fun `dueDateText is Yesterday when due date was yesterday`() {
-        val dueYesterday = baseTask.copy(dueDate = millisForDaysFromFixedToday(-1))
+        val dueYesterday = baseTask.copy(dueDate = today.plusDays(-1))
         val uiState = TaskItemUiState(dueYesterday, fixedClock)
 
         assertThat(uiState.dueDateText).isEqualTo("Yesterday")
@@ -106,7 +99,7 @@ class TaskItemUiStateTest {
 
     @Test
     fun `dueDateText is day of week when within next 7 days`() {
-        val dueIn3Days = baseTask.copy(dueDate = millisForDaysFromFixedToday(3))
+        val dueIn3Days = baseTask.copy(dueDate = today.plusDays(3))
         val uiState = TaskItemUiState(dueIn3Days, fixedClock)
 
         val expected = today
@@ -119,7 +112,7 @@ class TaskItemUiStateTest {
 
     @Test
     fun `dueDateText is formatted date when more than 7 days away`() {
-        val dueIn10Days = baseTask.copy(dueDate = millisForDaysFromFixedToday(10))
+        val dueIn10Days = baseTask.copy(dueDate = today.plusDays(10))
         val uiState = TaskItemUiState(dueIn10Days)
 
         val expected = today
@@ -130,5 +123,14 @@ class TaskItemUiStateTest {
             )
 
         assertThat(uiState.dueDateText).isEqualTo(expected)
+    }
+
+    @Test
+    fun `dueDateText appends the due time when set`() {
+        val task = baseTask.copy(dueDate = today.plusDays(0), dueTime = LocalTime.of(14, 30))
+        val uiState = TaskItemUiState(task, fixedClock)
+
+        val expectedTime = LocalTime.of(14, 30).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+        assertThat(uiState.dueDateText).isEqualTo("Today · $expectedTime")
     }
 }

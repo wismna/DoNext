@@ -13,8 +13,10 @@ import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.time.Clock
 import java.time.Instant
-import java.time.ZoneId
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneOffset
 import javax.inject.Inject
 
@@ -22,7 +24,8 @@ import javax.inject.Inject
 class TaskViewModel @Inject constructor(
     private val createTaskUseCase: AddTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
-    private val uiEventBus: UiEventBus
+    private val uiEventBus: UiEventBus,
+    private val clock: Clock
 ) : ViewModel() {
 
     var title by mutableStateOf("")
@@ -31,7 +34,9 @@ class TaskViewModel @Inject constructor(
         private set
     var priority by mutableStateOf(Priority.NORMAL)
         private set
-    var dueDate by mutableStateOf<Long?>(null)
+    var dueDate by mutableStateOf<LocalDate?>(null)
+        private set
+    var dueTime by mutableStateOf<LocalTime?>(null)
         private set
     var isDone by mutableStateOf(false)
         private set
@@ -59,14 +64,26 @@ class TaskViewModel @Inject constructor(
     fun onTitleChanged(value: String) { title = value }
     fun onDescriptionChanged(value: String) { description = value }
     fun onPriorityChanged(value: Priority) { priority = value }
-    fun onDueDateChanged(value: Long?) {
-        dueDate = if (value == null) null else
-            Instant.ofEpochMilli(value)
-                .atZone(ZoneOffset.UTC)
-                .toLocalDate()
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
+    fun onDueTimeChanged(value: LocalTime?) {
+        if (value == null || isDueTimeAllowed(value)) dueTime = value
+    }
+
+    /** A time that already passed today would never notify, so it cannot be picked for a task due today. */
+    fun isDueTimeAllowed(time: LocalTime): Boolean =
+        dueDate != LocalDate.now(clock) || time.isAfter(LocalTime.now(clock))
+
+    fun suggestedDueTime(): LocalTime {
+        dueTime?.let { return it }
+        if (dueDate != LocalDate.now(clock)) return DEFAULT_DUE_TIME
+        val nextFullHour = LocalTime.now(clock).plusHours(1).withMinute(0).withSecond(0).withNano(0)
+        return if (isDueTimeAllowed(nextFullHour)) nextFullHour else LocalTime.MAX.withSecond(0).withNano(0)
+    }
+
+    /** [utcMillis] is the date picker's selection: midnight UTC of the picked day. */
+    fun onDueDateChanged(utcMillis: Long?) {
+        if (utcMillis == null) dueTime = null
+        dueDate = utcMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
+        dueTime = dueTime?.takeIf { isDueTimeAllowed(it) }
     }
 
     fun save(onDone: (() -> Unit)? = null) {
@@ -76,9 +93,9 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch {
             val currentEditingTaskId = editingTaskId
             if (currentEditingTaskId != null) {
-                updateTaskUseCase(currentEditingTaskId, listId, title, description, priority, dueDate, isDone)
+                updateTaskUseCase(currentEditingTaskId, listId, title, description, priority, dueDate, dueTime)
             } else {
-                createTaskUseCase(listId, title, description, priority, dueDate)
+                createTaskUseCase(listId, title, description, priority, dueDate, dueTime)
             }
             onDone?.invoke()
         }
@@ -91,6 +108,7 @@ class TaskViewModel @Inject constructor(
         description = ""
         priority = Priority.NORMAL
         dueDate = null
+        dueTime = null
         isDeleted = false
     }
 
@@ -101,6 +119,7 @@ class TaskViewModel @Inject constructor(
         description = task.description ?: ""
         priority = task.priority
         dueDate = task.dueDate
+        dueTime = task.dueTime
         isDone = task.isDone
         isDeleted = task.isDeleted
     }
@@ -111,5 +130,13 @@ class TaskViewModel @Inject constructor(
         title = ""
         description = ""
         priority = Priority.NORMAL
+        dueDate = null
+        dueTime = null
+        isDone = false
+        isDeleted = false
+    }
+
+    private companion object {
+        val DEFAULT_DUE_TIME: LocalTime = LocalTime.of(9, 0)
     }
 }

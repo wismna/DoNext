@@ -8,6 +8,7 @@ import androidx.room.Update
 import com.wismna.geoffroy.donext.data.entities.TaskListEntity
 import com.wismna.geoffroy.donext.domain.model.TaskListWithOverdue
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface TaskListDao {
@@ -22,7 +23,7 @@ interface TaskListDao {
             CASE 
               WHEN t.done = 0 
                AND t.due_date IS NOT NULL 
-               AND t.due_date < :nowMillis
+               AND t.due_date < :today
               THEN 1 
               ELSE 0 
             END
@@ -33,7 +34,7 @@ interface TaskListDao {
         GROUP BY tl.id
         ORDER BY tl.display_order ASC
     """)
-    fun getTaskListsWithOverdue(nowMillis: Long): Flow<List<TaskListWithOverdue>>
+    fun getTaskListsWithOverdue(today: LocalDate): Flow<List<TaskListWithOverdue>>
 
     @Query("SELECT * FROM task_lists WHERE id = :taskListId")
     suspend fun getTaskListById(taskListId: Long): TaskListEntity?

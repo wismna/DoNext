@@ -52,4 +52,26 @@
     <string name="sample_list_work">Travail</string>
     <string name="sample_list_shopping">Shopping</string>
     <string name="tasklists_no_task_list">Aucune liste de tâches. Cliquez sur + pour en créer une.</string>
+
+    <string name="task_due_time">Heure</string>
+    <string name="task_due_time_clear">Effacer l\'heure</string>
+    <string name="task_due_time_pick">Choisir l\'heure</string>
+    <string name="navigation_settings">Paramètres</string>
+    <string name="settings_reminders_header">Rappels</string>
+    <string name="settings_daily_summary">Résumé quotidien</string>
+    <string name="settings_daily_summary_description">Liste les tâches en retard et celles prévues aujourd\'hui sans heure</string>
+    <string name="settings_daily_summary_time">Heure du résumé</string>
+    <string name="settings_notifications_blocked">Notifications désactivées</string>
+    <string name="settings_notifications_blocked_description">Les rappels et le résumé quotidien ne peuvent pas être affichés. Touchez pour autoriser les notifications.</string>
+    <string name="settings_exact_reminders">Rappels précis</string>
+    <string name="settings_exact_reminders_description">Les rappels peuvent arriver avec quelques minutes de retard. Touchez pour autoriser les alarmes exactes.</string>
+    <string name="notification_channel_tasks">Rappels de tâches</string>
+    <string name="notification_channel_digest">Résumé quotidien</string>
+    <string name="notification_action_done">Marquer comme terminée</string>
+    <string name="notification_task_due_at">Prévue à %1$s</string>
+    <plurals name="notification_digest_title">
+        <item quantity="one">%d tâche à traiter</item>
+        <item quantity="many">%d tâches à traiter</item>
+        <item quantity="other">%d tâches à traiter</item>
+    </plurals>
 </resources>
