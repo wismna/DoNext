@@ -90,4 +90,6 @@
         <item quantity="one">%d task needs attention</item>
         <item quantity="other">%d tasks need attention</item>
     </plurals>
+    <string name="quick_add_hint">Try: tomorrow 9am !high #Work</string>
+    <string name="quick_add_list">List</string>
 </resources>

@@ -3,7 +3,11 @@ package com.wismna.geoffroy.donext.presentation.viewmodel
 import com.google.common.truth.Truth.assertThat
 import com.wismna.geoffroy.donext.domain.model.Priority
 import com.wismna.geoffroy.donext.domain.model.Task
+import com.wismna.geoffroy.donext.domain.model.TaskList
+import com.wismna.geoffroy.donext.domain.quickadd.QuickAddParser
 import com.wismna.geoffroy.donext.domain.usecase.AddTaskUseCase
+import com.wismna.geoffroy.donext.domain.usecase.GetTaskListsUseCase
+import com.wismna.geoffroy.donext.domain.usecase.ParseQuickAddUseCase
 import com.wismna.geoffroy.donext.domain.usecase.UpdateTaskUseCase
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEvent
 import com.wismna.geoffroy.donext.presentation.ui.events.UiEventBus
@@ -14,6 +18,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -35,6 +40,7 @@ class TaskViewModelTest {
     private lateinit var createTaskUseCase: AddTaskUseCase
     private lateinit var updateTaskUseCase: UpdateTaskUseCase
     private lateinit var uiEventBus: UiEventBus
+    private lateinit var getTaskListsUseCase: GetTaskListsUseCase
     private lateinit var stickyEventsFlow: MutableSharedFlow<UiEvent>
 
     private lateinit var viewModel: TaskViewModel
@@ -43,7 +49,18 @@ class TaskViewModelTest {
     private val today = LocalDate.of(2025, 9, 1)
     private val clock = Clock.fixed(today.atTime(10, 0).atZone(zone).toInstant(), zone)
 
+    private val workList = TaskList(id = 7L, name = "Work", isDeleted = false, order = 0)
+
     private fun pickerMillis(date: LocalDate) = date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+
+    private fun createViewModel(viewModelClock: Clock = clock) = TaskViewModel(
+        createTaskUseCase,
+        updateTaskUseCase,
+        ParseQuickAddUseCase(QuickAddParser(), viewModelClock),
+        getTaskListsUseCase,
+        uiEventBus,
+        viewModelClock
+    )
 
     @Before
     fun setUp() {
@@ -53,16 +70,13 @@ class TaskViewModelTest {
         createTaskUseCase = mockk(relaxed = true)
         updateTaskUseCase = mockk(relaxed = true)
         uiEventBus = mockk(relaxed = true)
+        getTaskListsUseCase = mockk()
+        every { getTaskListsUseCase() } returns flowOf(listOf(workList))
 
         stickyEventsFlow = MutableSharedFlow()
         every { uiEventBus.stickyEvents } returns stickyEventsFlow
 
-        viewModel = TaskViewModel(
-            createTaskUseCase,
-            updateTaskUseCase,
-            uiEventBus,
-            clock
-        )
+        viewModel = createViewModel()
     }
 
     @After
@@ -361,7 +375,7 @@ class TaskViewModelTest {
     @Test
     fun `the suggested time does not wrap past midnight late in the evening`() {
         val lateClock = Clock.fixed(today.atTime(23, 20).atZone(zone).toInstant(), zone)
-        val lateViewModel = TaskViewModel(createTaskUseCase, updateTaskUseCase, uiEventBus, lateClock)
+        val lateViewModel = createViewModel(lateClock)
         lateViewModel.onDueDateChanged(pickerMillis(today))
 
         assertThat(lateViewModel.suggestedDueTime()).isEqualTo(LocalTime.of(23, 59))
@@ -386,5 +400,139 @@ class TaskViewModelTest {
         assertThat(viewModel.dueTime).isNull()
         assertThat(viewModel.isDone).isFalse()
         assertThat(viewModel.isDeleted).isFalse()
+    }
+
+    @Test
+    fun `typing shortcuts in a new task shows a preview`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+
+        viewModel.onTitleChanged("Call dentist tomorrow 9am !high #Work")
+
+        val preview = viewModel.quickAddPreview!!
+        assertThat(preview.title).isEqualTo("Call dentist")
+        assertThat(preview.dueDate).isEqualTo(today.plusDays(1))
+        assertThat(preview.dueTime).isEqualTo(LocalTime.of(9, 0))
+        assertThat(preview.priority).isEqualTo(Priority.HIGH)
+        assertThat(viewModel.quickAddListName).isEqualTo("Work")
+    }
+
+    @Test
+    fun `saving a new task applies the shortcuts and cleans the title`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+        viewModel.onTitleChanged("Call dentist tomorrow 9am !high #Work")
+
+        viewModel.save()
+        advanceUntilIdle()
+
+        coVerify {
+            createTaskUseCase(7L, "Call dentist", "", Priority.HIGH, today.plusDays(1), LocalTime.of(9, 0))
+        }
+    }
+
+    @Test
+    fun `fields set by hand are kept when the title sets nothing for them`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+        viewModel.onPriorityChanged(Priority.LOW)
+        viewModel.onTitleChanged("Call tomorrow")
+
+        viewModel.save()
+        advanceUntilIdle()
+
+        coVerify { createTaskUseCase(3L, "Call", "", Priority.LOW, today.plusDays(1), null) }
+    }
+
+    @Test
+    fun `a title without shortcuts has no preview`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+
+        viewModel.onTitleChanged("Buy milk")
+
+        assertThat(viewModel.quickAddPreview).isNull()
+    }
+
+    @Test
+    fun `editing an existing task never parses its title`() = runTest {
+        stickyEventsFlow.emit(
+            UiEvent.EditTask(
+                Task(id = 4L, taskListId = 3L, name = "Notes", description = "", priority = Priority.NORMAL, isDone = false, isDeleted = false)
+            )
+        )
+        advanceUntilIdle()
+
+        viewModel.onTitleChanged("Monday notes")
+        viewModel.save()
+        advanceUntilIdle()
+
+        assertThat(viewModel.quickAddPreview).isNull()
+        coVerify { updateTaskUseCase(4L, 3L, "Monday notes", "", Priority.NORMAL, null, null) }
+    }
+
+    @Test
+    fun `cannot save a title made only of shortcuts`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+
+        viewModel.onTitleChanged("tomorrow !high")
+        viewModel.save()
+        advanceUntilIdle()
+
+        assertThat(viewModel.canSave).isFalse()
+        coVerify(exactly = 0) { createTaskUseCase(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `shortcuts fill in the fields as they are typed`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+
+        viewModel.onTitleChanged("Call dentist tomorrow 9am !high")
+
+        assertThat(viewModel.dueDate).isEqualTo(today.plusDays(1))
+        assertThat(viewModel.dueTime).isEqualTo(LocalTime.of(9, 0))
+        assertThat(viewModel.priority).isEqualTo(Priority.HIGH)
+    }
+
+    @Test
+    fun `removing a shortcut restores the value the field had before`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+        viewModel.onPriorityChanged(Priority.LOW)
+
+        viewModel.onTitleChanged("Call !high")
+        assertThat(viewModel.priority).isEqualTo(Priority.HIGH)
+
+        viewModel.onTitleChanged("Call")
+        assertThat(viewModel.priority).isEqualTo(Priority.LOW)
+    }
+
+    @Test
+    fun `a field changed by hand wins over the shortcut still in the title`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+        viewModel.onTitleChanged("Call !high")
+
+        viewModel.onPriorityChanged(Priority.LOW)
+        viewModel.onTitleChanged("Call !high now")
+        viewModel.save()
+        advanceUntilIdle()
+
+        assertThat(viewModel.priority).isEqualTo(Priority.LOW)
+        coVerify { createTaskUseCase(3L, "Call now", "", Priority.LOW, null, null) }
+    }
+
+    @Test
+    fun `typing a different shortcut after a manual change applies it again`() = runTest {
+        stickyEventsFlow.emit(UiEvent.CreateNewTask(3L))
+        advanceUntilIdle()
+        viewModel.onTitleChanged("Call !high")
+        viewModel.onPriorityChanged(Priority.NORMAL)
+
+        viewModel.onTitleChanged("Call !low")
+
+        assertThat(viewModel.priority).isEqualTo(Priority.LOW)
     }
 }

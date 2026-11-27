@@ -81,10 +81,21 @@ fun TaskScreen(
             readOnly = viewModel.isDeleted,
             onValueChange = { viewModel.onTitleChanged(it) },
             label = { Text(stringResource(R.string.task_name)) },
+            supportingText = if (viewModel.isEditing()) null else {
+                { Text(stringResource(R.string.quick_add_hint)) }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(titleFocusRequester)
         )
+        viewModel.quickAddPreview?.let { preview ->
+            QuickAddChips(
+                preview = preview,
+                listName = viewModel.quickAddListName,
+                today = LocalDate.now(),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
         Spacer(Modifier.height(12.dp))
 
         // --- Description ---
@@ -204,7 +215,7 @@ fun TaskScreen(
                         viewModel.save()
                         onDismiss()
                     },
-                    enabled = viewModel.title.isNotBlank() && !viewModel.isDeleted,
+                    enabled = viewModel.canSave,
                 ) {
                     Text(stringResource(if (viewModel.isEditing()) R.string.task_save_edit else R.string.task_save_new))
                 }

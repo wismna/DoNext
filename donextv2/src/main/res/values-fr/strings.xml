@@ -74,4 +74,6 @@
         <item quantity="many">%d tâches à traiter</item>
         <item quantity="other">%d tâches à traiter</item>
     </plurals>
+    <string name="quick_add_hint">Essayez : demain 9h !haute #Travail</string>
+    <string name="quick_add_list">Liste</string>
 </resources>

@@ -6,8 +6,6 @@ import java.time.Clock
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.time.format.TextStyle
-import java.util.Locale
 
 class TaskItemUiState(
     task: Task,
@@ -24,20 +22,8 @@ class TaskItemUiState(
     val isOverdue: Boolean = task.dueDate?.isBefore(today) ?: false
 
     val dueDateText: String? = task.dueDate?.let { dueDate ->
-        val dateText = formatDueDate(dueDate)
+        val dateText = formatDueDate(dueDate, today)
         val timeText = task.dueTime?.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
         if (timeText == null) dateText else "$dateText · $timeText"
-    }
-
-    private fun formatDueDate(dueDate: LocalDate): String {
-        return when {
-            dueDate.isEqual(today) -> "Today"
-            dueDate.isEqual(today.plusDays(1)) -> "Tomorrow"
-            dueDate.isEqual(today.minusDays(1)) -> "Yesterday"
-            dueDate.isAfter(today) && dueDate.isBefore(today.plusDays(7)) ->
-                dueDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-            else ->
-                dueDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()))
-        }
     }
 }
